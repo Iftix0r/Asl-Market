@@ -1,0 +1,146 @@
+{% extends 'aslfood/food_panel_base.html' %}
+
+{% block title %}Taomlar Menyusi - AslFood Kitchen{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+  <div class="panel-title">
+    <h1>AslFood Fast-Food Menyusi</h1>
+    <p>Taomlar ro'yxati, narxlari va "Mavjud / Tugagan" holatlari</p>
+  </div>
+  <div>
+    <button onclick="openModal('addFoodModal')" class="btn-action-primary" style="background: var(--accent-amber-gradient);">
+      <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Yangi Taom Qo'shish
+    </button>
+  </div>
+</div>
+
+<!-- Menu Items Table -->
+<div class="table-responsive">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Taom</th>
+        <th>Kategoriya</th>
+        <th>Narxi</th>
+        <th>Tayyorlanish Vaqti</th>
+        <th>Holat (Mavjudligi)</th>
+        <th>Amallar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in food_items %}
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <img src="{{ item.image_url }}" alt="{{ item.name }}" style="width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover;">
+              <div>
+                <div style="font-weight: 600;">{{ item.name }}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">{{ item.ingredients|default:""|truncatechars:40 }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ item.category.name }}</td>
+          <td style="font-weight: 700; color: #fbbf24;">{{ item.price }} so'm</td>
+          <td style="color: var(--text-muted);">⏱️ {{ item.preparation_time_mins }} daqiqa</td>
+          <td>
+            {% if item.is_available %}
+              <span class="stock-badge" style="position: static; color: #34d399; border-color: rgba(16, 185, 129, 0.3);">
+                ✅ Mavjud
+              </span>
+            {% else %}
+              <span class="stock-badge" style="position: static; color: #fb7185; border-color: rgba(244, 63, 94, 0.3);">
+                ❌ Tugagan
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            <button onclick="toggleAvailability({{ item.id }})" class="btn-details" style="padding: 0.4rem 0.65rem;">
+              🔄 Holatni O'zgartirish
+            </button>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+            Hozircha menyuda taomlar mavjud emas.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL: Add Food Item -->
+<div id="addFoodModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Yangi Taom Qo'shish</h3>
+      <button onclick="closeModal('addFoodModal')" class="btn-close-modal">&times;</button>
+    </div>
+
+    <form method="POST" action="{% url 'aslfood_add_item' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Taom Nomi</label>
+        <input type="text" name="name" required class="form-control" placeholder="Masalan: Double Beef Lavash">
+      </div>
+
+      <div class="form-group">
+        <label>Kategoriya</label>
+        <select name="category" required class="form-control">
+          <option value="">-- Tanlang --</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Narxi (so'm)</label>
+          <input type="number" name="price" required class="form-control" placeholder="32000">
+        </div>
+        <div class="form-group">
+          <label>Tayyorlanish Vaqti (daqiqa)</label>
+          <input type="number" name="prep_time" value="15" required class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Rasm URL</label>
+        <input type="url" name="image_url" class="form-control" placeholder="https://images.unsplash.com/...">
+      </div>
+
+      <div class="form-group">
+        <label>Tarkibi / Masalliqlar</label>
+        <textarea name="ingredients" class="form-control" rows="2" placeholder="Mol go'shti, pishloq, chips..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit" style="background: var(--accent-amber-gradient);">
+        <i data-lucide="save" style="width: 16px; height: 16px;"></i> Taomni Menyoga Qo'shish
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  async function toggleAvailability(id) {
+    try {
+      const res = await fetch("/aslfood/panel/menu/toggle/" + id + "/");
+      const data = await res.json();
+      if (data.success) {
+        showToast("Taom holati o'zgartirildi!", "success");
+        setTimeout(() => location.reload(), 300);
+      }
+    } catch (e) {
+      showToast("Xatolik yuz berdi!", "danger");
+    }
+  }
+</script>
+{% endblock %}

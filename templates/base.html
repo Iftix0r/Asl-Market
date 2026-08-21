@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AslMarket.uz - Do'kon & Boshqaruv Tizimi{% endblock %}</title>
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  
+  <!-- Lucide Icons Library -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <a href="{% url 'storefront' %}" class="brand">
+      <div class="brand-icon">
+        <i data-lucide="store" style="width: 20px; height: 20px;"></i>
+      </div>
+      <span>AslMarket<span class="text-gradient">.uz</span></span>
+      <span class="brand-badge">v2.0 Django</span>
+    </a>
+
+    <div class="nav-actions">
+      <a href="{% url 'storefront' %}" class="chip {% if request.resolver_match.url_name == 'storefront' %}active{% endif %}">
+        <i data-lucide="shopping-bag" style="width: 15px; height: 15px;"></i> Xaridorlar Do'koni
+      </a>
+      <a href="{% url 'dashboard' %}" class="btn-nav-panel">
+        <i data-lucide="layout-dashboard" style="width: 16px; height: 16px;"></i> Boshqaruv Paneli (/panel)
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Layout -->
+  {% block content %}{% endblock %}
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Lucide Icons Initialization Script -->
+  <script>
+    lucide.createIcons();
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+  
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

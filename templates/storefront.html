@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+
+{% block title %}AslMarket & AslFood - Supermarket va Fast-Food{% endblock %}
+
+{% block content %}
+<div class="store-container">
+
+  <!-- Brand Switcher Tabs Header -->
+  <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; overflow-x: auto;">
+    <a href="{% url 'storefront' %}?tab=supermarket" class="btn-details" style="padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: var(--radius-md); {% if active_tab != 'food' %}background: var(--accent-gradient); color: white; border-color: transparent; font-weight: 700;{% endif %}">
+      <i data-lucide="store" style="width: 18px; height: 18px;"></i> 🛍️ AslMarket Supermarket
+    </a>
+
+    <a href="{% url 'storefront' %}?tab=food" class="btn-details" style="padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: var(--radius-md); {% if active_tab == 'food' %}background: var(--accent-amber-gradient); color: white; border-color: transparent; font-weight: 700;{% endif %}">
+      <i data-lucide="utensils" style="width: 18px; height: 18px;"></i> 🍔 AslFood Fast-Food & Restoran
+    </a>
+
+    <a href="{% url 'aslfood_dashboard' %}" class="btn-details" style="margin-left: auto; color: #fbbf24; border-color: rgba(245, 158, 11, 0.3);">
+      <i data-lucide="chef-hat" style="width: 16px; height: 16px;"></i> Oshpaz Paneli (/aslfood/panel)
+    </a>
+  </div>
+
+  {% if active_tab == 'food' %}
+    <!-- ASLFOOD FAST FOOD CATALOG -->
+    <div class="hero-banner" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(11, 15, 25, 0.95) 100%), url('https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=1400&q=80') center/cover;">
+      <div class="hero-content">
+        <h1 class="hero-title"><span style="color: #fbbf24;">AslFood</span> Issiq va Mazali Taomlar</h1>
+        <p class="hero-subtitle">Lavash, Gamburger, Pizza va salqin salqin ichimliklarni tezkor yetkazib berish bilan buyurtma qiling!</p>
+        
+        <form method="GET" action="{% url 'storefront' %}" class="search-bar">
+          <input type="hidden" name="tab" value="food">
+          <i data-lucide="search" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+          <input type="text" name="q" value="{{ query }}" placeholder="Taom nomini qidirish (Lavash, Pizza...)...">
+          <button type="submit" class="btn-action-primary" style="background: var(--accent-amber-gradient);">Qidirish</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Header with Cart Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2>AslFood Fast-Food Menyusi</h2>
+      <button onclick="openModal('foodCartModal')" class="btn-cart-toggle" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem; border-color: rgba(245, 158, 11, 0.3);">
+        <i data-lucide="utensils" style="width: 18px; height: 18px; color: #fbbf24;"></i>
+        <span>Taom Savati</span>
+        <span class="cart-count-badge" id="foodNavCartCount" style="background: var(--accent-amber-gradient);">0</span>
+      </button>
+    </div>
+
+    <!-- Food Category Filter Chips -->
+    <div class="categories-wrap">
+      <a href="{% url 'storefront' %}?tab=food" class="chip {% if not selected_category %}active{% endif %}">
+        Barchasi
+      </a>
+      {% for cat in food_categories %}
+        <a href="{% url 'storefront' %}?tab=food&category={{ cat.slug }}" class="chip {% if selected_category == cat.slug %}active{% endif %}">
+          {{ cat.name }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- Food Cards Grid -->
+    <div class="products-grid">
+      {% for food in food_items %}
+        <div class="product-card">
+          <div class="product-img-wrap">
+            <img src="{{ food.image_url }}" alt="{{ food.name }}">
+            <span class="stock-badge" style="position: absolute; top: 10px; right: 10px; color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">
+              ⏱️ ~{{ food.preparation_time_mins }} daqiqa
+            </span>
+          </div>
+          <div class="product-info">
+            <span class="product-category">{{ food.category.name }}</span>
+            <h3 class="product-title">{{ food.name }}</h3>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">{{ food.ingredients|default:"" }}</p>
+            <div class="product-footer">
+              <div class="product-price" style="color: #fbbf24;">{{ food.price }} so'm</div>
+              <button onclick="addToFoodCart('{{ food.id }}', '{{ food.name|escapejs }}', {{ food.price }})" class="btn-add-cart" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3);">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Buyurtma
+              </button>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+          <h3>Taomlar topilmadi</h3>
+          <p style="color: var(--text-muted); margin-top: 0.5rem;">Boshqa taom turini tanlang yoki qidiruv so'rovini o'zgartiring.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <!-- ASLMARKET SUPERMARKET CATALOG -->
+    <div class="hero-banner">
+      <div class="hero-content">
+        <h1 class="hero-title">Sifatli va Ishonchli <span class="text-gradient">AslMarket</span> Mahsulotlari</h1>
+        <p class="hero-subtitle">Eng so'nggi maishiy texnika, oziq-ovqat va ro'zg'or buyumlarini arzon narxlarda xarid qiling!</p>
+        
+        <form method="GET" action="{% url 'storefront' %}" class="search-bar">
+          <input type="hidden" name="tab" value="supermarket">
+          <i data-lucide="search" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+          <input type="text" name="q" value="{{ query }}" placeholder="Mahsulot qidirish (masalan: Televizor, Qahva)...">
+          <button type="submit" class="btn-action-primary">Qidirish</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Header with Cart Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2>Supermarket Katalogi</h2>
+      <button onclick="openModal('cartModal')" class="btn-cart-toggle" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem;">
+        <i data-lucide="shopping-cart" style="width: 18px; height: 18px;"></i>
+        <span>Savat</span>
+        <span class="cart-count-badge" id="navCartCount">0</span>
+      </button>
+    </div>
+
+    <!-- Category Filter Chips -->
+    <div class="categories-wrap">
+      <a href="{% url 'storefront' %}?tab=supermarket" class="chip {% if not selected_category %}active{% endif %}">
+        Barchasi
+      </a>
+      {% for cat in categories %}
+        <a href="{% url 'storefront' %}?tab=supermarket&category={{ cat.slug }}" class="chip {% if selected_category == cat.slug %}active{% endif %}">
+          {{ cat.name }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- Product Catalog Grid -->
+    <div class="products-grid">
+      {% for product in products %}
+        <div class="product-card">
+          <div class="product-img-wrap">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}">
+            <span class="stock-badge {% if product.is_low_stock %}low{% endif %}">
+              Omborda: {{ product.stock }} dona
+            </span>
+          </div>
+          <div class="product-info">
+            <span class="product-category">{{ product.category.name|default:"Umumiy" }}</span>
+            <h3 class="product-title">{{ product.name }}</h3>
+            <div class="product-footer">
+              <div class="product-price">{{ product.price }} so'm</div>
+              <button onclick="addToStorefrontCart('{{ product.id }}', '{{ product.name|escapejs }}', {{ product.price }}, {{ product.stock }})" class="btn-add-cart">
+                <i data-lucide="shopping-cart" style="width: 14px; height: 14px;"></i> Savatga
+              </button>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+          <h3>Mahsulotlar topilmadi</h3>
+          <p style="color: var(--text-muted); margin-top: 0.5rem;">Qidiruv so'rovini o'zgartirib ko'ring yoki boshqa kategoriyani tanlang.</p>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+</div>
+
+
+<!-- MODAL: AslFood Fast Food Cart & Order -->
+<div id="foodCartModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #fbbf24;">
+        <i data-lucide="utensils" style="width: 20px; height: 20px;"></i> Taomlar Savati
+      </h3>
+      <button onclick="closeModal('foodCartModal')" class="btn-close-modal">&times;</button>
+    </div>
+
+    <div id="foodCartModalItems" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 250px; overflow-y: auto; margin-bottom: 1rem;">
+      <p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">Savat bo'sh</p>
+    </div>
+
+    <div style="border-top: 1px solid var(--border-light); padding-top: 1rem;">
+      <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem;">
+        <span>Jami Summa:</span>
+        <span id="foodCartModalTotal" style="color: #fbbf24;">0 so'm</span>
+      </div>
+
+      <div class="form-group">
+        <label>Buyurtma Turi:</label>
+        <select id="foodOrderType" class="form-control">
+          <option value="delivery">🛵 Dostavka (Yetkazib berish)</option>
+          <option value="pickup">🛍️ Olib ketish (Takeaway)</option>
+          <option value="table">🍽️ Zalda / Stolga buyurtma</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Ismingiz (F.I.Sh):</label>
+        <input type="text" id="foodCustomerName" class="form-control" placeholder="Ismingizni kiriting...">
+      </div>
+
+      <div class="form-group">
+        <label>Telefon Raqamingiz:</label>
+        <input type="text" id="foodCustomerPhone" class="form-control" placeholder="+998 90 123 45 67">
+      </div>
+
+      <div class="form-group">
+        <label>Yetkazish Manzili / Stol #:</label>
+        <input type="text" id="foodCustomerAddress" class="form-control" placeholder="Toshkent sh., Yunusobod 4-mavze...">
+      </div>
+
+      <button onclick="submitFoodOrder()" class="btn-submit" style="background: var(--accent-amber-gradient);">
+        <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i> Taom Buyurtma Qilish
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: Supermarket Cart -->
+<div id="cartModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+        <i data-lucide="shopping-bag" style="width: 20px; height: 20px;"></i> Sizning Savatingiz
+      </h3>
+      <button onclick="closeModal('cartModal')" class="btn-close-modal">&times;</button>
+    </div>
+
+    <div id="cartModalItems" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 250px; overflow-y: auto; margin-bottom: 1rem;">
+      <p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">Savat bo'sh</p>
+    </div>
+
+    <div style="border-top: 1px solid var(--border-light); padding-top: 1rem;">
+      <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem;">
+        <span>Jami:</span>
+        <span id="cartModalTotal" style="color: #38bdf8;">0 so'm</span>
+      </div>
+
+      <div class="form-group">
+        <label>Ismingiz (F.I.Sh):</label>
+        <input type="text" id="webCustomerName" class="form-control" placeholder="Ismingizni kiriting...">
+      </div>
+
+      <div class="form-group">
+        <label>Telefon Raqamingiz:</label>
+        <input type="text" id="webCustomerPhone" class="form-control" placeholder="+998 90 123 45 67">
+      </div>
+
+      <button onclick="submitWebOrder()" class="btn-submit">
+        <i data-lucide="check-circle-2" style="width: 16px; height: 16px;"></i> Buyurtma Berish
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let sfCart = [];
+  let foodCart = [];
+
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  // Supermarket Cart
+  function addToStorefrontCart(id, name, price, stock) {
+    const existing = sfCart.find(item => item.id === id);
+    if (existing) {
+      if (existing.qty < stock) { existing.qty++; } else { showToast("Omborda yetarli mahsulot yo'q!", "warning"); return; }
+    } else {
+      sfCart.push({ id, name, price, qty: 1 });
+    }
+    showToast(`${name} savatga qo'shildi!`, "success");
+    renderSfCart();
+  }
+
+  function renderSfCart() {
+    const countBadge = document.getElementById('navCartCount');
+    const container = document.getElementById('cartModalItems');
+    const totalDisplay = document.getElementById('cartModalTotal');
+
+    let totalCount = 0, totalPrice = 0, html = '';
+
+    sfCart.forEach(item => {
+      totalCount += item.qty;
+      const itemSubtotal = item.price * item.qty;
+      totalPrice += itemSubtotal;
+      html += `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: var(--bg-dark); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+          <div>
+            <div style="font-weight: 600; font-size: 0.88rem;">${item.name}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${new Intl.NumberFormat('uz-UZ').format(item.price)} so'm x ${item.qty}</div>
+          </div>
+          <div style="font-weight: 700; color: #38bdf8; font-size: 0.9rem;">
+            ${new Intl.NumberFormat('uz-UZ').format(itemSubtotal)} so'm
+          </div>
+        </div>
+      `;
+    });
+
+    if (countBadge) countBadge.innerText = totalCount;
+    if (container) container.innerHTML = sfCart.length === 0 ? `<p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">Savat bo'sh</p>` : html;
+    if (totalDisplay) totalDisplay.innerText = new Intl.NumberFormat('uz-UZ').format(totalPrice) + " so'm";
+  }
+
+  async function submitWebOrder() {
+    if (sfCart.length === 0) { showToast("Savatga mahsulot qo'shing!", "danger"); return; }
+    const name = document.getElementById('webCustomerName').value;
+    const phone = document.getElementById('webCustomerPhone').value;
+    if (!name || !phone) { showToast("Ismingiz va telefon raqamingizni kiriting!", "warning"); return; }
+
+    try {
+      const res = await fetch("{% url 'online_checkout_api' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart: sfCart, customer_name: name, phone: phone })
+      });
+      const data = await res.json();
+      if (data.success) {
+        sfCart = []; renderSfCart(); closeModal('cartModal');
+        alert("Rahmat! Buyurtmangiz qabul qilindi. Chek raqami: #" + data.sale_code);
+        showToast("Buyurtma muvaffaqiyatli berildi!", "success");
+      }
+    } catch (e) { showToast("Tizim xatoligi!", "danger"); }
+  }
+
+  // Fast Food Cart
+  function addToFoodCart(id, name, price) {
+    const existing = foodCart.find(item => item.id === id);
+    if (existing) { existing.qty++; } else { foodCart.push({ id, name, price, qty: 1 }); }
+    showToast(`${name} taom savatiga qo'shildi! 🍔`, "success");
+    renderFoodCart();
+  }
+
+  function renderFoodCart() {
+    const countBadge = document.getElementById('foodNavCartCount');
+    const container = document.getElementById('foodCartModalItems');
+    const totalDisplay = document.getElementById('foodCartModalTotal');
+
+    let totalCount = 0, totalPrice = 0, html = '';
+
+    foodCart.forEach(item => {
+      totalCount += item.qty;
+      const itemSubtotal = item.price * item.qty;
+      totalPrice += itemSubtotal;
+      html += `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: var(--bg-dark); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+          <div>
+            <div style="font-weight: 600; font-size: 0.88rem;">${item.name}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${new Intl.NumberFormat('uz-UZ').format(item.price)} so'm x ${item.qty}</div>
+          </div>
+          <div style="font-weight: 700; color: #fbbf24; font-size: 0.9rem;">
+            ${new Intl.NumberFormat('uz-UZ').format(itemSubtotal)} so'm
+          </div>
+        </div>
+      `;
+    });
+
+    if (countBadge) countBadge.innerText = totalCount;
+    if (container) container.innerHTML = foodCart.length === 0 ? `<p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">Savat bo'sh</p>` : html;
+    if (totalDisplay) totalDisplay.innerText = new Intl.NumberFormat('uz-UZ').format(totalPrice) + " so'm";
+  }
+
+  async function submitFoodOrder() {
+    if (foodCart.length === 0) { showToast("Savatga taom qo'shing!", "danger"); return; }
+    const name = document.getElementById('foodCustomerName').value;
+    const phone = document.getElementById('foodCustomerPhone').value;
+    const address = document.getElementById('foodCustomerAddress').value;
+    const orderType = document.getElementById('foodOrderType').value;
+
+    if (!name || !phone) { showToast("Ismingiz va telefon raqamingizni kiriting!", "warning"); return; }
+
+    try {
+      const res = await fetch("{% url 'aslfood_order_api' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart: foodCart, customer_name: name, phone: phone, address: address, order_type: orderType })
+      });
+      const data = await res.json();
+      if (data.success) {
+        foodCart = []; renderFoodCart(); closeModal('foodCartModal');
+        alert("Rahmat! Taom buyurtmangiz oshxonaga yuborildi 🍳. Kodu: #" + data.order_code);
+        showToast("Taom buyurtmangiz tayyorlanmoqda!", "success");
+      }
+    } catch (e) { showToast("Tizim xatoligi!", "danger"); }
+  }
+</script>
+{% endblock %}

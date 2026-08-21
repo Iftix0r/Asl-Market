@@ -1,0 +1,218 @@
+{% extends 'panel/panel_base.html' %}
+
+{% block title %}Mahsulotlar Boshqaruvi - AslMarket.uz{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+  <div class="panel-title">
+    <h1>Mahsulotlar Boshqaruvi</h1>
+    <p>Ombor qoldig'i, sotish va tan narxlari hamda foyda marjasi</p>
+  </div>
+  <div>
+    <button onclick="openModal('addProductModal')" class="btn-action-primary">
+      <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Yangi Mahsulot Qo'shish
+    </button>
+  </div>
+</div>
+
+<!-- Search & Filter Controls -->
+<div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+  <form method="GET" action="{% url 'products_list' %}" class="search-bar" style="flex: 1; max-width: 400px;">
+    <input type="text" name="q" value="{{ query }}" placeholder="Mahsulot nomi yoki shtrix-kod bo'yicha...">
+    <button type="submit" class="btn-details">Qidirish</button>
+  </form>
+</div>
+
+<!-- Products Table -->
+<div class="table-responsive">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Mahsulot</th>
+        <th>Kategoriya</th>
+        <th>Sotish Narxi</th>
+        <th>Tan Narxi</th>
+        <th>Foyda (Dona)</th>
+        <th>Qoldiq</th>
+        <th>Shtrix-Kod</th>
+        <th>Amallar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products %}
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover;">
+              <span style="font-weight: 600;">{{ product.name }}</span>
+            </div>
+          </td>
+          <td>{{ product.category.name|default:"-" }}</td>
+          <td style="font-weight: 700; color: #38bdf8;">{{ product.price }} so'm</td>
+          <td style="color: var(--text-muted);">{{ product.cost_price }} so'm</td>
+          <td style="color: #34d399; font-weight: 600;">+{{ product.profit_per_unit }} so'm</td>
+          <td>
+            <span class="stock-badge {% if product.is_low_stock %}low{% endif %}" style="position: static;">
+              {{ product.stock }} dona
+            </span>
+          </td>
+          <td style="font-family: monospace; font-size: 0.85rem; color: var(--text-muted);">{{ product.barcode|default:"-" }}</td>
+          <td>
+            <div style="display: flex; gap: 0.5rem;">
+              <button onclick="openEditModal('{{ product.id }}', '{{ product.name|escapejs }}', '{{ product.category.id }}', {{ product.price }}, {{ product.cost_price }}, {{ product.stock }}, '{{ product.barcode|default:"" }}', '{{ product.image_url|escapejs }}', '{{ product.description|escapejs }}')" class="btn-details" style="padding: 0.4rem 0.6rem;">
+                <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+              </button>
+              <a href="{% url 'delete_product' product.id %}" onclick="return confirm('Haqiqatdan ham bu mahsulotni o\'chirmoqchimisiz?')" class="btn-details" style="padding: 0.4rem 0.6rem; color: #fb7185; border-color: rgba(244, 63, 94, 0.3);">
+                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            Hozircha mahsulotlar mavjud emas.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL: Add Product -->
+<div id="addProductModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Yangi Mahsulot Qo'shish</h3>
+      <button onclick="closeModal('addProductModal')" class="btn-close-modal">&times;</button>
+    </div>
+
+    <form method="POST" action="{% url 'add_product' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Mahsulot Nomi</label>
+        <input type="text" name="name" required class="form-control" placeholder="Masalan: Samsung TV 43">
+      </div>
+
+      <div class="form-group">
+        <label>Kategoriya</label>
+        <select name="category" class="form-control">
+          <option value="">-- Tanlang --</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Sotish Narxi (so'm)</label>
+          <input type="number" name="price" required class="form-control" placeholder="4500000">
+        </div>
+        <div class="form-group">
+          <label>Tan Narxi (Keltirilgan narx)</label>
+          <input type="number" name="cost_price" class="form-control" placeholder="3800000">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Ombor Qoldig'i (dona)</label>
+          <input type="number" name="stock" value="10" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Shtrix-Kod / Barcode</label>
+          <input type="text" name="barcode" class="form-control" placeholder="8806091234567">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Rasm Havolasi (URL)</label>
+        <input type="url" name="image_url" class="form-control" placeholder="https://images.unsplash.com/...">
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <i data-lucide="save" style="width: 16px; height: 16px;"></i> Mahsulotni Saqlash
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Edit Product -->
+<div id="editProductModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Mahsulotni Tahrirlash</h3>
+      <button onclick="closeModal('editProductModal')" class="btn-close-modal">&times;</button>
+    </div>
+
+    <form id="editProductForm" method="POST" action="">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Mahsulot Nomi</label>
+        <input type="text" name="name" id="editName" required class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label>Kategoriya</label>
+        <select name="category" id="editCategory" class="form-control">
+          <option value="">-- Tanlang --</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Sotish Narxi</label>
+          <input type="number" name="price" id="editPrice" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Tan Narxi</label>
+          <input type="number" name="cost_price" id="editCostPrice" class="form-control">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Ombor Qoldig'i</label>
+          <input type="number" name="stock" id="editStock" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Shtrix-Kod</label>
+          <input type="text" name="barcode" id="editBarcode" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Rasm URL</label>
+        <input type="url" name="image_url" id="editImageUrl" class="form-control">
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <i data-lucide="check" style="width: 16px; height: 16px;"></i> O'zgarishlarni Saqlash
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  function openEditModal(id, name, categoryId, price, costPrice, stock, barcode, imageUrl, description) {
+    document.getElementById('editProductForm').action = "/panel/products/edit/" + id + "/";
+    document.getElementById('editName').value = name;
+    document.getElementById('editCategory').value = categoryId || "";
+    document.getElementById('editPrice').value = price;
+    document.getElementById('editCostPrice').value = costPrice;
+    document.getElementById('editStock').value = stock;
+    document.getElementById('editBarcode').value = barcode;
+    document.getElementById('editImageUrl').value = imageUrl;
+    openModal('editProductModal');
+  }
+</script>
+{% endblock %}

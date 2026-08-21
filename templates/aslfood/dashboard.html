@@ -1,0 +1,224 @@
+{% extends 'aslfood/food_panel_base.html' %}
+
+{% block title %}Oshpaz Terminali - AslFood Kitchen{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+  <div class="panel-title">
+    <h1 style="display: flex; align-items: center; gap: 0.5rem;">
+      AslFood Oshpaz va Buyurtmalar Terminali
+      <span id="autoRefreshStatus" style="font-size: 0.8rem; font-weight: normal; background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 0.2rem 0.5rem; border-radius: 12px;">Avto-yangilanish faol</span>
+    </h1>
+    <p>Jonli oshxona taomlar ketma-ketligi va holatlar nazorati (Kanban board)</p>
+  </div>
+  <div class="glass-card" style="padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem;">
+    <i data-lucide="award" style="color: #fbbf24;"></i>
+    <div>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">Bugungi Taom Tushumi</div>
+      <div style="font-size: 1.1rem; font-weight: 800; color: #fbbf24;">{{ total_food_sales }} so'm</div>
+    </div>
+  </div>
+</div>
+
+<!-- Audio for new order notification -->
+<audio id="newOrderSound" preload="auto">
+  <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Live Kitchen Board Columns (Kanban) -->
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; align-items: start;">
+
+  <!-- Column 1: Yangi Buyurtmalar (New) -->
+  <div>
+    <div style="padding: 0.75rem 1rem; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); font-weight: 700; font-size: 0.9rem; color: #fbbf24; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; position: relative;">
+      <span>🟡 Yangi (<span id="newOrdersCount">{{ new_orders.count }}</span>)</span>
+      <i data-lucide="bell" style="width: 16px; height: 16px;"></i>
+      {% if new_orders.count > 0 %}
+      <span class="ping-indicator" style="position: absolute; top: -5px; right: -5px; width: 12px; height: 12px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444;"></span>
+      {% endif %}
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 1rem;" id="newOrdersContainer">
+      {% for order in new_orders %}
+        <div class="glass-card new-order-card" data-order-id="{{ order.id }}" style="padding: 1rem; border-left: 4px solid #fbbf24; animation: slideIn 0.3s ease-out;">
+          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem;">
+            <span>#{{ order.order_code }}</span>
+            <span style="color: #fbbf24;">{{ order.total_amount }} so'm</span>
+          </div>
+          <div style="font-size: 0.85rem; font-weight: 600;">{{ order.customer_name }}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            📞 {{ order.phone }} • {{ order.get_order_type_display }}
+          </div>
+
+          <div style="border-top: 1px solid var(--border-light); padding-top: 0.5rem; margin-bottom: 0.85rem; font-size: 0.82rem;">
+            {% for item in order.items.all %}
+              <div>• <strong>{{ item.quantity }}x</strong> {{ item.food_name }}</div>
+            {% endfor %}
+          </div>
+
+          <div style="display: flex; gap: 0.5rem;">
+            <button onclick="updateOrderStatus({{ order.id }}, 'preparing')" class="btn-submit" style="padding: 0.45rem; font-size: 0.82rem; background: var(--accent-amber-gradient); flex: 1;">
+              🍳 Tayyorlash
+            </button>
+            <a href="{% url 'aslfood_receipt_view' order.id %}" target="_blank" class="btn-details" style="padding: 0.45rem; display: flex; align-items: center; justify-content: center;" title="Chek chiqarish">
+              <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+            </a>
+          </div>
+        </div>
+      {% empty %}
+        <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 2rem 0;">Yangi buyurtmalar yo'q</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Column 2: Tayyorlanmoqda (Preparing) -->
+  <div>
+    <div style="padding: 0.75rem 1rem; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: var(--radius-md); font-weight: 700; font-size: 0.9rem; color: #818cf8; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+      <span>🍳 Tayyorlanmoqda ({{ preparing_orders.count }})</span>
+      <i data-lucide="flame" style="width: 16px; height: 16px;"></i>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      {% for order in preparing_orders %}
+        <div class="glass-card" style="padding: 1rem; border-left: 4px solid #818cf8;">
+          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem;">
+            <span>#{{ order.order_code }}</span>
+            <span>{{ order.total_amount }} so'm</span>
+          </div>
+          <div style="font-size: 0.85rem; font-weight: 600;">{{ order.customer_name }}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            📞 {{ order.phone }} • {{ order.get_order_type_display }}
+          </div>
+
+          <div style="border-top: 1px solid var(--border-light); padding-top: 0.5rem; margin-bottom: 0.85rem; font-size: 0.82rem;">
+            {% for item in order.items.all %}
+              <div>• <strong>{{ item.quantity }}x</strong> {{ item.food_name }}</div>
+            {% endfor %}
+          </div>
+
+          <button onclick="updateOrderStatus({{ order.id }}, 'delivering')" class="btn-submit" style="padding: 0.45rem; font-size: 0.82rem; background: var(--accent-gradient);">
+            🛵 Kuryerga / Mijozga Berish
+          </button>
+        </div>
+      {% empty %}
+        <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 2rem 0;">Jarayonda taomlar yo'q</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Column 3: Yo'lda / Kuryerda (Delivering) -->
+  <div>
+    <div style="padding: 0.75rem 1rem; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-md); font-weight: 700; font-size: 0.9rem; color: #38bdf8; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+      <span>🛵 Kuryerda / Berildi ({{ delivering_orders.count }})</span>
+      <i data-lucide="truck" style="width: 16px; height: 16px;"></i>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      {% for order in delivering_orders %}
+        <div class="glass-card" style="padding: 1rem; border-left: 4px solid #38bdf8;">
+          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem;">
+            <span>#{{ order.order_code }}</span>
+            <span>{{ order.total_amount }} so'm</span>
+          </div>
+          <div style="font-size: 0.85rem; font-weight: 600;">{{ order.customer_name }}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            📍 {{ order.delivery_address|default:"Manzil kiritilmagan" }}
+          </div>
+
+          <button onclick="updateOrderStatus({{ order.id }}, 'completed')" class="btn-submit" style="padding: 0.45rem; font-size: 0.82rem; background: var(--accent-emerald-gradient);">
+            ✅ Yakunlash (Topshirildi)
+          </button>
+        </div>
+      {% empty %}
+        <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 2rem 0;">Yo'lda buyurtmalar yo'q</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Column 4: Topshirildi / Yakunlandi (Completed) -->
+  <div>
+    <div style="padding: 0.75rem 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); font-weight: 700; font-size: 0.9rem; color: #34d399; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+      <span>✅ Topshirildi</span>
+      <i data-lucide="check-circle-2" style="width: 16px; height: 16px;"></i>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      {% for order in completed_orders %}
+        <div class="glass-card" style="padding: 0.75rem; border-left: 3px solid #34d399; opacity: 0.85;">
+          <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 0.85rem;">
+            <span>#{{ order.order_code }} - {{ order.customer_name }}</span>
+            <span style="color: #34d399;">{{ order.total_amount }} so'm</span>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">{{ order.created_at|date:"H:i" }} ga yetkazildi</div>
+        </div>
+      {% empty %}
+        <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 2rem 0;">Tarix yo'q</div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes ping {
+    75%, 100% { transform: scale(2); opacity: 0; }
+  }
+  .ping-indicator::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    background: #ef4444;
+    animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+</style>
+<script>
+  let lastNewOrderCount = {{ new_orders.count }};
+
+  // Play sound function (requires user interaction first typically, but works if tab is active)
+  function playNewOrderSound() {
+    const audio = document.getElementById('newOrderSound');
+    audio.play().catch(e => console.log("Audio play prevented by browser policy:", e));
+  }
+
+  // Auto-refresh the page every 15 seconds to check for new orders
+  setTimeout(function() {
+      // Save current count to sessionStorage before reload
+      sessionStorage.setItem('lastOrderCount', '{{ new_orders.count }}');
+      window.location.reload();
+  }, 15000);
+
+  // On page load, check if order count increased
+  window.onload = function() {
+      const prevCount = sessionStorage.getItem('lastOrderCount');
+      if (prevCount !== null && parseInt(prevCount) < {{ new_orders.count }}) {
+          playNewOrderSound();
+      }
+  };
+
+  async function updateOrderStatus(orderId, newStatus) {
+    try {
+      const res = await fetch("{% url 'aslfood_update_status_api' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, new_status: newStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast("Buyurtma holati yangilandi!", "success");
+        setTimeout(() => location.reload(), 400);
+      } else {
+        showToast(data.error || "Xatolik yuz berdi", "danger");
+      }
+    } catch (e) {
+      showToast("Tizim xatoligi!", "danger");
+    }
+  }
+</script>
+{% endblock %}

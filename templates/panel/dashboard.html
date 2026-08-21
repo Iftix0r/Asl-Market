@@ -1,0 +1,140 @@
+{% extends 'panel/panel_base.html' %}
+
+{% block title %}Boshqaruv Paneli - AslMarket.uz{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+  <div class="panel-title">
+    <h1>Boshqaruv Paneli</h1>
+    <p>Do'kon faoliyati, tushum va qarzlar holati bo'yicha umumiy ko'rsatkichlar</p>
+  </div>
+  <div>
+    <a href="{% url 'pos_view' %}" class="btn-action-primary">
+      <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Yangi Sotuv (Kassa)
+    </a>
+  </div>
+</div>
+
+<!-- Dashboard Metric Cards Grid -->
+<div class="metrics-grid">
+
+  <!-- Metric 1: Total Sales -->
+  <div class="glass-card metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Jami Sotuv Tushumi</span>
+      <div class="metric-icon blue">
+        <i data-lucide="wallet" style="width: 20px; height: 20px;"></i>
+      </div>
+    </div>
+    <div class="metric-value">{{ total_sales }} so'm</div>
+    <div class="metric-footer">
+      <i data-lucide="trending-up" style="color: #34d399; width: 14px; height: 14px;"></i> Barcha sotuv tushumlari
+    </div>
+  </div>
+
+  <!-- Metric 2: Active Debt Balance -->
+  <div class="glass-card metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Nasiya / Faol Qarzlar</span>
+      <div class="metric-icon rose">
+        <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
+      </div>
+    </div>
+    <div class="metric-value" style="color: #fb7185;">{{ total_debt }} so'm</div>
+    <div class="metric-footer">
+      <i data-lucide="alert-circle" style="color: #fb7185; width: 14px; height: 14px;"></i> Qarzdorlar balansi
+    </div>
+  </div>
+
+  <!-- Metric 3: Total Products in Stock -->
+  <div class="glass-card metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Ombor Mahsulotlari</span>
+      <div class="metric-icon emerald">
+        <i data-lucide="package" style="width: 20px; height: 20px;"></i>
+      </div>
+    </div>
+    <div class="metric-value">{{ total_products_count }} xil</div>
+    <div class="metric-footer">
+      <i data-lucide="check-circle" style="color: #34d399; width: 14px; height: 14px;"></i> Faol katalog birliklari
+    </div>
+  </div>
+
+  <!-- Metric 4: Low Stock Alert -->
+  <div class="glass-card metric-card">
+    <div class="metric-header">
+      <span class="metric-title">Kechikkan Qarzlar (30+ kun)</span>
+      <div class="metric-icon amber">
+        <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
+      </div>
+    </div>
+    <div class="metric-value" style="color: #fbbf24;">{{ urgent_debtors_count }} kishi</div>
+    <div class="metric-footer">
+      <i data-lucide="alert-triangle" style="color: #fbbf24; width: 14px; height: 14px;"></i> Shoshilinch qaytarilishi kerak
+    </div>
+  </div>
+
+</div>
+
+<!-- Recent Debtors Quick Section -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+  
+  <!-- Active Debtors List -->
+  <div class="glass-card">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+      <h3>Qarzdorlar Ro'yxati</h3>
+      <a href="{% url 'debtors_list' %}" style="font-size: 0.85rem; color: #818cf8; display: inline-flex; align-items: center; gap: 0.3rem;">
+        Barchasi <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+      {% for debtor in recent_debtors %}
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+          <div>
+            <div style="font-weight: 600;">{{ debtor.name }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem;">
+              <i data-lucide="phone" style="width: 12px; height: 12px;"></i> {{ debtor.phone }}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: 700; color: #fb7185;">{{ debtor.amount }} so'm</div>
+            <span class="elapsed-badge {{ debtor.overdue_level }}">
+              <i data-lucide="clock" style="width: 12px; height: 12px;"></i> {{ debtor.elapsed_time_str }}
+            </span>
+          </div>
+        </div>
+      {% empty %}
+        <p style="color: var(--text-muted); text-align: center;">Hozircha faol qarzdorlar yo'q</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recent Sales Log -->
+  <div class="glass-card">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+      <h3>So'nggi Sotuvlar</h3>
+      <a href="{% url 'sales_history' %}" style="font-size: 0.85rem; color: #818cf8; display: inline-flex; align-items: center; gap: 0.3rem;">
+        Barchasi <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+      {% for sale in recent_sales %}
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+          <div>
+            <div style="font-weight: 600;">Chek #{{ sale.sale_code }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ sale.customer_name }} • {{ sale.payment_method|upper }}</div>
+          </div>
+          <div style="font-weight: 700; color: #34d399;">
+            {{ sale.total_amount }} so'm
+          </div>
+        </div>
+      {% empty %}
+        <p style="color: var(--text-muted); text-align: center;">Hozircha sotuvlar qayd etilmagan</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

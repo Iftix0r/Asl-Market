@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>AslFood Chek #{{ order.order_code }}</title>
+  <style>
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      line-height: 1.4;
+      background: #f1f1f1;
+      color: #000;
+      padding: 20px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+    .receipt {
+      background: #fff;
+      width: 320px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-top: 5px solid #fbbf24;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      margin: 0 0 5px 0;
+      font-size: 20px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .header p {
+      margin: 0;
+      font-size: 12px;
+      color: #555;
+    }
+    .divider {
+      border-top: 1px dashed #000;
+      margin: 10px 0;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .item-name {
+      flex: 1;
+      padding-right: 10px;
+    }
+    .item-qty {
+      width: 30px;
+      text-align: center;
+    }
+    .item-price {
+      width: 80px;
+      text-align: right;
+    }
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 2px solid #000;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 12px;
+    }
+    .print-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: #fbbf24;
+      color: #000;
+      border: none;
+      font-weight: bold;
+      margin-top: 20px;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+      .receipt {
+        box-shadow: none;
+        border: none;
+        width: 100%;
+      }
+      .print-btn {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="receipt">
+  <div class="header">
+    <h1>AslFood</h1>
+    <p>Mazali Fast-Food va Ichimliklar</p>
+    <p>Tel: +998 90 123 45 67</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="info-row">
+    <span>Chek #</span>
+    <strong>{{ order.order_code }}</strong>
+  </div>
+  <div class="info-row">
+    <span>Sana:</span>
+    <span>{{ order.created_at|date:"Y-m-d H:i" }}</span>
+  </div>
+  <div class="info-row">
+    <span>Mijoz:</span>
+    <span>{{ order.customer_name }}</span>
+  </div>
+  <div class="info-row">
+    <span>Tel:</span>
+    <span>{{ order.phone }}</span>
+  </div>
+  <div class="info-row">
+    <span>Turi:</span>
+    <strong>{{ order.get_order_type_display }}</strong>
+  </div>
+  {% if order.order_type != 'pickup' %}
+  <div class="info-row">
+    <span>Manzil/Stol:</span>
+    <span>{{ order.delivery_address|default:"Kiritilmagan" }}</span>
+  </div>
+  {% endif %}
+
+  <div class="divider"></div>
+
+  <div style="font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+    Buyurtma qilingan taomlar:
+  </div>
+
+  {% for item in order.items.all %}
+  <div class="item-row">
+    <div class="item-name">{{ item.food_name }}</div>
+    <div class="item-qty">{{ item.quantity }}x</div>
+    <div class="item-price">{{ item.total_price }}</div>
+  </div>
+  {% endfor %}
+
+  <div class="total-row">
+    <span>Jami To'lov:</span>
+    <span>{{ order.total_amount }} so'm</span>
+  </div>
+
+  <div class="footer">
+    <p>Xaridingiz uchun rahmat!</p>
+    <p>Yoqimli ishtaha!</p>
+    <p style="font-size: 10px; color: #888; margin-top: 15px;">Tizim: AslMarket POS</p>
+  </div>
+
+  <button class="print-btn" onclick="window.print()">Chekni Chop Etish (Print)</button>
+</div>
+
+</body>
+</html>

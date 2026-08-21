@@ -1,0 +1,75 @@
+{% extends 'panel/panel_base.html' %}
+
+{% block title %}Sotuvlar Tarixi - AslMarket.uz{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+  <div class="panel-title">
+    <h1>Sotuvlar Tarixi va Hisobotlar</h1>
+    <p>Barcha kassa va do'kon sotuv operatsiyalari jurnali</p>
+  </div>
+  <div>
+    <a href="{% url 'export_sales_csv' %}" class="btn-action-primary" style="background: var(--accent-emerald-gradient);">
+      <i data-lucide="download" style="width: 16px; height: 16px;"></i> Excel/CSV Eksport
+    </a>
+  </div>
+</div>
+
+<!-- Sales Revenue Summary -->
+<div class="glass-card" style="margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #34d399;">
+  <div>
+    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Jami Sotuv Tushumi</div>
+    <div style="font-size: 2rem; font-weight: 800; color: #34d399;">{{ total_revenue }} so'm</div>
+  </div>
+  <div style="text-align: right; color: var(--text-muted); font-size: 0.88rem;">
+    Jami tranzaksiyalar: <strong style="color: var(--text-main);">{{ sales.count }} ta chek</strong>
+  </div>
+</div>
+
+<!-- Sales Table -->
+<div class="table-responsive">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Chek Raqami</th>
+        <th>Vaqti</th>
+        <th>Xaridor / Qarzdor</th>
+        <th>To'lov Usuli</th>
+        <th>Jami Summa</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sale in sales %}
+        <tr>
+          <td style="font-weight: 700; font-family: monospace; color: #38bdf8;">
+            #{{ sale.sale_code }}
+          </td>
+          <td style="color: var(--text-muted);">
+            {{ sale.date|date:"d.m.Y H:i" }}
+          </td>
+          <td>
+            <span style="font-weight: 600;">{{ sale.customer_name }}</span>
+            {% if sale.debtor %}
+              <div style="font-size: 0.8rem; color: #fb7185;">(Nasiya qarz daftarida)</div>
+            {% endif %}
+          </td>
+          <td>
+            <span class="chip" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; text-transform: uppercase;">
+              {{ sale.get_payment_method_display }}
+            </span>
+          </td>
+          <td style="font-weight: 800; color: #34d399; font-size: 1.05rem;">
+            {{ sale.total_amount }} so'm
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            Hozircha sotuvlar qayd etilmagan.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

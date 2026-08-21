@@ -1,0 +1,271 @@
+{% extends 'panel/panel_base.html' %}
+
+{% block title %}Qarzdorlar Daftari - AslMarket.uz{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+  <div class="panel-title">
+    <h1>Qarzdorlar Bo'limi <span class="text-gradient">(Nasiya Daftari)</span></h1>
+    <p>Qarzdorlar ro'yxati, to'lovlar jurnali va vaqt bo'yicha nazorat (Qancha vaqt o'tgani)</p>
+  </div>
+  <div style="display: flex; gap: 0.75rem;">
+    <a href="{% url 'export_debtors_csv' %}" class="btn-details" style="color: #34d399; border-color: rgba(16, 185, 129, 0.3);">
+      <i data-lucide="download" style="width: 16px; height: 16px;"></i> Excel/CSV Eksport
+    </a>
+    <button onclick="openModal('addDebtorModal')" class="btn-action-primary">
+      <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i> Yangi Qarzdor Qo'shish
+    </button>
+  </div>
+</div>
+
+<!-- Controls & Filters -->
+<div class="debtors-controls">
+  <div class="categories-wrap" style="margin-bottom: 0;">
+    <a href="{% url 'debtors_list' %}?status=all" class="chip {% if status_filter == 'all' %}active{% endif %}">
+      Barchasi
+    </a>
+    <a href="{% url 'debtors_list' %}?status=overdue" class="chip {% if status_filter == 'overdue' %}active{% endif %}" style="border-color: rgba(244, 63, 94, 0.4); color: #fb7185;">
+      <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i> Kechikkanlar (30+ kun)
+    </a>
+    <a href="{% url 'debtors_list' %}?status=active" class="chip {% if status_filter == 'active' %}active{% endif %}">
+      Faol Qarzlar
+    </a>
+    <a href="{% url 'debtors_list' %}?status=paid" class="chip {% if status_filter == 'paid' %}active{% endif %}">
+      To'langanlar
+    </a>
+  </div>
+
+  <form method="GET" action="{% url 'debtors_list' %}" class="search-bar" style="max-width: 320px;">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <input type="text" name="q" value="{{ query }}" placeholder="Ism yoki telefon bo'yicha...">
+    <button type="submit" class="btn-details" style="padding: 0.4rem 0.75rem;">Qidirish</button>
+  </form>
+</div>
+
+<!-- Total Balance Summary Banner -->
+<div class="glass-card" style="margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #f43f5e;">
+  <div>
+    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Jami Nasiya Balansi</div>
+    <div style="font-size: 2rem; font-weight: 800; color: #fb7185;">{{ total_active_debt }} so'm</div>
+  </div>
+  <div style="text-align: right; color: var(--text-muted); font-size: 0.88rem;">
+    Faol qarzdorlar: <strong style="color: var(--text-main);">{{ active_count }} kishi</strong>
+  </div>
+</div>
+
+<!-- Debtors Grid -->
+<div class="debtors-grid">
+  {% for debtor in debtors %}
+    <div class="debtor-card">
+      <div class="debtor-card-header">
+        <div>
+          <h3 class="debtor-name">{{ debtor.name }}</h3>
+          <div class="debtor-phone">
+            <i data-lucide="phone" style="width: 14px; height: 14px;"></i> {{ debtor.phone }}
+          </div>
+        </div>
+
+        <!-- LIVE ELAPSED TIME BADGE -->
+        <span class="elapsed-badge {{ debtor.overdue_level }}">
+          <i data-lucide="clock" style="width: 12px; height: 12px;"></i> {{ debtor.elapsed_time_str }}
+        </span>
+      </div>
+
+      <div class="debtor-amount-box">
+        <span class="debtor-amount-label">Qarz Qoldig'i:</span>
+        <span class="debtor-amount-val">{{ debtor.amount }} so'm</span>
+      </div>
+
+      <div class="debtor-meta">
+        <div class="debtor-meta-row">
+          <span>Boshlang'ich qarz:</span>
+          <strong>{{ debtor.initial_amount }} so'm</strong>
+        </div>
+        <div class="debtor-meta-row">
+          <span>Qarz olingan vaqt:</span>
+          <span>{{ debtor.created_at|date:"d.m.Y H:i" }}</span>
+        </div>
+        {% if debtor.items_description %}
+          <div class="debtor-meta-row" style="margin-top: 0.25rem;">
+            <span>Izoh / Mahsulotlar:</span>
+            <span style="color: var(--text-main); font-style: italic;">{{ debtor.items_description }}</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="debtor-actions">
+        {% if debtor.amount > 0 %}
+          <button onclick="openPayModal('{{ debtor.id }}', '{{ debtor.name|escapejs }}', {{ debtor.amount }})" class="btn-pay">
+            <i data-lucide="credit-card" style="width: 14px; height: 14px;"></i> To'lov
+          </button>
+        {% else %}
+          <div class="elapsed-badge normal" style="flex: 1; justify-content: center; padding: 0.55rem;">
+            <i data-lucide="check-circle-2" style="width: 14px; height: 14px;"></i> To'langan
+          </div>
+        {% endif %}
+        
+        <button onclick="showDebtorHistory('{{ debtor.id }}')" class="btn-details" title="To'lovlar Tarixi">
+          <i data-lucide="history" style="width: 14px; height: 14px;"></i> Tarix
+        </button>
+
+        {% if debtor.amount > 0 %}
+          <button onclick="sendSmsAlert('{{ debtor.phone }}', '{{ debtor.name|escapejs }}', '{{ debtor.amount }}')" class="btn-details" title="SMS Eslatma" style="color: #fbbf24;">
+            <i data-lucide="message-square" style="width: 14px; height: 14px;"></i> SMS
+          </button>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+      <h3>Qarzdorlar topilmadi</h3>
+      <p style="color: var(--text-muted); margin-top: 0.5rem;">Hozircha mos keluvchi qarzdor yozuvlari mavjud emas.</p>
+    </div>
+  {% endfor %}
+</div>
+
+
+<!-- MODAL: Add New Debtor -->
+<div id="addDebtorModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Yangi Qarzdor Qo'shish</h3>
+      <button onclick="closeModal('addDebtorModal')" class="btn-close-modal">&times;</button>
+    </div>
+    
+    <form method="POST" action="{% url 'add_debtor' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>F.I.Sh (Mijoz Ismi)</label>
+        <input type="text" name="name" required class="form-control" placeholder="Masalan: Alisher Qodirov">
+      </div>
+
+      <div class="form-group">
+        <label>Telefon Raqam</label>
+        <input type="text" name="phone" required class="form-control" placeholder="+998 90 123 45 67">
+      </div>
+
+      <div class="form-group">
+        <label>Qarz Summasi (so'm)</label>
+        <input type="number" name="amount" required class="form-control" placeholder="Masalan: 500000">
+      </div>
+
+      <div class="form-group">
+        <label>Olingan Buyumlar / Izoh</label>
+        <textarea name="items_description" class="form-control" rows="3" placeholder="Olingan mahsulotlar ro'yxati yoki izoh..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <i data-lucide="save" style="width: 16px; height: 16px;"></i> Saqlash va Qo'shish
+      </button>
+    </form>
+  </div>
+</div>
+
+
+<!-- MODAL: Record Debt Payment -->
+<div id="payModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="payModalTitle">Qarz To'lovini Qabul Qilish</h3>
+      <button onclick="closeModal('payModal')" class="btn-close-modal">&times;</button>
+    </div>
+
+    <form method="POST" action="{% url 'pay_debt' %}">
+      {% csrf_token %}
+      <input type="hidden" name="debtor_id" id="payDebtorId">
+      
+      <div class="form-group">
+        <label>Mavjud Qarz Summasi:</label>
+        <div id="payDebtorCurrentAmount" style="font-size: 1.3rem; font-weight: 800; color: #fb7185;"></div>
+      </div>
+
+      <div class="form-group">
+        <label>To'lanayotgan Summa (so'm)</label>
+        <input type="number" name="amount" id="payAmountInput" required class="form-control" placeholder="To'lanadigan summa...">
+      </div>
+
+      <div class="form-group">
+        <label>To'lov Usuli / Izoh</label>
+        <input type="text" name="note" class="form-control" value="Naqd to'lov" placeholder="Masalan: Naqd, Karta orqali...">
+      </div>
+
+      <button type="submit" class="btn-submit" style="background: var(--accent-emerald-gradient);">
+        <i data-lucide="check" style="width: 16px; height: 16px;"></i> To'lovni Tasdiqlash
+      </button>
+    </form>
+  </div>
+</div>
+
+
+<!-- MODAL: Payment History Log Timeline -->
+<div id="historyModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="historyTitle">To'lovlar Tarixi</h3>
+      <button onclick="closeModal('historyModal')" class="btn-close-modal">&times;</button>
+    </div>
+
+    <div id="historyBody" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  function openPayModal(debtorId, debtorName, amount) {
+    document.getElementById('payDebtorId').value = debtorId;
+    document.getElementById('payModalTitle').innerText = debtorName + " - Qarz To'lovi";
+    document.getElementById('payDebtorCurrentAmount').innerText = new Intl.NumberFormat('uz-UZ').format(amount) + " so'm";
+    document.getElementById('payAmountInput').value = amount;
+    openModal('payModal');
+  }
+
+  async function showDebtorHistory(id) {
+    try {
+      const res = await fetch("/panel/debtors/history/" + id + "/");
+      const data = await res.json();
+
+      document.getElementById('historyTitle').innerText = data.name + " - To'lovlar Tarixi";
+
+      let html = `
+        <div style="background: var(--bg-surface); padding: 0.85rem; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: 0.5rem;">
+          <div>Boshlang'ich qarz: <strong>${new Intl.NumberFormat('uz-UZ').format(data.initial_amount)} so'm</strong></div>
+          <div>Hozirgi qarz: <strong style="color: #fb7185;">${new Intl.NumberFormat('uz-UZ').format(data.current_amount)} so'm</strong></div>
+          <div>Qarz olingan vaqt: ${data.created_at} (${data.elapsed_time})</div>
+        </div>
+        <h4 style="font-size: 0.9rem; margin-top: 0.5rem;">To'lovlar jurnali:</h4>
+      `;
+
+      if (data.payments.length === 0) {
+        html += `<p style="color: var(--text-muted); font-size: 0.85rem;">Hozircha to'lovlar amalga oshirilmagan.</p>`;
+      } else {
+        data.payments.forEach(p => {
+          html += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-dark); border-radius: var(--radius-md); border: 1px solid var(--border-light); font-size: 0.85rem;">
+              <div>
+                <div style="font-weight: 600; color: #34d399;">+ ${new Intl.NumberFormat('uz-UZ').format(p.amount)} so'm</div>
+                <div style="color: var(--text-muted); font-size: 0.78rem;">${p.note}</div>
+              </div>
+              <div style="color: var(--text-muted); font-size: 0.78rem;">${p.date}</div>
+            </div>
+          `;
+        });
+      }
+
+      document.getElementById('historyBody').innerHTML = html;
+      openModal('historyModal');
+    } catch (e) {
+      showToast("Tarixni yuklashda xatolik!", "danger");
+    }
+  }
+
+  function sendSmsAlert(phone, name, amount) {
+    const text = `Hurmatli ${name}, sizning AslMarket do'konidan ${new Intl.NumberFormat('uz-UZ').format(amount)} so'm qarz qoldigingiz bor. Iltimos to'lovni o'z vaqtida amalga oshiring.`;
+    showToast(`SMS SMS eslatma ${phone} raqamiga yuborildi!`, "success");
+    alert("SMS yuborildi:\n\n" + text);
+  }
+</script>
+{% endblock %}

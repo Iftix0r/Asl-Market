@@ -1,0 +1,100 @@
+{% extends 'panel/panel_base.html' %}
+
+{% block title %}Tahlillar & Hisobotlar - AslMarket.uz{% endblock %}
+
+{% block panel_content %}
+<div class="panel-header">
+  <div class="panel-title">
+    <h1>Tahlillar va Vizual Hisobotlar</h1>
+    <p>Do'kon sotuv kanallari, tushum ulushi va ombor holati statistikasi</p>
+  </div>
+</div>
+
+<!-- Sales Channels Breakdown -->
+<div class="metrics-grid" style="margin-bottom: 2rem;">
+  <div class="glass-card metric-card">
+    <div class="metric-header">
+      <span class="metric-title">💵 Naqd Sotuv Tushumi</span>
+      <div class="metric-icon emerald">
+        <i data-lucide="banknote" style="width: 20px; height: 20px;"></i>
+      </div>
+    </div>
+    <div class="metric-value" style="color: #34d399;">{{ sales_by_naqd }} so'm</div>
+    <div class="metric-footer">Naqd to'lovlar ulushi</div>
+  </div>
+
+  <div class="glass-card metric-card">
+    <div class="metric-header">
+      <span class="metric-title">💳 Karta Tushumi</span>
+      <div class="metric-icon blue">
+        <i data-lucide="credit-card" style="width: 20px; height: 20px;"></i>
+      </div>
+    </div>
+    <div class="metric-value" style="color: #38bdf8;">{{ sales_by_karta }} so'm</div>
+    <div class="metric-footer">Plastik karta to'lovlari</div>
+  </div>
+
+  <div class="glass-card metric-card">
+    <div class="metric-header">
+      <span class="metric-title">📋 Nasiya Sotuvlar</span>
+      <div class="metric-icon rose">
+        <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
+      </div>
+    </div>
+    <div class="metric-value" style="color: #fb7185;">{{ sales_by_nasiya }} so'm</div>
+    <div class="metric-footer">Nasiyaga sotilgan tovarlar</div>
+  </div>
+
+  <div class="glass-card metric-card">
+    <div class="metric-header">
+      <span class="metric-title">✅ Qaytarilgan Qarzlar</span>
+      <div class="metric-icon emerald">
+        <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+      </div>
+    </div>
+    <div class="metric-value" style="color: #34d399;">{{ recovered_debt }} so'm</div>
+    <div class="metric-footer">Qarzdorlardan undirilgan summa</div>
+  </div>
+</div>
+
+<!-- Low Stock Restock Table -->
+<div class="glass-card">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+    <h3>⚠️ Omborda Kam Qolgan Mahsulotlar (Restock Warning)</h3>
+    <span style="font-size: 0.82rem; color: #fbbf24; font-weight: 600;">5 dona va undan kam</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Mahsulot</th>
+          <th>Sotuv Narxi</th>
+          <th>Qoldiq</th>
+          <th>Holat</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for prod in low_stock_products %}
+          <tr>
+            <td style="font-weight: 600;">{{ prod.name }}</td>
+            <td>{{ prod.price }} so'm</td>
+            <td style="font-weight: 800; color: #fbbf24;">{{ prod.stock }} dona</td>
+            <td>
+              <span class="stock-badge low" style="position: static;">
+                ⚠️ Qoldiq oz qoldi
+              </span>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+              Barcha mahsulotlar omborda yetarli darajada mavjud! ✅
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
