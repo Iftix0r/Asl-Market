@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "AslFood",
+    "slug": "iftixor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0b0f19",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0b0f19",
+      "imageWidth": 200
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0b0f19"
+      },
+      "package": "uz.aslmarket.aslfood",
+      "versionCode": 1,
+      "permissions": [
+        "VIBRATE",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "uz.aslmarket.aslfood",
+      "supportsTablet": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5419bdb3-0afd-4583-8683-26179d2072c0"
+      }
+    },
+    "owner": "iftixors-team"
+  }
+}

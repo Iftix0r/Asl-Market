@@ -46,4 +46,27 @@ urlpatterns = [
 
     # Seed Demo Data
     path('panel/seed/', views.seed_demo_data, name='seed_demo_data'),
+
+    # ==========================================================================
+    # ASLFOOD MOBILE APP REST API ENDPOINTS (/api/food/...)
+    # ==========================================================================
+
+    # Menu
+    path('api/food/menu/', views.api_food_menu, name='api_food_menu'),
+    path('api/food/menu/all/', views.api_food_menu_all, name='api_food_menu_all'),
+    path('api/food/menu/add/', views.api_food_add_item, name='api_food_add_item_api'),
+    path('api/food/menu/edit/<int:pk>/', views.api_food_edit_item, name='api_food_edit_item'),
+    path('api/food/menu/delete/<int:pk>/', views.api_food_delete_item, name='api_food_delete_item'),
+    path('api/food/menu/toggle/<int:pk>/', views.api_food_toggle, name='api_food_toggle'),
+    path('api/food/categories/', views.api_food_categories, name='api_food_categories'),
+
+    # Orders
+    path('api/food/orders/', views.api_food_orders, name='api_food_orders'),
+    path('api/food/orders/place/', views.api_food_place_order, name='api_food_place_order'),
+    path('api/food/orders/status/', views.api_food_order_status_update, name='api_food_order_status_update'),
+    path('api/food/orders/<int:pk>/', views.api_food_order_detail, name='api_food_order_detail'),
+    path('api/food/orders/track/<str:code>/', views.api_food_order_by_code, name='api_food_order_by_code'),
+
+    # Stats / Analytics
+    path('api/food/stats/', views.api_food_stats, name='api_food_stats'),
 ]

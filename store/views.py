@@ -780,3 +780,475 @@ def seed_demo_data(request):
         )
 
     return redirect('dashboard')
+
+
+# ==========================================================================
+# ASLFOOD MOBILE APP REST API ENDPOINTS
+# /api/food/... — React Native Android ilovasi uchun
+# ==========================================================================
+
+def api_food_menu(request):
+    """
+    GET /api/food/menu/
+    Barcha mavjud taomlarni kategoriyalar bilan qaytaradi.
+    """
+    categories = FoodCategory.objects.prefetch_related('items').all()
+    result = []
+    for cat in categories:
+        items = []
+        for item in cat.items.filter(is_available=True):
+            items.append({
+                'id': item.id,
+                'name': item.name,
+                'price': float(item.price),
+                'preparation_time_mins': item.preparation_time_mins,
+                'is_available': item.is_available,
+                'image_url': item.image_url or '',
+                'ingredients': item.ingredients or '',
+            })
+        result.append({
+            'id': cat.id,
+            'name': cat.name,
+            'slug': cat.slug,
+            'items': items,
+        })
+    return JsonResponse({'success': True, 'categories': result})
+
+
+def api_food_menu_all(request):
+    """
+    GET /api/food/menu/all/
+    Barcha taomlar (admin panel uchun - mavjud bo'lmagan ham)
+    """
+    items = FoodItem.objects.select_related('category').all()
+    data = []
+    for item in items:
+        data.append({
+            'id': item.id,
+            'name': item.name,
+            'category': item.category.name if item.category else '',
+            'category_id': item.category.id if item.category else None,
+            'price': float(item.price),
+            'preparation_time_mins': item.preparation_time_mins,
+            'is_available': item.is_available,
+            'image_url': item.image_url or '',
+            'ingredients': item.ingredients or '',
+        })
+    return JsonResponse({'success': True, 'items': data})
+
+
+@csrf_exempt
+def api_food_toggle(request, pk):
+    """
+    POST /api/food/menu/toggle/<pk>/
+    Taomni mavjud/tugagan holatga o'tkazish
+    """
+    item = get_object_or_404(FoodItem, pk=pk)
+    item.is_available = not item.is_available
+    item.save()
+    return JsonResponse({
+        'success': True,
+        'id': item.id,
+        'is_available': item.is_available,
+        'message': f"{'Mavjud' if item.is_available else 'Tugagan'} holatga o'tkazildi"
+    })
+
+
+@csrf_exempt
+def api_food_add_item(request):
+    """
+    POST /api/food/menu/add/
+    Yangi taom qo'shish (JSON body)
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Faqat POST'})
+    try:
+        data = json.loads(request.body)
+        name = data.get('name', '').strip()
+        category_id = data.get('category_id')
+        price = data.get('price')
+        prep_time = data.get('preparation_time_mins', 15)
+        image_url = data.get('image_url', '')
+        ingredients = data.get('ingredients', '')
+
+        if not name or not price:
+            return JsonResponse({'success': False, 'error': 'Nom va narx kiritilishi shart'})
+
+        category = FoodCategory.objects.filter(pk=category_id).first() if category_id else None
+        if not category:
+            return JsonResponse({'success': False, 'error': 'Kategoriya topilmadi'})
+
+        item = FoodItem.objects.create(
+            name=name,
+            category=category,
+            price=price,
+            preparation_time_mins=prep_time or 15,
+            image_url=image_url or 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+            ingredients=ingredients,
+            is_available=True,
+        )
+        return JsonResponse({
+            'success': True,
+            'item': {
+                'id': item.id,
+                'name': item.name,
+                'price': float(item.price),
+                'category': item.category.name,
+                'is_available': item.is_available,
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@csrf_exempt
+def api_food_edit_item(request, pk):
+    """
+    POST /api/food/menu/edit/<pk>/
+    Mavjud taomni tahrirlash
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Faqat POST'})
+    try:
+        item = get_object_or_404(FoodItem, pk=pk)
+        data = json.loads(request.body)
+
+        if 'name' in data:
+            item.name = data['name'].strip()
+        if 'price' in data:
+            item.price = data['price']
+        if 'preparation_time_mins' in data:
+            item.preparation_time_mins = data['preparation_time_mins']
+        if 'image_url' in data:
+            item.image_url = data['image_url']
+        if 'ingredients' in data:
+            item.ingredients = data['ingredients']
+        if 'category_id' in data:
+            cat = FoodCategory.objects.filter(pk=data['category_id']).first()
+            if cat:
+                item.category = cat
+        item.save()
+
+        return JsonResponse({
+            'success': True,
+            'item': {
+                'id': item.id,
+                'name': item.name,
+                'price': float(item.price),
+                'category': item.category.name,
+                'is_available': item.is_available,
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@csrf_exempt
+def api_food_delete_item(request, pk):
+    """
+    POST /api/food/menu/delete/<pk>/
+    Taomni o'chirish
+    """
+    item = get_object_or_404(FoodItem, pk=pk)
+    item.delete()
+    return JsonResponse({'success': True, 'message': 'Taom o\'chirildi'})
+
+
+def api_food_categories(request):
+    """
+    GET /api/food/categories/
+    Barcha kategoriyalarni qaytaradi
+    """
+    cats = FoodCategory.objects.all()
+    data = [{'id': c.id, 'name': c.name, 'slug': c.slug} for c in cats]
+    return JsonResponse({'success': True, 'categories': data})
+
+
+def api_food_orders(request):
+    """
+    GET /api/food/orders/
+    Barcha buyurtmalarni status bo'yicha qaytaradi (kitchen board uchun)
+    Query params: ?status=new|preparing|delivering|completed
+    """
+    status_filter = request.GET.get('status', '')
+
+    qs = FoodOrder.objects.prefetch_related('items').all()
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    else:
+        # Kitchen board: faqat faol buyurtmalar
+        qs = qs.exclude(status='cancelled').order_by('created_at')
+
+    def serialize_order(order):
+        items = []
+        for it in order.items.all():
+            items.append({
+                'id': it.id,
+                'food_name': it.food_name,
+                'quantity': it.quantity,
+                'unit_price': float(it.unit_price),
+                'total_price': float(it.total_price),
+            })
+        return {
+            'id': order.id,
+            'order_code': order.order_code,
+            'customer_name': order.customer_name,
+            'phone': order.phone,
+            'delivery_address': order.delivery_address or '',
+            'total_amount': float(order.total_amount),
+            'payment_method': order.payment_method,
+            'order_type': order.order_type,
+            'order_type_display': order.get_order_type_display(),
+            'status': order.status,
+            'status_display': order.get_status_display(),
+            'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'items': items,
+        }
+
+    data = [serialize_order(o) for o in qs]
+    return JsonResponse({'success': True, 'orders': data, 'count': len(data)})
+
+
+def api_food_order_detail(request, pk):
+    """
+    GET /api/food/orders/<pk>/
+    Bitta buyurtma tafsilotlari
+    """
+    order = get_object_or_404(FoodOrder, pk=pk)
+    items = []
+    for it in order.items.all():
+        items.append({
+            'id': it.id,
+            'food_name': it.food_name,
+            'quantity': it.quantity,
+            'unit_price': float(it.unit_price),
+            'total_price': float(it.total_price),
+        })
+    return JsonResponse({
+        'success': True,
+        'order': {
+            'id': order.id,
+            'order_code': order.order_code,
+            'customer_name': order.customer_name,
+            'phone': order.phone,
+            'delivery_address': order.delivery_address or '',
+            'total_amount': float(order.total_amount),
+            'payment_method': order.payment_method,
+            'order_type': order.order_type,
+            'order_type_display': order.get_order_type_display(),
+            'status': order.status,
+            'status_display': order.get_status_display(),
+            'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'items': items,
+        }
+    })
+
+
+@csrf_exempt
+def api_food_order_status_update(request):
+    """
+    POST /api/food/orders/status/
+    Body: { "order_id": 1, "new_status": "preparing" }
+    Buyurtma holatini yangilash
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Faqat POST'})
+    try:
+        data = json.loads(request.body)
+        order_id = data.get('order_id')
+        new_status = data.get('new_status')
+
+        valid_statuses = ['new', 'preparing', 'delivering', 'completed', 'cancelled']
+        if new_status not in valid_statuses:
+            return JsonResponse({'success': False, 'error': f'Noto\'g\'ri status. Qabul qilinadiganlar: {valid_statuses}'})
+
+        order = get_object_or_404(FoodOrder, pk=order_id)
+        order.status = new_status
+        order.save()
+
+        return JsonResponse({
+            'success': True,
+            'order_id': order.id,
+            'order_code': order.order_code,
+            'new_status': new_status,
+            'status_display': order.get_status_display(),
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@csrf_exempt
+def api_food_place_order(request):
+    """
+    POST /api/food/orders/place/
+    Mijoz tomonidan yangi buyurtma berish (aslfood_order_api bilan bir xil mantiq,
+    lekin faqat JSON in/out)
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Faqat POST'})
+    try:
+        data = json.loads(request.body)
+        cart = data.get('cart', [])
+        customer_name = data.get('customer_name', 'Mijoz').strip()
+        phone = data.get('phone', '').strip()
+        address = data.get('address', '')
+        order_type = data.get('order_type', 'delivery')
+
+        if not cart:
+            return JsonResponse({'success': False, 'error': 'Savat bo\'sh'})
+        if not customer_name or not phone:
+            return JsonResponse({'success': False, 'error': 'Ism va telefon kiritilishi shart'})
+
+        total_amount = 0
+        order_items = []
+
+        for item in cart:
+            food = FoodItem.objects.get(pk=item['id'])
+            if not food.is_available:
+                return JsonResponse({'success': False, 'error': f"{food.name} hozir mavjud emas"})
+            qty = int(item['qty'])
+            subtotal = food.price * qty
+            total_amount += subtotal
+            order_items.append({
+                'food': food,
+                'name': food.name,
+                'qty': qty,
+                'price': food.price,
+            })
+
+        code = "FOOD-" + str(uuid.uuid4())[:6].upper()
+        order = FoodOrder.objects.create(
+            order_code=code,
+            customer_name=customer_name,
+            phone=phone,
+            delivery_address=address,
+            total_amount=total_amount,
+            order_type=order_type,
+            status='new',
+            created_at=timezone.now(),
+        )
+
+        for it in order_items:
+            FoodOrderItem.objects.create(
+                order=order,
+                food_item=it['food'],
+                food_name=it['name'],
+                quantity=it['qty'],
+                unit_price=it['price'],
+            )
+
+        return JsonResponse({
+            'success': True,
+            'order_code': code,
+            'order_id': order.id,
+            'total_amount': float(total_amount),
+            'message': 'Buyurtmangiz qabul qilindi! Oshpaz tayyorlamoqda 🍳',
+        })
+    except FoodItem.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Taom topilmadi'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+def api_food_stats(request):
+    """
+    GET /api/food/stats/
+    Kitchen dashboard statistikasi: bugungi tushum, buyurtmalar soni, holat bo'yicha
+    """
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today_start - timedelta(days=7)
+
+    # Bugungi statistika
+    today_orders = FoodOrder.objects.filter(created_at__gte=today_start)
+    today_completed = today_orders.filter(status='completed')
+    today_revenue = today_completed.aggregate(total=Sum('total_amount'))['total'] or 0
+
+    # Haftalik statistika
+    week_orders = FoodOrder.objects.filter(created_at__gte=week_start)
+    week_completed = week_orders.filter(status='completed')
+    week_revenue = week_completed.aggregate(total=Sum('total_amount'))['total'] or 0
+
+    # Hozirgi faol buyurtmalar soni
+    active_new = FoodOrder.objects.filter(status='new').count()
+    active_preparing = FoodOrder.objects.filter(status='preparing').count()
+    active_delivering = FoodOrder.objects.filter(status='delivering').count()
+
+    # Jami statistika
+    total_revenue = FoodOrder.objects.filter(status='completed').aggregate(total=Sum('total_amount'))['total'] or 0
+    total_orders = FoodOrder.objects.filter(status='completed').count()
+
+    # Eng ko'p sotilgan taomlar (top 5)
+    top_items = (
+        FoodOrderItem.objects
+        .values('food_name')
+        .annotate(total_qty=Sum('quantity'))
+        .order_by('-total_qty')[:5]
+    )
+
+    return JsonResponse({
+        'success': True,
+        'stats': {
+            'today': {
+                'revenue': float(today_revenue),
+                'orders_count': today_orders.count(),
+                'completed_count': today_completed.count(),
+            },
+            'week': {
+                'revenue': float(week_revenue),
+                'orders_count': week_orders.count(),
+                'completed_count': week_completed.count(),
+            },
+            'total': {
+                'revenue': float(total_revenue),
+                'completed_orders': total_orders,
+            },
+            'active_now': {
+                'new': active_new,
+                'preparing': active_preparing,
+                'delivering': active_delivering,
+            },
+            'top_items': list(top_items),
+        }
+    })
+
+
+def api_food_order_by_code(request, code):
+    """
+    GET /api/food/orders/track/<code>/
+    Buyurtma kodi orqali holat kuzatish (mijoz tomonidan)
+    """
+    order = get_object_or_404(FoodOrder, order_code=code.upper())
+    items = []
+    for it in order.items.all():
+        items.append({
+            'food_name': it.food_name,
+            'quantity': it.quantity,
+            'unit_price': float(it.unit_price),
+            'total_price': float(it.total_price),
+        })
+
+    status_steps = {
+        'new': 1,
+        'preparing': 2,
+        'delivering': 3,
+        'completed': 4,
+        'cancelled': 0,
+    }
+
+    return JsonResponse({
+        'success': True,
+        'order': {
+            'order_code': order.order_code,
+            'customer_name': order.customer_name,
+            'status': order.status,
+            'status_display': order.get_status_display(),
+            'status_step': status_steps.get(order.status, 1),
+            'order_type': order.order_type,
+            'order_type_display': order.get_order_type_display(),
+            'total_amount': float(order.total_amount),
+            'delivery_address': order.delivery_address or '',
+            'created_at': order.created_at.strftime('%Y-%m-%d %H:%M'),
+            'items': items,
+        }
+    })
