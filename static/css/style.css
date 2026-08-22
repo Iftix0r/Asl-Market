@@ -1,7 +1,29 @@
 /* ==========================================================================
-   AslMarket.uz — Universal Design System
-   Light / Dark mode, clean & professional
+   AslMarket.uz — Light Only Design System
    ========================================================================== */
+
+/* Force light mode — override any OS/browser dark mode */
+:root { color-scheme: light; }
+html  { color-scheme: light !important; }
+@media (prefers-color-scheme: dark) {
+  html, body {
+    background-color: #f5f7fa !important;
+    color: #0f172a !important;
+  }
+  :root {
+    --bg-page:            #f5f7fa !important;
+    --bg-card:            #ffffff !important;
+    --bg-surface:         #f1f5f9 !important;
+    --bg-surface-lighter: #e2e8f0 !important;
+    --text-main:          #0f172a !important;
+    --text-sub:           #334155 !important;
+    --text-muted:         #64748b !important;
+    --text-dim:           #94a3b8 !important;
+    --border-light:       #e2e8f0 !important;
+    --border-subtle:      #cbd5e1 !important;
+    --bg-dark:            #f5f7fa !important;
+  }
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
