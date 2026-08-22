@@ -1,146 +1,155 @@
 {% extends 'aslfood/food_panel_base.html' %}
 
-{% block title %}Taomlar Menyusi - AslFood Kitchen{% endblock %}
+{% block title %}Taomlar Menyusi — AslFood Manager{% endblock %}
 
 {% block panel_content %}
-<div class="panel-header">
-  <div class="panel-title">
-    <h1>AslFood Fast-Food Menyusi</h1>
-    <p>Taomlar ro'yxati, narxlari va "Mavjud / Tugagan" holatlari</p>
-  </div>
-  <div>
-    <button onclick="openModal('addFoodModal')" class="btn-action-primary" style="background: var(--accent-amber-gradient);">
-      <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Yangi Taom Qo'shish
-    </button>
-  </div>
-</div>
-
-<!-- Menu Items Table -->
-<div class="table-responsive">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Taom</th>
-        <th>Kategoriya</th>
-        <th>Narxi</th>
-        <th>Tayyorlanish Vaqti</th>
-        <th>Holat (Mavjudligi)</th>
-        <th>Amallar</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in food_items %}
-        <tr>
-          <td>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <img src="{{ item.image_url }}" alt="{{ item.name }}" style="width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover;">
-              <div>
-                <div style="font-weight: 600;">{{ item.name }}</div>
-                <div style="font-size: 0.78rem; color: var(--text-muted);">{{ item.ingredients|default:""|truncatechars:40 }}</div>
-              </div>
-            </div>
-          </td>
-          <td>{{ item.category.name }}</td>
-          <td style="font-weight: 700; color: #fbbf24;">{{ item.price }} so'm</td>
-          <td style="color: var(--text-muted);">⏱️ {{ item.preparation_time_mins }} daqiqa</td>
-          <td>
-            {% if item.is_available %}
-              <span class="stock-badge" style="position: static; color: #34d399; border-color: rgba(16, 185, 129, 0.3);">
-                ✅ Mavjud
-              </span>
-            {% else %}
-              <span class="stock-badge" style="position: static; color: #fb7185; border-color: rgba(244, 63, 94, 0.3);">
-                ❌ Tugagan
-              </span>
-            {% endif %}
-          </td>
-          <td>
-            <button onclick="toggleAvailability({{ item.id }})" class="btn-details" style="padding: 0.4rem 0.65rem;">
-              🔄 Holatni O'zgartirish
-            </button>
-          </td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-            Hozircha menyuda taomlar mavjud emas.
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-<!-- MODAL: Add Food Item -->
-<div id="addFoodModal" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>Yangi Taom Qo'shish</h3>
-      <button onclick="closeModal('addFoodModal')" class="btn-close-modal">&times;</button>
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-book-open text-warning"></i> Fast-Food Taomlar Menyusi
+        </h3>
+        <p class="text-muted small mb-0">Taomlar narxi, tarkibi va mavjudligini yoqish/o'chirish</p>
     </div>
 
-    <form method="POST" action="{% url 'aslfood_add_item' %}">
-      {% csrf_token %}
-      <div class="form-group">
-        <label>Taom Nomi</label>
-        <input type="text" name="name" required class="form-control" placeholder="Masalan: Double Beef Lavash">
-      </div>
+    <button class="btn btn-warning text-dark fw-bold rounded-pill shadow d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addFoodModal">
+        <i class="fa-solid fa-plus"></i> Yangi Taom Qo'shish
+    </button>
+</div>
 
-      <div class="form-group">
-        <label>Kategoriya</label>
-        <select name="category" required class="form-control">
-          <option value="">-- Tanlang --</option>
-          {% for cat in categories %}
-            <option value="{{ cat.id }}">{{ cat.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
+<!-- Food Catalog Table -->
+<div class="glass-card p-3">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-muted small text-uppercase">
+                    <th>Taom Nomi</th>
+                    <th>Kategoriya</th>
+                    <th>Narxi</th>
+                    <th>Tayyorlanish Vaqti</th>
+                    <th>Mavjudligi</th>
+                    <th class="text-end">Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in food_items %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 overflow-hidden bg-dark d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                                    {% if item.image_url %}
+                                        <img src="{{ item.image_url }}" class="w-100 h-100 object-fit-cover" alt="{{ item.name }}">
+                                    {% else %}
+                                        <i class="fa-solid fa-utensils text-warning fs-5"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-white">{{ item.name }}</div>
+                                    <div class="text-muted small text-truncate" style="max-width: 250px;">{{ item.ingredients|default:"" }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-secondary">{{ item.category.name }}</span></td>
+                        <td class="fw-extrabold text-warning fs-5">{{ item.price|floatformat:0 }} so'm</td>
+                        <td>⏱️ {{ item.preparation_time_mins }} daqiqa</td>
+                        <td>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="toggleSwitch{{ item.id }}" {% if item.is_available %}checked{% endif %} onchange="toggleFoodAvailability({{ item.id }})">
+                                <label class="form-check-label small {% if item.is_available %}text-success{% else %}text-danger{% endif %}" id="toggleLabel{{ item.id }}">
+                                    {% if item.is_available %}Mavjud{% else %}Tugagan{% endif %}
+                                </label>
+                            </div>
+                        </td>
+                        <td class="text-end">
+                            <form method="POST" action="{% url 'api_food_delete_item' item.id %}" class="d-inline" onsubmit="return confirm('Taomni o\'chirmoqchimisiz?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle"><i class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-utensils fs-1 mb-2"></i>
+                            <div>Taomlar menyusi bo'sh</div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label>Narxi (so'm)</label>
-          <input type="number" name="price" required class="form-control" placeholder="32000">
+<!-- ADD FOOD MODAL -->
+<div class="modal fade" id="addFoodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-warning text-white">
+            <form method="POST" action="{% url 'aslfood_add_item' %}">
+                {% csrf_token %}
+                <div class="modal-header border-warning">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-plus text-warning"></i> Yangi Taom Qo'shish</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Taom Nomi</label>
+                        <input type="text" name="name" class="form-control bg-dark text-white border-secondary" placeholder="Lavash Big" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted">Kategoriya</label>
+                            <select name="category" class="form-select bg-dark text-white border-secondary" required>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted">Tayyorlanish Vaqti (min)</label>
+                            <input type="number" name="prep_time" class="form-control bg-dark text-white border-secondary" value="15" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Sotish Narxi (so'm)</label>
+                        <input type="number" name="price" class="form-control bg-dark text-white border-secondary" placeholder="35000" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Rasm URL</label>
+                        <input type="url" name="image_url" class="form-control bg-dark text-white border-secondary" placeholder="https://...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Tarkibi / Retsept</label>
+                        <textarea name="ingredients" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Mol go'shti, pomidor..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-warning">
+                    <button type="submit" class="btn btn-warning text-dark rounded-pill px-4 fw-bold">Saqlash</button>
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-          <label>Tayyorlanish Vaqti (daqiqa)</label>
-          <input type="number" name="prep_time" value="15" required class="form-control">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Rasm URL</label>
-        <input type="url" name="image_url" class="form-control" placeholder="https://images.unsplash.com/...">
-      </div>
-
-      <div class="form-group">
-        <label>Tarkibi / Masalliqlar</label>
-        <textarea name="ingredients" class="form-control" rows="2" placeholder="Mol go'shti, pishloq, chips..."></textarea>
-      </div>
-
-      <button type="submit" class="btn-submit" style="background: var(--accent-amber-gradient);">
-        <i data-lucide="save" style="width: 16px; height: 16px;"></i> Taomni Menyoga Qo'shish
-      </button>
-    </form>
-  </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  function openModal(id) { document.getElementById(id).classList.add('active'); }
-  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-  async function toggleAvailability(id) {
-    try {
-      const res = await fetch("/aslfood/panel/menu/toggle/" + id + "/");
-      const data = await res.json();
-      if (data.success) {
-        showToast("Taom holati o'zgartirildi!", "success");
-        setTimeout(() => location.reload(), 300);
-      }
-    } catch (e) {
-      showToast("Xatolik yuz berdi!", "danger");
+    async function toggleFoodAvailability(id) {
+        try {
+            const res = await fetch(`/aslfood/panel/menu/toggle/${id}/`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                const label = document.getElementById(`toggleLabel${id}`);
+                if (data.is_available) {
+                    label.innerText = 'Mavjud';
+                    label.className = 'form-check-label small text-success';
+                } else {
+                    label.innerText = 'Tugagan';
+                    label.className = 'form-check-label small text-danger';
+                }
+                showToast('Mavjudlik holati o\'zgardi!');
+            }
+        } catch (e) {
+            showToast('Xatolik yuz berdi', true);
+        }
     }
-  }
 </script>
 {% endblock %}

@@ -762,10 +762,10 @@ def seed_demo_data(request):
     """Seed comprehensive retail mock data into SQLite database"""
     with transaction.atomic():
         # Supermarket Categories
-        c1, _ = Category.objects.get_or_create(name="Ichimliklar & Sharbating", slug="ichimliklar")
-        c2, _ = Category.objects.get_or_create(name="Sut va Qatiq Mahsulotlari", slug="sut-mahsulotlari")
-        c3, _ = Category.objects.get_or_create(name="Shirinliklar va Pecheynelar", slug="shirinliklar")
-        c4, _ = Category.objects.get_or_create(name="Yorma va Makaronlar", slug="yormolar")
+        c1, _ = Category.objects.get_or_create(slug="ichimliklar", defaults={'name': "Ichimliklar & Sharbating"})
+        c2, _ = Category.objects.get_or_create(slug="sut-mahsulotlari", defaults={'name': "Sut va Qatiq Mahsulotlari"})
+        c3, _ = Category.objects.get_or_create(slug="shirinliklar", defaults={'name': "Shirinliklar va Pecheynelar"})
+        c4, _ = Category.objects.get_or_create(slug="yormolar", defaults={'name': "Yorma va Makaronlar"})
 
         # Supermarket Products
         products_data = [
@@ -830,10 +830,10 @@ def seed_demo_data(request):
 def aslfood_seed_data(request):
     """Seed Fast-Food mock data into SQLite database"""
     with transaction.atomic():
-        fc1, _ = FoodCategory.objects.get_or_create(name="Lavash va Burgerlar", slug="lavash-burger")
-        fc2, _ = FoodCategory.objects.get_or_create(name="Pizza va Pide", slug="pizza-pide")
-        fc3, _ = FoodCategory.objects.get_or_create(name="Ichimliklar va Kokteyllar", slug="fast-ichimliklar")
-        fc4, _ = FoodCategory.objects.get_or_create(name="Souslar va Gamburgerlar", slug="gamburgerlar")
+        fc1, _ = FoodCategory.objects.get_or_create(slug="lavash-burger", defaults={'name': "Lavash va Burgerlar"})
+        fc2, _ = FoodCategory.objects.get_or_create(slug="pizza-pide", defaults={'name': "Pizza va Pide"})
+        fc3, _ = FoodCategory.objects.get_or_create(slug="fast-ichimliklar", defaults={'name': "Ichimliklar va Kokteyllar"})
+        fc4, _ = FoodCategory.objects.get_or_create(slug="gamburgerlar", defaults={'name': "Souslar va Gamburgerlar"})
 
         food_data = [
             ("Mol go'shtli Lavash Big", fc1, 35000, 15, "https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=400&q=80", "Mol go'shti, poytaxt sous, pomidor, bodring, chipslar"),
