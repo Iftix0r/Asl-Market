@@ -21,6 +21,7 @@ urlpatterns = [
     # AslMarket Retail Admin Panel routes (/panel/...)
     path('panel/', views.dashboard, name='dashboard'),
     path('panel/analytics/', views.analytics_view, name='analytics_view'),
+    path('panel/shift-summary/', views.shift_summary_api, name='shift_summary_api'),
 
     # Debtors routes (Qarzdorlar bo'limi)
     path('panel/debtors/', views.debtors_list, name='debtors_list'),

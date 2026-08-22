@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Sum, F, Q, Count, DecimalField, ExpressionWrapper
 from django.utils import timezone
@@ -1097,3 +1098,46 @@ def api_food_stats(request):
             'active_orders_count': active_orders_count
         }
     })
+
+
+# ==========================================================================
+# SHIFT SUMMARY & TELEGRAM NOTIFICATION HELPERS
+# ==========================================================================
+
+def shift_summary_api(request):
+    """GET /panel/shift-summary/ — Cashier shift sales report"""
+    today = timezone.now().date()
+    today_sales = Sale.objects.filter(date__date=today)
+
+    total_naqd = today_sales.filter(payment_method='naqd').aggregate(t=Sum('total_amount'))['t'] or 0
+    total_karta = today_sales.filter(payment_method='karta').aggregate(t=Sum('total_amount'))['t'] or 0
+    total_nasiya = today_sales.filter(payment_method='nasiya').aggregate(t=Sum('total_amount'))['t'] or 0
+    grand_total = today_sales.aggregate(t=Sum('total_amount'))['t'] or 0
+
+    return JsonResponse({
+        'success': True,
+        'date': today.strftime('%Y-%m-%d'),
+        'sales_count': today_sales.count(),
+        'total_naqd': float(total_naqd),
+        'total_karta': float(total_karta),
+        'total_nasiya': float(total_nasiya),
+        'grand_total': float(grand_total)
+    })
+
+
+def send_telegram_notification(text):
+    """Optional Helper to dispatch instant Telegram alert on new orders"""
+    import urllib.request
+    import urllib.parse
+    bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
+    chat_id = getattr(settings, 'TELEGRAM_CHAT_ID', None)
+
+    if bot_token and chat_id:
+        try:
+            url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+            params = urllib.parse.urlencode({'chat_id': chat_id, 'text': text, 'parse_mode': 'Markdown'}).encode('utf-8')
+            req = urllib.request.Request(url, data=params)
+            urllib.request.urlopen(req, timeout=3)
+        except Exception:
+            pass
+
