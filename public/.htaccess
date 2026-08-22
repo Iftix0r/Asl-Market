@@ -1,0 +1,22 @@
+# AslMarket.uz — Apache .htaccess
+# Bu fayl cPanel da public/ papkasiga joylashadi
+
+# Statik fayllarni to'g'ridan-to'g'ri xizmat qilish
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Statik fayllar uchun Passenger ni chetlab o'tish
+    RewriteCond %{REQUEST_URI} ^/static/
+    RewriteRule ^static/(.*)$ static/$1 [L]
+
+    # Qolganlarni Passenger ga yo'naltirish
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ passenger_wsgi.py/$1 [QSA,L]
+</IfModule>
+
+# Xavfsizlik sarlavhalari
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
