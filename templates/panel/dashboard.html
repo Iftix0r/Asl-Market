@@ -1,140 +1,129 @@
 {% extends 'panel/panel_base.html' %}
 
-{% block title %}Boshqaruv Paneli - AslMarket.uz{% endblock %}
+{% block title %}AslMarket Boshqaruv Dashboardi{% endblock %}
 
 {% block panel_content %}
-<div class="panel-header">
-  <div class="panel-title">
-    <h1>Boshqaruv Paneli</h1>
-    <p>Do'kon faoliyati, tushum va qarzlar holati bo'yicha umumiy ko'rsatkichlar</p>
-  </div>
-  <div>
-    <a href="{% url 'pos_view' %}" class="btn-action-primary">
-      <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Yangi Sotuv (Kassa)
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-gauge-high text-primary"></i> AslMarket Dashboard
+        </h3>
+        <p class="text-muted small mb-0">Tizim holati, sotuvlar tushumi va nasiya qarzdorlarining umumiy statistikasi</p>
+    </div>
+
+    <a href="{% url 'pos_view' %}" class="btn btn-success btn-lg rounded-pill px-4 fw-bold shadow d-flex align-items-center gap-2">
+        <i class="fa-solid fa-cash-register"></i> Yangi Sotuv (POS Kassa)
     </a>
-  </div>
 </div>
 
-<!-- Dashboard Metric Cards Grid -->
-<div class="metrics-grid">
-
-  <!-- Metric 1: Total Sales -->
-  <div class="glass-card metric-card">
-    <div class="metric-header">
-      <span class="metric-title">Jami Sotuv Tushumi</span>
-      <div class="metric-icon blue">
-        <i data-lucide="wallet" style="width: 20px; height: 20px;"></i>
-      </div>
-    </div>
-    <div class="metric-value">{{ total_sales }} so'm</div>
-    <div class="metric-footer">
-      <i data-lucide="trending-up" style="color: #34d399; width: 14px; height: 14px;"></i> Barcha sotuv tushumlari
-    </div>
-  </div>
-
-  <!-- Metric 2: Active Debt Balance -->
-  <div class="glass-card metric-card">
-    <div class="metric-header">
-      <span class="metric-title">Nasiya / Faol Qarzlar</span>
-      <div class="metric-icon rose">
-        <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
-      </div>
-    </div>
-    <div class="metric-value" style="color: #fb7185;">{{ total_debt }} so'm</div>
-    <div class="metric-footer">
-      <i data-lucide="alert-circle" style="color: #fb7185; width: 14px; height: 14px;"></i> Qarzdorlar balansi
-    </div>
-  </div>
-
-  <!-- Metric 3: Total Products in Stock -->
-  <div class="glass-card metric-card">
-    <div class="metric-header">
-      <span class="metric-title">Ombor Mahsulotlari</span>
-      <div class="metric-icon emerald">
-        <i data-lucide="package" style="width: 20px; height: 20px;"></i>
-      </div>
-    </div>
-    <div class="metric-value">{{ total_products_count }} xil</div>
-    <div class="metric-footer">
-      <i data-lucide="check-circle" style="color: #34d399; width: 14px; height: 14px;"></i> Faol katalog birliklari
-    </div>
-  </div>
-
-  <!-- Metric 4: Low Stock Alert -->
-  <div class="glass-card metric-card">
-    <div class="metric-header">
-      <span class="metric-title">Kechikkan Qarzlar (30+ kun)</span>
-      <div class="metric-icon amber">
-        <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
-      </div>
-    </div>
-    <div class="metric-value" style="color: #fbbf24;">{{ urgent_debtors_count }} kishi</div>
-    <div class="metric-footer">
-      <i data-lucide="alert-triangle" style="color: #fbbf24; width: 14px; height: 14px;"></i> Shoshilinch qaytarilishi kerak
-    </div>
-  </div>
-
-</div>
-
-<!-- Recent Debtors Quick Section -->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem;">
-  
-  <!-- Active Debtors List -->
-  <div class="glass-card">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
-      <h3>Qarzdorlar Ro'yxati</h3>
-      <a href="{% url 'debtors_list' %}" style="font-size: 0.85rem; color: #818cf8; display: inline-flex; align-items: center; gap: 0.3rem;">
-        Barchasi <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
-      </a>
-    </div>
-
-    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-      {% for debtor in recent_debtors %}
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
-          <div>
-            <div style="font-weight: 600;">{{ debtor.name }}</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem;">
-              <i data-lucide="phone" style="width: 12px; height: 12px;"></i> {{ debtor.phone }}
+<!-- Metrics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card p-3 border-start border-4 border-primary">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small fw-bold text-uppercase">Jami Sotuv Tushumi</div>
+                <i class="fa-solid fa-wallet fs-4 text-primary"></i>
             </div>
-          </div>
-          <div style="text-align: right;">
-            <div style="font-weight: 700; color: #fb7185;">{{ debtor.amount }} so'm</div>
-            <span class="elapsed-badge {{ debtor.overdue_level }}">
-              <i data-lucide="clock" style="width: 12px; height: 12px;"></i> {{ debtor.elapsed_time_str }}
-            </span>
-          </div>
+            <div class="fs-2 fw-extrabold text-white mt-2">{{ total_revenue|floatformat:0 }} so'm</div>
+            <div class="text-success small mt-1"><i class="fa-solid fa-arrow-up-right"></i> {{ total_sales_count }} ta muvaffaqiyatli sotuv</div>
         </div>
-      {% empty %}
-        <p style="color: var(--text-muted); text-align: center;">Hozircha faol qarzdorlar yo'q</p>
-      {% endfor %}
-    </div>
-  </div>
-
-  <!-- Recent Sales Log -->
-  <div class="glass-card">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
-      <h3>So'nggi Sotuvlar</h3>
-      <a href="{% url 'sales_history' %}" style="font-size: 0.85rem; color: #818cf8; display: inline-flex; align-items: center; gap: 0.3rem;">
-        Barchasi <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
-      </a>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-      {% for sale in recent_sales %}
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
-          <div>
-            <div style="font-weight: 600;">Chek #{{ sale.sale_code }}</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ sale.customer_name }} • {{ sale.payment_method|upper }}</div>
-          </div>
-          <div style="font-weight: 700; color: #34d399;">
-            {{ sale.total_amount }} so'm
-          </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card p-3 border-start border-4 border-danger">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small fw-bold text-uppercase">Faol Nasiya Qarzlari</div>
+                <i class="fa-solid fa-handshake-angle fs-4 text-danger"></i>
+            </div>
+            <div class="fs-2 fw-extrabold text-danger mt-2">{{ total_debt_amount|floatformat:0 }} so'm</div>
+            <div class="text-danger small mt-1"><i class="fa-solid fa-users"></i> {{ total_debtors }} kishi qarzdor</div>
         </div>
-      {% empty %}
-        <p style="color: var(--text-muted); text-align: center;">Hozircha sotuvlar qayd etilmagan</p>
-      {% endfor %}
     </div>
-  </div>
 
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card p-3 border-start border-4 border-warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small fw-bold text-uppercase">Shoshilinch Qarzlar</div>
+                <i class="fa-solid fa-clock-rotate-left fs-4 text-warning"></i>
+            </div>
+            <div class="fs-2 fw-extrabold text-warning mt-2">{{ urgent_debtors.count }} kishi</div>
+            <div class="text-warning small mt-1"><i class="fa-solid fa-triangle-exclamation"></i> Kechikkan qarzlar</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="glass-card p-3 border-start border-4 border-info">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small fw-bold text-uppercase">Kam Qolgan Mahsulotlar</div>
+                <i class="fa-solid fa-boxes-stacked fs-4 text-info"></i>
+            </div>
+            <div class="fs-2 fw-extrabold text-info mt-2">{{ low_stock_products.count }} xil</div>
+            <div class="text-info small mt-1"><i class="fa-solid fa-box-open"></i> Ombor to'ldirilishi kerak</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Urgent Debtors -->
+    <div class="col-12 col-xl-6">
+        <div class="glass-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-clock text-warning"></i> Shoshilinch Nasiya Qarzlar
+                </h5>
+                <a href="{% url 'debtors_list' %}" class="btn btn-outline-warning btn-sm rounded-pill">Barchasi <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+                {% for debtor in urgent_debtors %}
+                    <div class="glass-card p-2 px-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold text-white">{{ debtor.name }}</div>
+                            <div class="text-muted small"><i class="fa-solid fa-phone me-1"></i> {{ debtor.phone }}</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-danger">{{ debtor.amount|floatformat:0 }} so'm</div>
+                            {% if debtor.overdue_level == 'urgent' %}
+                                <span class="badge badge-urgent rounded-pill">⏱️ {{ debtor.elapsed_time_str }}</span>
+                            {% else %}
+                                <span class="badge badge-warning rounded-pill">⏱️ {{ debtor.elapsed_time_str }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-4 text-muted">Muddati o'tgan qarzlar yo'q</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Sales -->
+    <div class="col-12 col-xl-6">
+        <div class="glass-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-receipt text-success"></i> So'nggi Sotuvlar Tarixi
+                </h5>
+                <a href="{% url 'sales_history' %}" class="btn btn-outline-success btn-sm rounded-pill">Barchasi <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+                {% for sale in recent_sales %}
+                    <div class="glass-card p-2 px-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold text-white">Chek #{{ sale.sale_code }}</div>
+                            <div class="text-muted small">{{ sale.customer_name }} • {{ sale.get_payment_method_display }}</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-success">{{ sale.total_amount|floatformat:0 }} so'm</div>
+                            <div class="text-muted small">{{ sale.date|date:"H:i, d.m.Y" }}</div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-4 text-muted">Sotuvlar tarixi yo'q</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

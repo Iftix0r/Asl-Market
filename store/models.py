@@ -4,7 +4,7 @@ import math
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name="Kategoriya nomi")
-    slug = models.SlugField(unique=True, max_length=100)
+    slug = models.SlugField(unique=True, max_length=100, db_index=True)
 
     class Meta:
         verbose_name = "Kategoriya"
@@ -20,7 +20,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Sotish narxi (so'm)")
     cost_price = models.DecimalField(max_digits=12, decimal_places=0, default=0, verbose_name="Tan narxi (so'm)")
     stock = models.IntegerField(default=0, verbose_name="Ombor qoldig'i")
-    barcode = models.CharField(max_length=50, blank=True, null=True, verbose_name="Shtrix-kod / SKU")
+    barcode = models.CharField(max_length=50, blank=True, null=True, db_index=True, verbose_name="Shtrix-kod / SKU")
     image_url = models.URLField(max_length=500, blank=True, null=True, verbose_name="Rasm havolasi")
     description = models.TextField(blank=True, null=True, verbose_name="Tavsif")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -49,12 +49,12 @@ class Debtor(models.Model):
     )
 
     name = models.CharField(max_length=150, verbose_name="F.I.SH")
-    phone = models.CharField(max_length=30, verbose_name="Telefon raqami")
+    phone = models.CharField(max_length=30, db_index=True, verbose_name="Telefon raqami")
     amount = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Hozirgi qarz summasi")
     initial_amount = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Boshlang'ich qarz")
     created_at = models.DateTimeField(default=timezone.now, verbose_name="Qarz olingan sana")
     due_date = models.DateField(null=True, blank=True, verbose_name="Qaytarish muddati")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="Holat")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', db_index=True, verbose_name="Holat")
     items_description = models.TextField(blank=True, null=True, verbose_name="Olingan buyumlar / Izoh")
 
     class Meta:
@@ -63,7 +63,7 @@ class Debtor(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.name} - {self.amount} so'm"
+        return f"{self.name} - {self.amount:,} so'm"
 
     @property
     def elapsed_days(self):
@@ -124,10 +124,10 @@ class Sale(models.Model):
         ('nasiya', 'Nasiya / Qarz'),
     )
 
-    sale_code = models.CharField(max_length=50, unique=True, verbose_name="Chek raqami")
+    sale_code = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="Chek raqami")
     date = models.DateTimeField(default=timezone.now, verbose_name="Sotuv vaqti")
     total_amount = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Jami summa")
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='naqd', verbose_name="To'lov usuli")
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='naqd', db_index=True, verbose_name="To'lov usuli")
     debtor = models.ForeignKey(Debtor, on_delete=models.SET_NULL, null=True, blank=True, related_name="sales", verbose_name="Qarzdor (agar nasiya bo'lsa)")
     customer_name = models.CharField(max_length=150, default="Xaridor", verbose_name="Xaridor nomi")
 
@@ -158,7 +158,7 @@ class SaleItem(models.Model):
 
 class FoodCategory(models.Model):
     name = models.CharField(max_length=100, verbose_name="Taom kategoriyasi (Lavash, Pizza...)")
-    slug = models.SlugField(unique=True, max_length=100)
+    slug = models.SlugField(unique=True, max_length=100, db_index=True)
 
     class Meta:
         verbose_name = "Taom Kategoriyasi"
@@ -200,14 +200,14 @@ class FoodOrder(models.Model):
         ('table', 'Zalda / Table Order'),
     )
 
-    order_code = models.CharField(max_length=50, unique=True, verbose_name="Buyurtma kodi")
+    order_code = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="Buyurtma kodi")
     customer_name = models.CharField(max_length=150, verbose_name="Mijoz ismi")
     phone = models.CharField(max_length=30, verbose_name="Telefon raqam")
     delivery_address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Dostavka manzili / Stol #")
     total_amount = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Jami summa")
     payment_method = models.CharField(max_length=20, default='naqd', verbose_name="To'lov usuli")
     order_type = models.CharField(max_length=20, choices=ORDER_TYPES, default='delivery', verbose_name="Buyurtma turi")
-    status = models.CharField(max_length=20, choices=ORDER_STATUS, default='new', verbose_name="Buyurtma holati")
+    status = models.CharField(max_length=20, choices=ORDER_STATUS, default='new', db_index=True, verbose_name="Buyurtma holati")
     created_at = models.DateTimeField(default=timezone.now, verbose_name="Buyurtma vaqti")
 
     class Meta:

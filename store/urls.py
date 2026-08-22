@@ -26,6 +26,7 @@ urlpatterns = [
     path('panel/debtors/', views.debtors_list, name='debtors_list'),
     path('panel/debtors/add/', views.add_debtor, name='add_debtor'),
     path('panel/debtors/pay/', views.pay_debt, name='pay_debt'),
+    path('panel/debtors/search/', views.search_debtors_api, name='search_debtors_api'),
     path('panel/debtors/history/<int:pk>/', views.debtor_history_api, name='debtor_history_api'),
     path('panel/debtors/receipt/<int:pk>/', views.debt_receipt_view, name='debt_receipt_view'),
     path('panel/debtors/export/', views.export_debtors_csv, name='export_debtors_csv'),
@@ -38,6 +39,7 @@ urlpatterns = [
 
     # POS Kassa routes
     path('panel/pos/', views.pos_view, name='pos_view'),
+    path('panel/pos/scan/', views.pos_scan_barcode_api, name='pos_scan_barcode_api'),
     path('panel/pos/checkout/', views.pos_checkout_api, name='pos_checkout_api'),
 
     # Sales & Reports

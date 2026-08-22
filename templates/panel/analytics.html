@@ -1,100 +1,132 @@
 {% extends 'panel/panel_base.html' %}
 
-{% block title %}Tahlillar & Hisobotlar - AslMarket.uz{% endblock %}
+{% block title %}Tahlillar & Grafika — AslMarket Analytics{% endblock %}
 
 {% block panel_content %}
-<div class="panel-header">
-  <div class="panel-title">
-    <h1>Tahlillar va Vizual Hisobotlar</h1>
-    <p>Do'kon sotuv kanallari, tushum ulushi va ombor holati statistikasi</p>
-  </div>
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-purple"></i> Tahlillar va Grafika
+        </h3>
+        <p class="text-muted small mb-0">Sotuvlar dinamikasi, to'lov turlari va eng xaridorgir mahsulotlar hisoboti</p>
+    </div>
 </div>
 
-<!-- Sales Channels Breakdown -->
-<div class="metrics-grid" style="margin-bottom: 2rem;">
-  <div class="glass-card metric-card">
-    <div class="metric-header">
-      <span class="metric-title">💵 Naqd Sotuv Tushumi</span>
-      <div class="metric-icon emerald">
-        <i data-lucide="banknote" style="width: 20px; height: 20px;"></i>
-      </div>
+<!-- Charts Grid -->
+<div class="row g-4 mb-4">
+    <!-- Daily Revenue Line Chart -->
+    <div class="col-12 col-xl-8">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-chart-line text-primary"></i> Oxirgi 7 kunlik Sotuv Dinamikasi
+            </h5>
+            <div style="height: 300px;">
+                <canvas id="dailySalesChart"></canvas>
+            </div>
+        </div>
     </div>
-    <div class="metric-value" style="color: #34d399;">{{ sales_by_naqd }} so'm</div>
-    <div class="metric-footer">Naqd to'lovlar ulushi</div>
-  </div>
 
-  <div class="glass-card metric-card">
-    <div class="metric-header">
-      <span class="metric-title">💳 Karta Tushumi</span>
-      <div class="metric-icon blue">
-        <i data-lucide="credit-card" style="width: 20px; height: 20px;"></i>
-      </div>
+    <!-- Payment Methods Doughnut Chart -->
+    <div class="col-12 col-xl-4">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-pie-chart text-success"></i> To'lov Usullari Ulushi
+            </h5>
+            <div style="height: 300px;" class="d-flex align-items-center justify-content-center">
+                <canvas id="paymentMethodsChart"></canvas>
+            </div>
+        </div>
     </div>
-    <div class="metric-value" style="color: #38bdf8;">{{ sales_by_karta }} so'm</div>
-    <div class="metric-footer">Plastik karta to'lovlari</div>
-  </div>
-
-  <div class="glass-card metric-card">
-    <div class="metric-header">
-      <span class="metric-title">📋 Nasiya Sotuvlar</span>
-      <div class="metric-icon rose">
-        <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
-      </div>
-    </div>
-    <div class="metric-value" style="color: #fb7185;">{{ sales_by_nasiya }} so'm</div>
-    <div class="metric-footer">Nasiyaga sotilgan tovarlar</div>
-  </div>
-
-  <div class="glass-card metric-card">
-    <div class="metric-header">
-      <span class="metric-title">✅ Qaytarilgan Qarzlar</span>
-      <div class="metric-icon emerald">
-        <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
-      </div>
-    </div>
-    <div class="metric-value" style="color: #34d399;">{{ recovered_debt }} so'm</div>
-    <div class="metric-footer">Qarzdorlardan undirilgan summa</div>
-  </div>
 </div>
 
-<!-- Low Stock Restock Table -->
-<div class="glass-card">
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
-    <h3>⚠️ Omborda Kam Qolgan Mahsulotlar (Restock Warning)</h3>
-    <span style="font-size: 0.82rem; color: #fbbf24; font-weight: 600;">5 dona va undan kam</span>
-  </div>
-
-  <div class="table-responsive">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Mahsulot</th>
-          <th>Sotuv Narxi</th>
-          <th>Qoldiq</th>
-          <th>Holat</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for prod in low_stock_products %}
-          <tr>
-            <td style="font-weight: 600;">{{ prod.name }}</td>
-            <td>{{ prod.price }} so'm</td>
-            <td style="font-weight: 800; color: #fbbf24;">{{ prod.stock }} dona</td>
-            <td>
-              <span class="stock-badge low" style="position: static;">
-                ⚠️ Qoldiq oz qoldi
-              </span>
-            </td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
-              Barcha mahsulotlar omborda yetarli darajada mavjud! ✅
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<!-- Top Products Table -->
+<div class="glass-card p-4">
+    <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+        <i class="fa-solid fa-trophy text-warning"></i> Eng Ko'p Sotilgan Top-5 Mahsulotlar
+    </h5>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-muted small text-uppercase">
+                    <th>Mahsulot Nomi</th>
+                    <th>Sotilgan Soni</th>
+                    <th>Jami Tushum Summasi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in top_products %}
+                    <tr>
+                        <td class="fw-bold text-white">{{ item.product_name }}</td>
+                        <td><span class="badge bg-primary fs-6">{{ item.total_qty }} dona</span></td>
+                        <td class="fw-extrabold text-success fs-5">{{ item.total_sum|floatformat:0 }} so'm</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center py-4 text-muted">Sotuvlar statistikasi hali shakllanmadi</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Prepare Daily Sales Data
+    const dailyData = {{ daily_sales|safe }};
+    const dailyLabels = dailyData.map(d => d.date__date);
+    const dailyTotals = dailyData.map(d => d.total);
+
+    const ctxLine = document.getElementById('dailySalesChart').getContext('2d');
+    new Chart(ctxLine, {
+        type: 'line',
+        data: {
+            labels: dailyLabels.length ? dailyLabels : ['Boshlang\'ich'],
+            datasets: [{
+                label: 'Tushum (so\'m)',
+                data: dailyTotals.length ? dailyTotals : [0],
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#94a3b8' } } },
+            scales: {
+                x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+            }
+        }
+    });
+
+    // Prepare Payment Methods Data
+    const payData = {{ sales_by_payment|safe }};
+    const payLabels = payData.map(p => p.payment_method.toUpperCase());
+    const payTotals = payData.map(p => p.total);
+
+    const ctxPie = document.getElementById('paymentMethodsChart').getContext('2d');
+    new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+            labels: payLabels.length ? payLabels : ['NAQD', 'KARTA', 'NASIYA'],
+            datasets: [{
+                data: payTotals.length ? payTotals : [0, 0, 0],
+                backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } }
+        }
+    });
+</script>
 {% endblock %}

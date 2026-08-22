@@ -1,75 +1,81 @@
 {% extends 'panel/panel_base.html' %}
 
-{% block title %}Sotuvlar Tarixi - AslMarket.uz{% endblock %}
+{% block title %}Sotuvlar Tarixi — AslMarket Cheklar Logi{% endblock %}
 
 {% block panel_content %}
-<div class="panel-header">
-  <div class="panel-title">
-    <h1>Sotuvlar Tarixi va Hisobotlar</h1>
-    <p>Barcha kassa va do'kon sotuv operatsiyalari jurnali</p>
-  </div>
-  <div>
-    <a href="{% url 'export_sales_csv' %}" class="btn-action-primary" style="background: var(--accent-emerald-gradient);">
-      <i data-lucide="download" style="width: 16px; height: 16px;"></i> Excel/CSV Eksport
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-receipt text-info"></i> Sotuvlar Tarixi & Cheklar Logi
+        </h3>
+        <p class="text-muted small mb-0">Barcha POS va onlayn cheklar ro'yxati hamda eksport amallari</p>
+    </div>
+
+    <a href="{% url 'export_sales_csv' %}" class="btn btn-outline-success rounded-pill d-flex align-items-center gap-2">
+        <i class="fa-solid fa-file-csv"></i> Sotuvlarni CSV ga Eksport
     </a>
-  </div>
 </div>
 
-<!-- Sales Revenue Summary -->
-<div class="glass-card" style="margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #34d399;">
-  <div>
-    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Jami Sotuv Tushumi</div>
-    <div style="font-size: 2rem; font-weight: 800; color: #34d399;">{{ total_revenue }} so'm</div>
-  </div>
-  <div style="text-align: right; color: var(--text-muted); font-size: 0.88rem;">
-    Jami tranzaksiyalar: <strong style="color: var(--text-main);">{{ sales.count }} ta chek</strong>
-  </div>
+<!-- Filters -->
+<div class="glass-card p-3 mb-4">
+    <form method="GET" action="{% url 'sales_history' %}" class="row g-3 align-items-center">
+        <div class="col-12 col-md-5">
+            <input type="text" name="q" value="{{ query }}" class="form-control bg-dark text-white border-secondary" placeholder="Chek raqami yoki xaridor nomi bo'yicha...">
+        </div>
+        <div class="col-6 col-md-4">
+            <select name="payment_method" class="form-select bg-dark text-white border-secondary">
+                <option value="">-- Barcha To'lov Usullari --</option>
+                <option value="naqd" {% if selected_payment == 'naqd' %}selected{% endif %}>Naqd pul</option>
+                <option value="karta" {% if selected_payment == 'karta' %}selected{% endif %}>Bank kartasi</option>
+                <option value="nasiya" {% if selected_payment == 'nasiya' %}selected{% endif %}>Nasiya / Qarz</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3">
+            <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-filter me-1"></i> Qidirish</button>
+        </div>
+    </form>
 </div>
 
-<!-- Sales Table -->
-<div class="table-responsive">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Chek Raqami</th>
-        <th>Vaqti</th>
-        <th>Xaridor / Qarzdor</th>
-        <th>To'lov Usuli</th>
-        <th>Jami Summa</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for sale in sales %}
-        <tr>
-          <td style="font-weight: 700; font-family: monospace; color: #38bdf8;">
-            #{{ sale.sale_code }}
-          </td>
-          <td style="color: var(--text-muted);">
-            {{ sale.date|date:"d.m.Y H:i" }}
-          </td>
-          <td>
-            <span style="font-weight: 600;">{{ sale.customer_name }}</span>
-            {% if sale.debtor %}
-              <div style="font-size: 0.8rem; color: #fb7185;">(Nasiya qarz daftarida)</div>
-            {% endif %}
-          </td>
-          <td>
-            <span class="chip" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; text-transform: uppercase;">
-              {{ sale.get_payment_method_display }}
-            </span>
-          </td>
-          <td style="font-weight: 800; color: #34d399; font-size: 1.05rem;">
-            {{ sale.total_amount }} so'm
-          </td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
-            Hozircha sotuvlar qayd etilmagan.
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<!-- Sales Log Table -->
+<div class="glass-card p-3">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-muted small text-uppercase">
+                    <th>Chek kodi</th>
+                    <th>Xaridor / Mijoz</th>
+                    <th>To'lov Usuli</th>
+                    <th>Jami Summa</th>
+                    <th>Sotuv Vaqti</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                    <tr>
+                        <td class="fw-bold font-monospace text-warning">#{{ sale.sale_code }}</td>
+                        <td class="fw-bold text-white">{{ sale.customer_name }}</td>
+                        <td>
+                            {% if sale.payment_method == 'naqd' %}
+                                <span class="badge bg-success"><i class="fa-solid fa-money-bill-wave me-1"></i> Naqd</span>
+                            {% elif sale.payment_method == 'karta' %}
+                                <span class="badge bg-primary"><i class="fa-solid fa-credit-card me-1"></i> Karta</span>
+                            {% else %}
+                                <span class="badge bg-danger"><i class="fa-solid fa-handshake me-1"></i> Nasiya</span>
+                            {% endif %}
+                        </td>
+                        <td class="fw-extrabold text-success">{{ sale.total_amount|floatformat:0 }} so'm</td>
+                        <td class="text-muted small">{{ sale.date|date:"H:i, d.m.Y" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-receipt fs-1 mb-2"></i>
+                            <div>Sotuv cheklari topilmadi</div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

@@ -1,218 +1,241 @@
 {% extends 'panel/panel_base.html' %}
 
-{% block title %}Mahsulotlar Boshqaruvi - AslMarket.uz{% endblock %}
+{% block title %}Mahsulotlar Ombori — AslMarket Catalog{% endblock %}
 
 {% block panel_content %}
-<div class="panel-header">
-  <div class="panel-title">
-    <h1>Mahsulotlar Boshqaruvi</h1>
-    <p>Ombor qoldig'i, sotish va tan narxlari hamda foyda marjasi</p>
-  </div>
-  <div>
-    <button onclick="openModal('addProductModal')" class="btn-action-primary">
-      <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Yangi Mahsulot Qo'shish
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked text-warning"></i> Ombor va Mahsulotlar Boshqaruvi
+        </h3>
+        <p class="text-muted small mb-0">Ombor qoldiqlarini nazorat qilish, narxlar va foyda marjasini belgilash</p>
+    </div>
+
+    <button class="btn btn-primary rounded-pill d-flex align-items-center gap-2 shadow" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <i class="fa-solid fa-plus"></i> Yangi Mahsulot
     </button>
-  </div>
 </div>
 
 <!-- Search & Filter Controls -->
-<div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
-  <form method="GET" action="{% url 'products_list' %}" class="search-bar" style="flex: 1; max-width: 400px;">
-    <input type="text" name="q" value="{{ query }}" placeholder="Mahsulot nomi yoki shtrix-kod bo'yicha...">
-    <button type="submit" class="btn-details">Qidirish</button>
-  </form>
+<div class="glass-card p-3 mb-4">
+    <form method="GET" action="{% url 'products_list' %}" class="row g-3 align-items-center">
+        <div class="col-12 col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-dark text-muted border-secondary"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" name="q" value="{{ query }}" class="form-control bg-dark text-white border-secondary" placeholder="Nomi yoki shtrix-kod bo'yicha...">
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <select name="category" class="form-select bg-dark text-white border-secondary">
+                <option value="">-- Barcha Kategoriyalar --</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"i" %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">Filtrlash</button>
+            <a href="{% url 'products_list' %}?low_stock=1" class="btn btn-outline-danger {% if low_stock_only == '1' %}active{% endif %}" title="Kam qolganlar">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </a>
+        </div>
+    </form>
 </div>
 
 <!-- Products Table -->
-<div class="table-responsive">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Mahsulot</th>
-        <th>Kategoriya</th>
-        <th>Sotish Narxi</th>
-        <th>Tan Narxi</th>
-        <th>Foyda (Dona)</th>
-        <th>Qoldiq</th>
-        <th>Shtrix-Kod</th>
-        <th>Amallar</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for product in products %}
-        <tr>
-          <td>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover;">
-              <span style="font-weight: 600;">{{ product.name }}</span>
-            </div>
-          </td>
-          <td>{{ product.category.name|default:"-" }}</td>
-          <td style="font-weight: 700; color: #38bdf8;">{{ product.price }} so'm</td>
-          <td style="color: var(--text-muted);">{{ product.cost_price }} so'm</td>
-          <td style="color: #34d399; font-weight: 600;">+{{ product.profit_per_unit }} so'm</td>
-          <td>
-            <span class="stock-badge {% if product.is_low_stock %}low{% endif %}" style="position: static;">
-              {{ product.stock }} dona
-            </span>
-          </td>
-          <td style="font-family: monospace; font-size: 0.85rem; color: var(--text-muted);">{{ product.barcode|default:"-" }}</td>
-          <td>
-            <div style="display: flex; gap: 0.5rem;">
-              <button onclick="openEditModal('{{ product.id }}', '{{ product.name|escapejs }}', '{{ product.category.id }}', {{ product.price }}, {{ product.cost_price }}, {{ product.stock }}, '{{ product.barcode|default:"" }}', '{{ product.image_url|escapejs }}', '{{ product.description|escapejs }}')" class="btn-details" style="padding: 0.4rem 0.6rem;">
-                <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
-              </button>
-              <a href="{% url 'delete_product' product.id %}" onclick="return confirm('Haqiqatdan ham bu mahsulotni o\'chirmoqchimisiz?')" class="btn-details" style="padding: 0.4rem 0.6rem; color: #fb7185; border-color: rgba(244, 63, 94, 0.3);">
-                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-              </a>
-            </div>
-          </td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-            Hozircha mahsulotlar mavjud emas.
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="glass-card p-3 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+            <thead>
+                <tr class="text-muted small text-uppercase">
+                    <th>Mahsulot Nomi</th>
+                    <th>Kategoriya</th>
+                    <th>Sotish Narxi</th>
+                    <th>Tan Narxi</th>
+                    <th>Sof Foyda</th>
+                    <th>Qoldiq</th>
+                    <th>Shtrix-Kod</th>
+                    <th class="text-end">Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 overflow-hidden bg-dark d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                                    {% if product.image_url %}
+                                        <img src="{{ product.image_url }}" class="w-100 h-100 object-fit-cover" alt="{{ product.name }}">
+                                    {% else %}
+                                        <i class="fa-solid fa-box text-secondary fs-5"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="fw-bold text-white">{{ product.name }}</span>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-secondary">{{ product.category.name|default:"General" }}</span></td>
+                        <td class="fw-bold text-success">{{ product.price|floatformat:0 }} so'm</td>
+                        <td class="text-muted">{{ product.cost_price|floatformat:0 }} so'm</td>
+                        <td class="fw-bold text-info">+{{ product.profit_per_unit|floatformat:0 }} so'm</td>
+                        <td>
+                            {% if product.is_low_stock %}
+                                <span class="badge bg-danger">Low: {{ product.stock }} dona</span>
+                            {% else %}
+                                <span class="badge bg-success bg-opacity-75">{{ product.stock }} dona</span>
+                            {% endif %}
+                        </td>
+                        <td class="font-monospace small text-muted">{{ product.barcode|default:"-" }}</td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-warning btn-sm rounded-circle me-1" onclick="openEditProductModal('{{ product.id }}', '{{ product.name|escapejs }}', '{{ product.category.id|default:"" }}', {{ product.price }}, {{ product.cost_price }}, {{ product.stock }}, '{{ product.barcode|default:"" }}', '{{ product.image_url|escapejs }}', '{{ product.description|escapejs }}')">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <form method="POST" action="{% url 'delete_product' product.id %}" class="d-inline" onsubmit="return confirm('Haqiqatdan ham o\'chirmoqchimisiz?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle"><i class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-boxes-packing fs-1 mb-2"></i>
+                            <div>Mahsulotlar topilmadi</div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- MODAL: Add Product -->
-<div id="addProductModal" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>Yangi Mahsulot Qo'shish</h3>
-      <button onclick="closeModal('addProductModal')" class="btn-close-modal">&times;</button>
+<!-- ADD PRODUCT MODAL -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-secondary text-white">
+            <form method="POST" action="{% url 'add_product' %}">
+                {% csrf_token %}
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-plus text-primary"></i> Yangi Mahsulot Qo'shish</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Mahsulot Nomi</label>
+                        <input type="text" name="name" class="form-control bg-dark text-white border-secondary" placeholder="Nomi" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted">Kategoriya</label>
+                            <select name="category" class="form-select bg-dark text-white border-secondary">
+                                <option value="">-- Tanlang --</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted">Shtrix-kod / SKU</label>
+                            <input type="text" name="barcode" class="form-control bg-dark text-white border-secondary" placeholder="47800...">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <label class="form-label text-muted">Sotish Narxi</label>
+                            <input type="number" name="price" class="form-control bg-dark text-white border-secondary" placeholder="15000" required>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label text-muted">Tan Narxi</label>
+                            <input type="number" name="cost_price" class="form-control bg-dark text-white border-secondary" placeholder="11000">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label text-muted">Ombor Qoldig'i</label>
+                            <input type="number" name="stock" class="form-control bg-dark text-white border-secondary" placeholder="50" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Rasm URL</label>
+                        <input type="url" name="image_url" class="form-control bg-dark text-white border-secondary" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Saqlash</button>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <form method="POST" action="{% url 'add_product' %}">
-      {% csrf_token %}
-      <div class="form-group">
-        <label>Mahsulot Nomi</label>
-        <input type="text" name="name" required class="form-control" placeholder="Masalan: Samsung TV 43">
-      </div>
-
-      <div class="form-group">
-        <label>Kategoriya</label>
-        <select name="category" class="form-control">
-          <option value="">-- Tanlang --</option>
-          {% for cat in categories %}
-            <option value="{{ cat.id }}">{{ cat.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label>Sotish Narxi (so'm)</label>
-          <input type="number" name="price" required class="form-control" placeholder="4500000">
-        </div>
-        <div class="form-group">
-          <label>Tan Narxi (Keltirilgan narx)</label>
-          <input type="number" name="cost_price" class="form-control" placeholder="3800000">
-        </div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label>Ombor Qoldig'i (dona)</label>
-          <input type="number" name="stock" value="10" required class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Shtrix-Kod / Barcode</label>
-          <input type="text" name="barcode" class="form-control" placeholder="8806091234567">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Rasm Havolasi (URL)</label>
-        <input type="url" name="image_url" class="form-control" placeholder="https://images.unsplash.com/...">
-      </div>
-
-      <button type="submit" class="btn-submit">
-        <i data-lucide="save" style="width: 16px; height: 16px;"></i> Mahsulotni Saqlash
-      </button>
-    </form>
-  </div>
 </div>
 
-<!-- MODAL: Edit Product -->
-<div id="editProductModal" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>Mahsulotni Tahrirlash</h3>
-      <button onclick="closeModal('editProductModal')" class="btn-close-modal">&times;</button>
+<!-- EDIT PRODUCT MODAL -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-secondary text-white">
+            <form method="POST" id="editProductForm">
+                {% csrf_token %}
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen text-warning"></i> Mahsulotni Tahrirlash</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Mahsulot Nomi</label>
+                        <input type="text" name="name" id="editName" class="form-control bg-dark text-white border-secondary" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted">Kategoriya</label>
+                            <select name="category" id="editCategory" class="form-select bg-dark text-white border-secondary">
+                                <option value="">-- Tanlang --</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted">Shtrix-kod</label>
+                            <input type="text" name="barcode" id="editBarcode" class="form-control bg-dark text-white border-secondary">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <label class="form-label text-muted">Sotish Narxi</label>
+                            <input type="number" name="price" id="editPrice" class="form-control bg-dark text-white border-secondary" required>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label text-muted">Tan Narxi</label>
+                            <input type="number" name="cost_price" id="editCostPrice" class="form-control bg-dark text-white border-secondary">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label text-muted">Qoldiq</label>
+                            <input type="number" name="stock" id="editStock" class="form-control bg-dark text-white border-secondary" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Rasm URL</label>
+                        <input type="url" name="image_url" id="editImageUrl" class="form-control bg-dark text-white border-secondary">
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="submit" class="btn btn-warning text-dark rounded-pill px-4 fw-bold">O'zgartirishlarni Saqlash</button>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <form id="editProductForm" method="POST" action="">
-      {% csrf_token %}
-      <div class="form-group">
-        <label>Mahsulot Nomi</label>
-        <input type="text" name="name" id="editName" required class="form-control">
-      </div>
-
-      <div class="form-group">
-        <label>Kategoriya</label>
-        <select name="category" id="editCategory" class="form-control">
-          <option value="">-- Tanlang --</option>
-          {% for cat in categories %}
-            <option value="{{ cat.id }}">{{ cat.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label>Sotish Narxi</label>
-          <input type="number" name="price" id="editPrice" required class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Tan Narxi</label>
-          <input type="number" name="cost_price" id="editCostPrice" class="form-control">
-        </div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label>Ombor Qoldig'i</label>
-          <input type="number" name="stock" id="editStock" required class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Shtrix-Kod</label>
-          <input type="text" name="barcode" id="editBarcode" class="form-control">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Rasm URL</label>
-        <input type="url" name="image_url" id="editImageUrl" class="form-control">
-      </div>
-
-      <button type="submit" class="btn-submit">
-        <i data-lucide="check" style="width: 16px; height: 16px;"></i> O'zgarishlarni Saqlash
-      </button>
-    </form>
-  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  function openModal(id) { document.getElementById(id).classList.add('active'); }
-  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function openEditProductModal(id, name, catId, price, costPrice, stock, barcode, imgUrl, desc) {
+        document.getElementById('editProductForm').action = `/panel/products/edit/${id}/`;
+        document.getElementById('editName').value = name;
+        document.getElementById('editCategory').value = catId;
+        document.getElementById('editPrice').value = price;
+        document.getElementById('editCostPrice').value = costPrice;
+        document.getElementById('editStock').value = stock;
+        document.getElementById('editBarcode').value = barcode;
+        document.getElementById('editImageUrl').value = imgUrl;
 
-  function openEditModal(id, name, categoryId, price, costPrice, stock, barcode, imageUrl, description) {
-    document.getElementById('editProductForm').action = "/panel/products/edit/" + id + "/";
-    document.getElementById('editName').value = name;
-    document.getElementById('editCategory').value = categoryId || "";
-    document.getElementById('editPrice').value = price;
-    document.getElementById('editCostPrice').value = costPrice;
-    document.getElementById('editStock').value = stock;
-    document.getElementById('editBarcode').value = barcode;
-    document.getElementById('editImageUrl').value = imageUrl;
-    openModal('editProductModal');
-  }
+        new bootstrap.Modal(document.getElementById('editProductModal')).show();
+    }
 </script>
 {% endblock %}
