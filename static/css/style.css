@@ -54,51 +54,7 @@
   --border-glow:       rgba(99,102,241,.3);
 }
 
-/* ── Dark theme ── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-page:           #0d1117;
-    --bg-card:           #161b22;
-    --bg-card-hover:     #1c2230;
-    --bg-surface:        #1c2230;
-    --bg-surface-lighter:#21262d;
-    --bg-modal:          rgba(22,27,34,.97);
-
-    --text-main:   #e6edf3;
-    --text-sub:    #c9d1d9;
-    --text-muted:  #8b949e;
-    --text-dim:    #484f58;
-
-    --border-light:  rgba(255,255,255,.09);
-    --border-subtle: rgba(255,255,255,.15);
-
-    --shadow-sm: 0 1px 4px rgba(0,0,0,.4);
-    --shadow-md: 0 4px 20px rgba(0,0,0,.5);
-    --shadow-lg: 0 12px 40px rgba(0,0,0,.65);
-
-    --bg-dark: var(--bg-page);
-  }
-}
-
-/* ── Manual dark toggle class ── */
-.dark-mode {
-  --bg-page:           #0d1117;
-  --bg-card:           #161b22;
-  --bg-card-hover:     #1c2230;
-  --bg-surface:        #1c2230;
-  --bg-surface-lighter:#21262d;
-  --bg-modal:          rgba(22,27,34,.97);
-  --text-main:   #e6edf3;
-  --text-sub:    #c9d1d9;
-  --text-muted:  #8b949e;
-  --text-dim:    #484f58;
-  --border-light:  rgba(255,255,255,.09);
-  --border-subtle: rgba(255,255,255,.15);
-  --shadow-sm: 0 1px 4px rgba(0,0,0,.4);
-  --shadow-md: 0 4px 20px rgba(0,0,0,.5);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,.65);
-  --bg-dark: var(--bg-page);
-}
+/* Dark mode o'chirilgan — faqat kunduzgi rejim */
 
 /* ==========================================================================
    RESET & BASE
@@ -418,15 +374,7 @@ h1,h2,h3,h4,h5,h6 {
 }
 .stock-badge.low { color: #d97706; border-color: #fde68a; background: #fffbeb; }
 
-@media (prefers-color-scheme: dark) {
-  .stock-badge {
-    background: rgba(22,27,34,.92);
-    color: var(--text-muted);
-  }
-  .stock-badge.low { color: #fbbf24; background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.3); }
-}
-.dark-mode .stock-badge { background: rgba(22,27,34,.92); color: var(--text-muted); }
-.dark-mode .stock-badge.low { color: #fbbf24; background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.3); }
+
 
 .product-info {
   padding: 1.1rem;

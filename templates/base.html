@@ -7,18 +7,6 @@
   <title>{% block title %}AslMarket.uz - Do'kon & Boshqaruv Tizimi{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- Theme flash prevention (must be before body renders) -->
-  <script>
-    (function() {
-      var saved = localStorage.getItem('aslmarket-theme');
-      if (saved === 'dark') document.documentElement.classList.add('dark-mode-html');
-    })();
-  </script>
-  <style>
-    /* Ensure dark-mode-html class on <html> also works */
-    .dark-mode-html body { background-color: #0d1117; }
-  </style>
 </head>
 <body>
 
@@ -37,7 +25,7 @@
         <i data-lucide="shopping-bag" style="width: 14px; height: 14px;"></i>
         <span>Do'kon</span>
       </a>
-      <a href="{% url 'aslfood_dashboard' %}" class="chip {% if 'aslfood' in request.resolver_match.url_name %}active{% endif %}" style="color: #d97706; border-color: rgba(217,119,6,.25);">
+      <a href="{% url 'aslfood_dashboard' %}" class="chip" style="color: #d97706; border-color: rgba(217,119,6,.25);">
         <i data-lucide="utensils" style="width: 14px; height: 14px;"></i>
         <span>AslFood</span>
       </a>
@@ -45,11 +33,6 @@
         <i data-lucide="layout-dashboard" style="width: 15px; height: 15px;"></i>
         <span>Panel</span>
       </a>
-      <!-- Dark / Light toggle -->
-      <button class="btn-theme-toggle" id="themeToggle" title="Mavzuni o'zgartirish" aria-label="Mavzuni o'zgartirish">
-        <i data-lucide="sun" id="iconSun" style="width:17px;height:17px;display:none;"></i>
-        <i data-lucide="moon" id="iconMoon" style="width:17px;height:17px;"></i>
-      </button>
     </div>
   </nav>
 
@@ -60,7 +43,6 @@
   <script>
     lucide.createIcons();
 
-    // ── Toast ──────────────────────────────────────────────────────────────
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
@@ -76,36 +58,6 @@
       }, 3000);
     }
 
-    // ── Theme toggle ───────────────────────────────────────────────────────
-    const body       = document.body;
-    const btnToggle  = document.getElementById('themeToggle');
-    const iconSun    = document.getElementById('iconSun');
-    const iconMoon   = document.getElementById('iconMoon');
-
-    function applyTheme(theme) {
-      if (theme === 'dark') {
-        body.classList.add('dark-mode');
-        iconSun.style.display  = 'block';
-        iconMoon.style.display = 'none';
-      } else {
-        body.classList.remove('dark-mode');
-        iconSun.style.display  = 'none';
-        iconMoon.style.display = 'block';
-      }
-      localStorage.setItem('aslmarket-theme', theme);
-    }
-
-    // Load saved preference; fallback to system preference
-    const saved  = localStorage.getItem('aslmarket-theme');
-    const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    applyTheme(saved || system);
-
-    btnToggle.addEventListener('click', function() {
-      const current = body.classList.contains('dark-mode') ? 'dark' : 'light';
-      applyTheme(current === 'dark' ? 'light' : 'dark');
-    });
-
-    // Re-init lucide after DOM updates (for dynamic content)
     document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
   </script>
 
