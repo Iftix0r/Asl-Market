@@ -5,32 +5,32 @@
 {% block panel_content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <div>
-        <h3 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+        <h3 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
             <i class="fa-solid fa-gauge-high text-primary"></i> AslMarket Dashboard
         </h3>
         <p class="text-muted small mb-0">Tizim holati, sotuvlar tushumi va nasiya qarzdorlarining umumiy statistikasi</p>
     </div>
 
-    <a href="{% url 'pos_view' %}" class="btn btn-success btn-lg rounded-pill px-4 fw-bold shadow d-flex align-items-center gap-2">
+    <a href="{% url 'pos_view' %}" class="btn btn-success btn-lg rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center gap-2">
         <i class="fa-solid fa-cash-register"></i> Yangi Sotuv (POS Kassa)
     </a>
 </div>
 
-<!-- Metrics Cards -->
+<!-- Metrics Cards (Light) -->
 <div class="row g-4 mb-4">
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="glass-card p-3 border-start border-4 border-primary">
+        <div class="glass-card p-3 border-start border-4 border-primary bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="text-muted small fw-bold text-uppercase">Jami Sotuv Tushumi</div>
                 <i class="fa-solid fa-wallet fs-4 text-primary"></i>
             </div>
-            <div class="fs-2 fw-extrabold text-white mt-2">{{ total_revenue|floatformat:0 }} so'm</div>
+            <div class="fs-2 fw-extrabold text-dark mt-2">{{ total_revenue|floatformat:0 }} so'm</div>
             <div class="text-success small mt-1"><i class="fa-solid fa-arrow-up-right"></i> {{ total_sales_count }} ta muvaffaqiyatli sotuv</div>
         </div>
     </div>
 
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="glass-card p-3 border-start border-4 border-danger">
+        <div class="glass-card p-3 border-start border-4 border-danger bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="text-muted small fw-bold text-uppercase">Faol Nasiya Qarzlari</div>
                 <i class="fa-solid fa-handshake-angle fs-4 text-danger"></i>
@@ -41,18 +41,18 @@
     </div>
 
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="glass-card p-3 border-start border-4 border-warning">
+        <div class="glass-card p-3 border-start border-4 border-warning bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="text-muted small fw-bold text-uppercase">Shoshilinch Qarzlar</div>
                 <i class="fa-solid fa-clock-rotate-left fs-4 text-warning"></i>
             </div>
-            <div class="fs-2 fw-extrabold text-warning mt-2">{{ urgent_debtors.count }} kishi</div>
-            <div class="text-warning small mt-1"><i class="fa-solid fa-triangle-exclamation"></i> Kechikkan qarzlar</div>
+            <div class="fs-2 fw-extrabold text-warning-emphasis mt-2">{{ urgent_debtors.count }} kishi</div>
+            <div class="text-warning-emphasis small mt-1"><i class="fa-solid fa-triangle-exclamation"></i> Kechikkan qarzlar</div>
         </div>
     </div>
 
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="glass-card p-3 border-start border-4 border-info">
+        <div class="glass-card p-3 border-start border-4 border-info bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="text-muted small fw-bold text-uppercase">Kam Qolgan Mahsulotlar</div>
                 <i class="fa-solid fa-boxes-stacked fs-4 text-info"></i>
@@ -64,21 +64,21 @@
 </div>
 
 <div class="row g-4">
-    <!-- Urgent Debtors -->
+    <!-- Urgent Debtors (Light) -->
     <div class="col-12 col-xl-6">
-        <div class="glass-card p-3 h-100">
+        <div class="glass-card p-3 h-100 bg-white">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+                <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
                     <i class="fa-solid fa-clock text-warning"></i> Shoshilinch Nasiya Qarzlar
                 </h5>
-                <a href="{% url 'debtors_list' %}" class="btn btn-outline-warning btn-sm rounded-pill">Barchasi <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="{% url 'debtors_list' %}" class="btn btn-outline-warning text-dark btn-sm rounded-pill">Barchasi <i class="fa-solid fa-arrow-right"></i></a>
             </div>
 
             <div class="d-flex flex-column gap-2">
                 {% for debtor in urgent_debtors %}
-                    <div class="glass-card p-2 px-3 d-flex align-items-center justify-content-between">
+                    <div class="glass-card p-2 px-3 d-flex align-items-center justify-content-between bg-light border-secondary-subtle">
                         <div>
-                            <div class="fw-bold text-white">{{ debtor.name }}</div>
+                            <div class="fw-bold text-dark">{{ debtor.name }}</div>
                             <div class="text-muted small"><i class="fa-solid fa-phone me-1"></i> {{ debtor.phone }}</div>
                         </div>
                         <div class="text-end">
@@ -97,11 +97,11 @@
         </div>
     </div>
 
-    <!-- Recent Sales -->
+    <!-- Recent Sales (Light) -->
     <div class="col-12 col-xl-6">
-        <div class="glass-card p-3 h-100">
+        <div class="glass-card p-3 h-100 bg-white">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+                <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
                     <i class="fa-solid fa-receipt text-success"></i> So'nggi Sotuvlar Tarixi
                 </h5>
                 <a href="{% url 'sales_history' %}" class="btn btn-outline-success btn-sm rounded-pill">Barchasi <i class="fa-solid fa-arrow-right"></i></a>
@@ -109,9 +109,9 @@
 
             <div class="d-flex flex-column gap-2">
                 {% for sale in recent_sales %}
-                    <div class="glass-card p-2 px-3 d-flex align-items-center justify-content-between">
+                    <div class="glass-card p-2 px-3 d-flex align-items-center justify-content-between bg-light border-secondary-subtle">
                         <div>
-                            <div class="fw-bold text-white">Chek #{{ sale.sale_code }}</div>
+                            <div class="fw-bold text-dark">Chek #{{ sale.sale_code }}</div>
                             <div class="text-muted small">{{ sale.customer_name }} • {{ sale.get_payment_method_display }}</div>
                         </div>
                         <div class="text-end">

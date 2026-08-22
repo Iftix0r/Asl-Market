@@ -5,19 +5,19 @@
 {% block panel_content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <div>
-        <h3 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+        <h3 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
             <i class="fa-solid fa-chart-pie text-purple"></i> Tahlillar va Grafika
         </h3>
         <p class="text-muted small mb-0">Sotuvlar dinamikasi, to'lov turlari va eng xaridorgir mahsulotlar hisoboti</p>
     </div>
 </div>
 
-<!-- Charts Grid -->
+<!-- Charts Grid (Light) -->
 <div class="row g-4 mb-4">
     <!-- Daily Revenue Line Chart -->
     <div class="col-12 col-xl-8">
-        <div class="glass-card p-4 h-100">
-            <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+        <div class="glass-card p-4 h-100 bg-white">
+            <h5 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
                 <i class="fa-solid fa-chart-line text-primary"></i> Oxirgi 7 kunlik Sotuv Dinamikasi
             </h5>
             <div style="height: 300px;">
@@ -28,8 +28,8 @@
 
     <!-- Payment Methods Doughnut Chart -->
     <div class="col-12 col-xl-4">
-        <div class="glass-card p-4 h-100">
-            <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+        <div class="glass-card p-4 h-100 bg-white">
+            <h5 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
                 <i class="fa-solid fa-pie-chart text-success"></i> To'lov Usullari Ulushi
             </h5>
             <div style="height: 300px;" class="d-flex align-items-center justify-content-center">
@@ -39,15 +39,15 @@
     </div>
 </div>
 
-<!-- Top Products Table -->
-<div class="glass-card p-4">
-    <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+<!-- Top Products Table (Light) -->
+<div class="glass-card p-4 bg-white">
+    <h5 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
         <i class="fa-solid fa-trophy text-warning"></i> Eng Ko'p Sotilgan Top-5 Mahsulotlar
     </h5>
     <div class="table-responsive">
-        <table class="table table-dark table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0">
             <thead>
-                <tr class="text-muted small text-uppercase">
+                <tr class="text-muted small text-uppercase border-bottom border-secondary-subtle">
                     <th>Mahsulot Nomi</th>
                     <th>Sotilgan Soni</th>
                     <th>Jami Tushum Summasi</th>
@@ -56,7 +56,7 @@
             <tbody>
                 {% for item in top_products %}
                     <tr>
-                        <td class="fw-bold text-white">{{ item.product_name }}</td>
+                        <td class="fw-bold text-dark">{{ item.product_name }}</td>
                         <td><span class="badge bg-primary fs-6">{{ item.total_qty }} dona</span></td>
                         <td class="fw-extrabold text-success fs-5">{{ item.total_sum|floatformat:0 }} so'm</td>
                     </tr>
@@ -88,8 +88,8 @@
             datasets: [{
                 label: 'Tushum (so\'m)',
                 data: dailyTotals.length ? dailyTotals : [0],
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.12)',
                 fill: true,
                 tension: 0.4,
                 borderWidth: 3
@@ -98,10 +98,10 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: '#94a3b8' } } },
+            plugins: { legend: { labels: { color: '#475569' } } },
             scales: {
-                x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                x: { ticks: { color: '#64748b' }, grid: { color: '#e2e8f0' } },
+                y: { ticks: { color: '#64748b' }, grid: { color: '#e2e8f0' } }
             }
         }
     });
@@ -118,14 +118,14 @@
             labels: payLabels.length ? payLabels : ['NAQD', 'KARTA', 'NASIYA'],
             datasets: [{
                 data: payTotals.length ? payTotals : [0, 0, 0],
-                backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+                backgroundColor: ['#059669', '#2563eb', '#dc2626'],
                 borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } }
+            plugins: { legend: { position: 'bottom', labels: { color: '#475569' } } }
         }
     });
 </script>

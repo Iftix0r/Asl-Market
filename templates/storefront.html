@@ -5,18 +5,18 @@
 {% block content %}
 <div class="container py-4">
 
-    <!-- Store Navigation Tabs Header -->
-    <div class="glass-card p-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <!-- Store Navigation Tabs Header (Light Mode) -->
+    <div class="glass-card p-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3 bg-white">
         <div class="d-flex gap-2">
-            <a href="{% url 'storefront' %}?tab=supermarket" class="btn px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 {% if active_tab != 'food' %}btn-primary shadow{% else %}btn-outline-light border-0{% endif %}">
+            <a href="{% url 'storefront' %}?tab=supermarket" class="btn px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 {% if active_tab != 'food' %}btn-primary text-white shadow-sm{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
                 <i class="fa-solid fa-cart-shopping"></i> Supermarket Catalog
             </a>
-            <a href="{% url 'storefront' %}?tab=food" class="btn px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 {% if active_tab == 'food' %}btn-warning text-dark shadow{% else %}btn-outline-light border-0{% endif %}">
+            <a href="{% url 'storefront' %}?tab=food" class="btn px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 {% if active_tab == 'food' %}btn-warning text-dark shadow-sm{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
                 <i class="fa-solid fa-burger"></i> AslFood Fast-Food
             </a>
         </div>
 
-        <button class="btn btn-outline-success rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow" data-bs-toggle="modal" data-bs-target="#cartModal">
+        <button class="btn btn-outline-success rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#cartModal">
             <i class="fa-solid fa-basket-shopping fs-5"></i>
             <span>Savat</span>
             <span class="badge bg-success rounded-circle" id="cartCountBadge">0</span>
@@ -24,16 +24,16 @@
     </div>
 
     {% if active_tab == 'food' %}
-        <!-- ASLFOOD HERO BANNER -->
-        <div class="glass-card p-4 p-lg-5 mb-4 text-center position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(15, 23, 42, 0.95) 100%); border-color: rgba(245, 158, 11, 0.3);">
-            <h1 class="fw-extrabold display-5 text-warning mb-2">AslFood Issiq & Mazali Taomlar</h1>
-            <p class="text-light-50 fs-5 max-w-600 mx-auto mb-4">Lavash, Gamburger, Pizza va salqin ichimliklarni 15-20 daqiqada yetkazib beramiz!</p>
+        <!-- ASLFOOD HERO BANNER (LIGHT) -->
+        <div class="glass-card p-4 p-lg-5 mb-4 text-center position-relative overflow-hidden bg-white" style="background: linear-gradient(135deg, rgba(254, 243, 199, 0.8) 0%, rgba(255, 255, 255, 1) 100%); border-color: #fde68a;">
+            <h1 class="fw-extrabold display-5 text-warning-emphasis mb-2">AslFood Issiq & Mazali Taomlar</h1>
+            <p class="text-secondary fs-5 max-w-600 mx-auto mb-4">Lavash, Gamburger, Pizza va salqin ichimliklarni 15-20 daqiqada yetkazib beramiz!</p>
 
             <form method="GET" action="{% url 'storefront' %}" class="max-w-600 mx-auto">
                 <input type="hidden" name="tab" value="food">
-                <div class="input-group input-group-lg glass-card p-1">
+                <div class="input-group input-group-lg glass-card p-1 bg-white border-warning-subtle">
                     <span class="input-group-text bg-transparent border-0 text-warning"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    <input type="text" name="q" value="{{ query }}" class="form-control bg-transparent border-0 text-white shadow-none" placeholder="Taom nomini qidirish (Lavash, Pizza...)...">
+                    <input type="text" name="q" value="{{ query }}" class="form-control bg-transparent border-0 text-dark shadow-none" placeholder="Taom nomini qidirish (Lavash, Pizza...)...">
                     <button type="submit" class="btn btn-warning text-dark fw-bold rounded-3 px-4">Qidirish</button>
                 </div>
             </form>
@@ -41,11 +41,11 @@
 
         <!-- Food Category Filter Chips -->
         <div class="d-flex flex-wrap gap-2 mb-4">
-            <a href="{% url 'storefront' %}?tab=food" class="btn btn-sm rounded-pill px-3 {% if not selected_category %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary text-light{% endif %}">
+            <a href="{% url 'storefront' %}?tab=food" class="btn btn-sm rounded-pill px-3 {% if not selected_category %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary text-dark{% endif %}">
                 Barcha Taomlar
             </a>
             {% for cat in food_categories %}
-                <a href="{% url 'storefront' %}?tab=food&category={{ cat.slug }}" class="btn btn-sm rounded-pill px-3 {% if selected_category == cat.slug %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary text-light{% endif %}">
+                <a href="{% url 'storefront' %}?tab=food&category={{ cat.slug }}" class="btn btn-sm rounded-pill px-3 {% if selected_category == cat.slug %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary text-dark{% endif %}">
                     {{ cat.name }}
                 </a>
             {% endfor %}
@@ -55,8 +55,8 @@
         <div class="row g-4">
             {% for food in food_items %}
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <div class="glass-card h-100 d-flex flex-column overflow-hidden">
-                        <div class="position-relative" style="height: 180px; background: #1e293b;">
+                    <div class="glass-card h-100 d-flex flex-column overflow-hidden bg-white">
+                        <div class="position-relative" style="height: 180px; background: #f1f5f9;">
                             {% if food.image_url %}
                                 <img src="{{ food.image_url }}" class="w-100 h-100 object-fit-cover" alt="{{ food.name }}">
                             {% else %}
@@ -64,17 +64,17 @@
                                     <i class="fa-solid fa-utensils fs-1"></i>
                                 </div>
                             {% endif %}
-                            <span class="badge bg-dark bg-opacity-75 text-warning border border-warning border-opacity-50 position-absolute top-0 end-0 m-2 rounded-pill px-2 py-1">
+                            <span class="badge bg-white text-dark shadow-sm position-absolute top-0 end-0 m-2 rounded-pill px-2 py-1">
                                 ⏱️ {{ food.preparation_time_mins }} min
                             </span>
                         </div>
                         <div class="p-3 d-flex flex-column flex-grow-1">
-                            <span class="text-warning text-uppercase fw-bold" style="font-size: 0.75rem;">{{ food.category.name }}</span>
-                            <h5 class="fw-bold text-white mb-1">{{ food.name }}</h5>
+                            <span class="text-warning-emphasis text-uppercase fw-bold" style="font-size: 0.75rem;">{{ food.category.name }}</span>
+                            <h5 class="fw-bold text-dark mb-1">{{ food.name }}</h5>
                             <p class="text-muted small flex-grow-1 mb-3">{{ food.ingredients|default:"Yangi va tabiiy masalliqlar" }}</p>
                             <div class="d-flex align-items-center justify-content-between mt-auto">
-                                <span class="fs-5 fw-bold text-warning">{{ food.price|floatformat:0 }} so'm</span>
-                                <button onclick="addToCart('food', '{{ food.id }}', '{{ food.name|escapejs }}', {{ food.price }})" class="btn btn-warning btn-sm rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 36px; height: 36px;">
+                                <span class="fs-5 fw-bold text-dark">{{ food.price|floatformat:0 }} so'm</span>
+                                <button onclick="addToCart('food', '{{ food.id }}', '{{ food.name|escapejs }}', {{ food.price }})" class="btn btn-warning btn-sm rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
                                     <i class="fa-solid fa-plus text-dark"></i>
                                 </button>
                             </div>
@@ -83,7 +83,7 @@
                 </div>
             {% empty %}
                 <div class="col-12 text-center py-5">
-                    <div class="glass-card p-5">
+                    <div class="glass-card p-5 bg-white">
                         <i class="fa-solid fa-utensils fs-1 text-warning mb-3"></i>
                         <h3>Hech qanday taom topilmadi</h3>
                         <p class="text-muted">Iltimos, boshqa toifani tanlang yoki qidiruv so'rovini o'zgartiring.</p>
@@ -93,16 +93,16 @@
         </div>
 
     {% else %}
-        <!-- SUPERMARKET HERO BANNER -->
-        <div class="glass-card p-4 p-lg-5 mb-4 text-center position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(15, 23, 42, 0.95) 100%);">
-            <h1 class="fw-extrabold display-5 text-white mb-2">AslMarket Sifatli Mahsulotlar Katalogi</h1>
-            <p class="text-light-50 fs-5 max-w-600 mx-auto mb-4">Har kuni yangi oziq-ovqatlar, shirinliklar, ichimliklar va maishiy tovarlar!</p>
+        <!-- SUPERMARKET HERO BANNER (LIGHT) -->
+        <div class="glass-card p-4 p-lg-5 mb-4 text-center position-relative overflow-hidden bg-white" style="background: linear-gradient(135deg, rgba(238, 242, 255, 0.9) 0%, rgba(255, 255, 255, 1) 100%); border-color: #c7d2fe;">
+            <h1 class="fw-extrabold display-5 text-primary mb-2">AslMarket Sifatli Mahsulotlar Katalogi</h1>
+            <p class="text-secondary fs-5 max-w-600 mx-auto mb-4">Har kuni yangi oziq-ovqatlar, shirinliklar, ichimliklar va maishiy tovarlar!</p>
 
             <form method="GET" action="{% url 'storefront' %}" class="max-w-600 mx-auto">
                 <input type="hidden" name="tab" value="supermarket">
-                <div class="input-group input-group-lg glass-card p-1">
+                <div class="input-group input-group-lg glass-card p-1 bg-white border-primary-subtle">
                     <span class="input-group-text bg-transparent border-0 text-primary"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    <input type="text" name="q" value="{{ query }}" class="form-control bg-transparent border-0 text-white shadow-none" placeholder="Mahsulot yoki shtrix-kod qidirish...">
+                    <input type="text" name="q" value="{{ query }}" class="form-control bg-transparent border-0 text-dark shadow-none" placeholder="Mahsulot yoki shtrix-kod qidirish...">
                     <button type="submit" class="btn btn-primary rounded-3 px-4">Qidirish</button>
                 </div>
             </form>
@@ -110,11 +110,11 @@
 
         <!-- Supermarket Category Filter Chips -->
         <div class="d-flex flex-wrap gap-2 mb-4">
-            <a href="{% url 'storefront' %}?tab=supermarket" class="btn btn-sm rounded-pill px-3 {% if not selected_category %}btn-primary text-white fw-bold{% else %}btn-outline-secondary text-light{% endif %}">
+            <a href="{% url 'storefront' %}?tab=supermarket" class="btn btn-sm rounded-pill px-3 {% if not selected_category %}btn-primary text-white fw-bold{% else %}btn-outline-secondary text-dark{% endif %}">
                 Barchasi
             </a>
             {% for cat in categories %}
-                <a href="{% url 'storefront' %}?tab=supermarket&category={{ cat.slug }}" class="btn btn-sm rounded-pill px-3 {% if selected_category == cat.slug %}btn-primary text-white fw-bold{% else %}btn-outline-secondary text-light{% endif %}">
+                <a href="{% url 'storefront' %}?tab=supermarket&category={{ cat.slug }}" class="btn btn-sm rounded-pill px-3 {% if selected_category == cat.slug %}btn-primary text-white fw-bold{% else %}btn-outline-secondary text-dark{% endif %}">
                     {{ cat.name }}
                 </a>
             {% endfor %}
@@ -124,8 +124,8 @@
         <div class="row g-4">
             {% for product in products %}
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <div class="glass-card h-100 d-flex flex-column overflow-hidden">
-                        <div class="position-relative" style="height: 180px; background: #1e293b;">
+                    <div class="glass-card h-100 d-flex flex-column overflow-hidden bg-white">
+                        <div class="position-relative" style="height: 180px; background: #f1f5f9;">
                             {% if product.image_url %}
                                 <img src="{{ product.image_url }}" class="w-100 h-100 object-fit-cover" alt="{{ product.name }}">
                             {% else %}
@@ -136,15 +136,15 @@
                             {% if product.is_low_stock %}
                                 <span class="badge bg-danger position-absolute top-0 end-0 m-2">Oz qoldi: {{ product.stock }} dona</span>
                             {% else %}
-                                <span class="badge bg-success bg-opacity-75 position-absolute top-0 end-0 m-2">Mavjud: {{ product.stock }} dona</span>
+                                <span class="badge bg-success bg-opacity-90 position-absolute top-0 end-0 m-2">Mavjud: {{ product.stock }} dona</span>
                             {% endif %}
                         </div>
                         <div class="p-3 d-flex flex-column flex-grow-1">
                             <span class="text-primary text-uppercase fw-bold" style="font-size: 0.75rem;">{{ product.category.name }}</span>
-                            <h5 class="fw-bold text-white mb-2">{{ product.name }}</h5>
+                            <h5 class="fw-bold text-dark mb-2">{{ product.name }}</h5>
                             <div class="d-flex align-items-center justify-content-between mt-auto">
-                                <span class="fs-5 fw-bold text-success">{{ product.price|floatformat:0 }} so'm</span>
-                                <button onclick="addToCart('market', '{{ product.id }}', '{{ product.name|escapejs }}', {{ product.price }})" class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 36px; height: 36px;">
+                                <span class="fs-5 fw-bold text-primary">{{ product.price|floatformat:0 }} so'm</span>
+                                <button onclick="addToCart('market', '{{ product.id }}', '{{ product.name|escapejs }}', {{ product.price }})" class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
                                     <i class="fa-solid fa-cart-plus"></i>
                                 </button>
                             </div>
@@ -153,7 +153,7 @@
                 </div>
             {% empty %}
                 <div class="col-12 text-center py-5">
-                    <div class="glass-card p-5">
+                    <div class="glass-card p-5 bg-white">
                         <i class="fa-solid fa-box-open fs-1 text-primary mb-3"></i>
                         <h3>Mahsulotlar topilmadi</h3>
                         <p class="text-muted">Iltimos, boshqa toifani tanlang yoki qidiruvni o'zgartiring.</p>
@@ -164,22 +164,22 @@
     {% endif %}
 </div>
 
-<!-- SHOPPING CART MODAL -->
+<!-- SHOPPING CART MODAL (LIGHT) -->
 <div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content glass-card border-secondary text-white">
-            <div class="modal-header border-secondary">
+        <div class="modal-content glass-card border-secondary-subtle text-dark bg-white">
+            <div class="modal-header border-secondary-subtle">
                 <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
                     <i class="fa-solid fa-basket-shopping text-success"></i> Xarid Savatchasi
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div id="cartItemsList" class="d-flex flex-column gap-2 mb-4">
                     <!-- Dynamic cart elements -->
                 </div>
 
-                <div class="glass-card p-3 mb-4">
+                <div class="glass-card p-3 mb-4 bg-light">
                     <div class="d-flex justify-content-between fs-4 fw-bold">
                         <span>Jami Summa:</span>
                         <span class="text-success" id="cartTotalSum">0 so'm</span>
@@ -190,21 +190,21 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label text-muted">Ismingiz</label>
-                            <input type="text" id="custName" class="form-control bg-dark text-white border-secondary" placeholder="Ismingizni kiriting" required>
+                            <input type="text" id="custName" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Ismingizni kiriting" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted">Telefon raqamingiz</label>
-                            <input type="text" id="custPhone" class="form-control bg-dark text-white border-secondary" placeholder="+99890..." required>
+                            <input type="text" id="custPhone" class="form-control bg-white text-dark border-secondary-subtle" placeholder="+99890..." required>
                         </div>
                         <div class="col-12" id="addressRow" style="display: none;">
                             <label class="form-label text-muted">Dostavka manzili / Stol #</label>
-                            <input type="text" id="custAddress" class="form-control bg-dark text-white border-secondary" placeholder="Toshkent shahri, ko'cha, xonadon">
+                            <input type="text" id="custAddress" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Toshkent shahri, ko'cha, xonadon">
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-outline-light rounded-pill" onclick="clearCart()">Savatni Tozalash</button>
+            <div class="modal-footer border-secondary-subtle">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" onclick="clearCart()">Savatni Tozalash</button>
                 <button type="button" class="btn btn-success rounded-pill px-4 fw-bold" onclick="submitCheckout()">Buyurtma Berish</button>
             </div>
         </div>
@@ -260,16 +260,16 @@
             total += subtotal;
 
             list.innerHTML += `
-                <div class="d-flex align-items-center justify-content-between glass-card p-3">
+                <div class="d-flex align-items-center justify-content-between glass-card p-3 bg-white">
                     <div>
-                        <div class="fw-bold text-white">${item.name}</div>
+                        <div class="fw-bold text-dark">${item.name}</div>
                         <div class="text-muted small">${item.price.toLocaleString()} so'm x ${item.qty} dona</div>
                     </div>
                     <div class="d-flex align-items-center gap-3">
                         <span class="fw-bold text-success">${subtotal.toLocaleString()} so'm</span>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-light" onclick="changeQty(${index}, -1)">-</button>
-                            <button class="btn btn-outline-light" onclick="changeQty(${index}, 1)">+</button>
+                            <button class="btn btn-outline-secondary" onclick="changeQty(${index}, -1)">-</button>
+                            <button class="btn btn-outline-secondary" onclick="changeQty(${index}, 1)">+</button>
                             <button class="btn btn-danger" onclick="removeItem(${index})"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>

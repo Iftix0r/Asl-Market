@@ -5,7 +5,7 @@
 {% block panel_content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <div>
-        <h3 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+        <h3 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
             <i class="fa-solid fa-address-book text-danger"></i> Qarzdorlar Daftari (Nasiya)
         </h3>
         <p class="text-muted small mb-0">Barcha nasiya to'lovlari, muddat o'tish tahlillari va qarz topshirish</p>
@@ -15,43 +15,43 @@
         <a href="{% url 'export_debtors_csv' %}" class="btn btn-outline-success rounded-pill d-flex align-items-center gap-2">
             <i class="fa-solid fa-file-excel"></i> CSV Eksport
         </a>
-        <button class="btn btn-primary rounded-pill d-flex align-items-center gap-2 shadow" data-bs-toggle="modal" data-bs-target="#addDebtorModal">
+        <button class="btn btn-primary rounded-pill d-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#addDebtorModal">
             <i class="fa-solid fa-user-plus"></i> Yangi Qarzdor
         </button>
     </div>
 </div>
 
-<!-- Summary Cards Banner -->
+<!-- Summary Cards Banner (Light) -->
 <div class="row g-3 mb-4">
     <div class="col-12 col-sm-6 col-xl-4">
-        <div class="glass-card p-3 border-start border-4 border-danger">
+        <div class="glass-card p-3 border-start border-4 border-danger bg-white">
             <div class="text-muted small fw-bold text-uppercase">Jami Faol Qarz Balansi</div>
             <div class="fs-2 fw-extrabold text-danger mt-1">{{ total_active_debt|floatformat:0 }} so'm</div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-xl-4">
-        <div class="glass-card p-3 border-start border-4 border-warning">
+        <div class="glass-card p-3 border-start border-4 border-warning bg-white">
             <div class="text-muted small fw-bold text-uppercase">Jami Qarzdorlar</div>
-            <div class="fs-2 fw-extrabold text-warning mt-1">{{ debtors.count }} kishi</div>
+            <div class="fs-2 fw-extrabold text-warning-emphasis mt-1">{{ debtors.count }} kishi</div>
         </div>
     </div>
 </div>
 
-<!-- Filters & Search -->
-<div class="glass-card p-3 mb-4">
+<!-- Filters & Search (Light) -->
+<div class="glass-card p-3 mb-4 bg-white">
     <div class="row g-3 align-items-center">
         <div class="col-12 col-md-6">
             <div class="btn-group w-100" role="group">
-                <a href="{% url 'debtors_list' %}?status=active" class="btn btn-sm {% if status_filter == 'active' %}btn-danger fw-bold{% else %}btn-outline-secondary text-light{% endif %}">Faol Qarzlar</a>
-                <a href="{% url 'debtors_list' %}?status=paid" class="btn btn-sm {% if status_filter == 'paid' %}btn-success fw-bold{% else %}btn-outline-secondary text-light{% endif %}">To'langanlar</a>
-                <a href="{% url 'debtors_list' %}?status=" class="btn btn-sm {% if not status_filter %}btn-primary fw-bold{% else %}btn-outline-secondary text-light{% endif %}">Barchasi</a>
+                <a href="{% url 'debtors_list' %}?status=active" class="btn btn-sm {% if status_filter == 'active' %}btn-danger fw-bold{% else %}btn-outline-secondary text-dark{% endif %}">Faol Qarzlar</a>
+                <a href="{% url 'debtors_list' %}?status=paid" class="btn btn-sm {% if status_filter == 'paid' %}btn-success fw-bold{% else %}btn-outline-secondary text-dark{% endif %}">To'langanlar</a>
+                <a href="{% url 'debtors_list' %}?status=" class="btn btn-sm {% if not status_filter %}btn-primary fw-bold{% else %}btn-outline-secondary text-dark{% endif %}">Barchasi</a>
             </div>
         </div>
         <div class="col-12 col-md-6">
             <form method="GET" action="{% url 'debtors_list' %}">
                 <input type="hidden" name="status" value="{{ status_filter }}">
                 <div class="input-group">
-                    <input type="text" name="q" value="{{ query }}" class="form-control bg-dark text-white border-secondary" placeholder="Ism yoki telefon nomer bo'yicha search...">
+                    <input type="text" name="q" value="{{ query }}" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Ism yoki telefon nomer bo'yicha search...">
                     <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
             </form>
@@ -59,16 +59,16 @@
     </div>
 </div>
 
-<!-- Debtors Grid Cards -->
+<!-- Debtors Grid Cards (Light) -->
 <div class="row g-4">
     {% for debtor in debtors %}
         <div class="col-12 col-md-6 col-xl-4">
-            <div class="glass-card h-100 p-3 d-flex flex-column justify-content-between position-relative">
+            <div class="glass-card h-100 p-3 d-flex flex-column justify-content-between position-relative bg-white">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
-                            <h5 class="fw-bold text-white mb-0">{{ debtor.name }}</h5>
-                            <div class="text-muted small"><i class="fa-solid fa-phone text-secondary me-1"></i> {{ debtor.phone }}</div>
+                            <h5 class="fw-bold text-dark mb-0">{{ debtor.name }}</h5>
+                            <div class="text-muted small"><i class="fa-solid fa-phone me-1"></i> {{ debtor.phone }}</div>
                         </div>
                         <!-- Overdue level badge -->
                         {% if debtor.overdue_level == 'urgent' %}
@@ -80,7 +80,7 @@
                         {% endif %}
                     </div>
 
-                    <div class="glass-card p-2 my-3 text-center bg-dark bg-opacity-50">
+                    <div class="glass-card p-2 my-3 text-center bg-light border-secondary-subtle">
                         <div class="text-muted small">Qarz Qoldig'i</div>
                         <div class="fs-3 fw-extrabold {% if debtor.amount > 0 %}text-danger{% else %}text-success{% endif %}">
                             {{ debtor.amount|floatformat:0 }} so'm
@@ -90,19 +90,19 @@
                     <div class="small text-muted mb-2">
                         <div class="d-flex justify-content-between">
                             <span>Boshlang'ich qarz:</span>
-                            <span class="text-light fw-bold">{{ debtor.initial_amount|floatformat:0 }} so'm</span>
+                            <span class="text-dark fw-bold">{{ debtor.initial_amount|floatformat:0 }} so'm</span>
                         </div>
                         <div class="d-flex justify-content-between">
                             <span>Qarz olingan sana:</span>
-                            <span class="text-light">{{ debtor.created_at|date:"d.m.Y H:i" }}</span>
+                            <span class="text-dark">{{ debtor.created_at|date:"d.m.Y H:i" }}</span>
                         </div>
                         {% if debtor.items_description %}
-                            <div class="mt-2 text-white-50 fst-italic">"{{ debtor.items_description }}"</div>
+                            <div class="mt-2 text-secondary fst-italic">"{{ debtor.items_description }}"</div>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="d-flex gap-2 mt-3 pt-2 border-top border-secondary">
+                <div class="d-flex gap-2 mt-3 pt-2 border-top border-secondary-subtle">
                     {% if debtor.amount > 0 %}
                         <button class="btn btn-success btn-sm flex-grow-1 fw-bold" onclick="openPayModal('{{ debtor.id }}', '{{ debtor.name|escapejs }}', {{ debtor.amount }})">
                             <i class="fa-solid fa-money-bill-wave"></i> To'lov Qabul Qilish
@@ -110,7 +110,7 @@
                     {% else %}
                         <span class="btn btn-outline-success btn-sm flex-grow-1 disabled"><i class="fa-solid fa-circle-check"></i> To'langan</span>
                     {% endif %}
-                    <button class="btn btn-outline-light btn-sm" onclick="openHistoryModal({{ debtor.id }})">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="openHistoryModal({{ debtor.id }})">
                         <i class="fa-solid fa-clock-rotate-left"></i> Tarix
                     </button>
                 </div>
@@ -118,7 +118,7 @@
         </div>
     {% empty %}
         <div class="col-12 text-center py-5">
-            <div class="glass-card p-5">
+            <div class="glass-card p-5 bg-white">
                 <i class="fa-solid fa-user-check fs-1 text-success mb-3"></i>
                 <h3>Qarzdorlar topilmadi</h3>
                 <p class="text-muted">Ro'yxat bo'sh yoki qidiruv mos kelmadi.</p>
@@ -127,39 +127,39 @@
     {% endfor %}
 </div>
 
-<!-- ADD DEBTOR MODAL -->
+<!-- ADD DEBTOR MODAL (LIGHT) -->
 <div class="modal fade" id="addDebtorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content glass-card border-secondary text-white">
+        <div class="modal-content glass-card border-secondary-subtle text-dark bg-white">
             <form method="POST" action="{% url 'add_debtor' %}">
                 {% csrf_token %}
-                <div class="modal-header border-secondary">
+                <div class="modal-header border-secondary-subtle">
                     <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus text-primary"></i> Yangi Qarzdor Qo'shish</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label text-muted">F.I.SH (Ism Sharif)</label>
-                        <input type="text" name="name" class="form-control bg-dark text-white border-secondary" placeholder="F.I.SH" required>
+                        <input type="text" name="name" class="form-control bg-white text-dark border-secondary-subtle" placeholder="F.I.SH" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">Telefon Raqami</label>
-                        <input type="text" name="phone" class="form-control bg-dark text-white border-secondary" placeholder="+998901234567" required>
+                        <input type="text" name="phone" class="form-control bg-white text-dark border-secondary-subtle" placeholder="+998901234567" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">Qarz Summasi (so'm)</label>
-                        <input type="number" name="amount" class="form-control bg-dark text-white border-secondary" placeholder="100000" required>
+                        <input type="number" name="amount" class="form-control bg-white text-dark border-secondary-subtle" placeholder="100000" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">Qaytarish Muddati (Ixtiyoriy)</label>
-                        <input type="date" name="due_date" class="form-control bg-dark text-white border-secondary">
+                        <input type="date" name="due_date" class="form-control bg-white text-dark border-secondary-subtle">
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">Olingan mahsulotlar / Izoh</label>
-                        <textarea name="items_description" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Kola, sariyog'..."></textarea>
+                        <textarea name="items_description" class="form-control bg-white text-dark border-secondary-subtle" rows="2" placeholder="Kola, sariyog'..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-secondary">
+                <div class="modal-footer border-secondary-subtle">
                     <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Saqlash</button>
                 </div>
             </form>
@@ -167,21 +167,21 @@
     </div>
 </div>
 
-<!-- PAY DEBT MODAL -->
+<!-- PAY DEBT MODAL (LIGHT) -->
 <div class="modal fade" id="payDebtModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content glass-card border-secondary text-white">
+        <div class="modal-content glass-card border-secondary-subtle text-dark bg-white">
             <form method="POST" action="{% url 'pay_debt' %}">
                 {% csrf_token %}
                 <input type="hidden" name="debtor_id" id="payDebtorId">
-                <div class="modal-header border-secondary">
+                <div class="modal-header border-secondary-subtle">
                     <h5 class="modal-title fw-bold"><i class="fa-solid fa-money-bill-wave text-success"></i> Qarz To'lovini Qabul Qilish</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label text-muted">Qarzdor:</label>
-                        <div class="fs-5 fw-bold text-warning" id="payDebtorName">Ism</div>
+                        <div class="fs-5 fw-bold text-dark" id="payDebtorName">Ism</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">Hozirgi Qarz Qoldig'i:</label>
@@ -189,14 +189,14 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">To'lanayotgan Summa (so'm)</label>
-                        <input type="number" name="amount" id="payInputAmount" class="form-control bg-dark text-white border-secondary form-control-lg" placeholder="To'lov summasi" required>
+                        <input type="number" name="amount" id="payInputAmount" class="form-control bg-white text-dark border-secondary-subtle form-control-lg" placeholder="To'lov summasi" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">Izoh / To'lov usuli</label>
-                        <input type="text" name="note" class="form-control bg-dark text-white border-secondary" placeholder="Naqd pul / Karta to'lovi">
+                        <input type="text" name="note" class="form-control bg-white text-dark border-secondary-subtle" placeholder="Naqd pul / Karta to'lovi">
                     </div>
                 </div>
-                <div class="modal-footer border-secondary">
+                <div class="modal-footer border-secondary-subtle">
                     <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">To'lovni Tasdiqlash</button>
                 </div>
             </form>
@@ -204,13 +204,13 @@
     </div>
 </div>
 
-<!-- HISTORY MODAL -->
+<!-- HISTORY MODAL (LIGHT) -->
 <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content glass-card border-secondary text-white">
-            <div class="modal-header border-secondary">
+        <div class="modal-content glass-card border-secondary-subtle text-dark bg-white">
+            <div class="modal-header border-secondary-subtle">
                 <h5 class="modal-title fw-bold"><i class="fa-solid fa-clock-rotate-left text-info"></i> To'lovlar va Qarzlar Tarixi</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="historyModalBody">
                 <div class="text-center py-4 text-muted">Yuklanmoqda...</div>
@@ -241,8 +241,8 @@
             const data = await res.json();
             if (data.success) {
                 let html = `
-                    <div class="glass-card p-3 mb-3">
-                        <div class="fw-bold fs-5 text-white">${data.debtor.name} (${data.debtor.phone})</div>
+                    <div class="glass-card p-3 mb-3 bg-light">
+                        <div class="fw-bold fs-5 text-dark">${data.debtor.name} (${data.debtor.phone})</div>
                         <div class="text-muted small">Qarz olingan: ${data.debtor.created_at} (${data.debtor.elapsed_str})</div>
                     </div>
                     <h6 class="fw-bold text-success mt-3 mb-2"><i class="fa-solid fa-money-bill-check"></i> To'lovlar Tarixi</h6>
@@ -253,7 +253,7 @@
                 } else {
                     data.payments.forEach(p => {
                         html += `
-                            <div class="d-flex justify-content-between glass-card p-2 mb-2">
+                            <div class="d-flex justify-content-between glass-card p-2 mb-2 bg-white">
                                 <div><div class="fw-bold text-success">+${p.amount.toLocaleString()} so'm</div><div class="text-muted small">${p.note}</div></div>
                                 <div class="text-muted small">${p.date}</div>
                             </div>

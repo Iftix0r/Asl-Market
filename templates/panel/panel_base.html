@@ -3,46 +3,46 @@
 {% block content %}
 <div class="container-fluid py-4 px-3 px-lg-4">
     <div class="row g-4">
-        <!-- Sidebar Navigation Column -->
+        <!-- Sidebar Navigation Column (Light Mode) -->
         <div class="col-12 col-lg-3 col-xl-2">
-            <div class="glass-card p-3 d-flex flex-column gap-2 sticky-top" style="top: 80px;">
+            <div class="glass-card p-3 d-flex flex-column gap-2 sticky-top bg-white" style="top: 80px;">
                 <div class="text-uppercase text-muted fw-bold px-3 py-1" style="font-size: 0.75rem; letter-spacing: 1px;">
                     Chakana Savdo Paneli
                 </div>
 
-                <a href="{% url 'dashboard' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'dashboard' %}btn-primary text-white shadow{% else %}btn-outline-light border-0 text-light{% endif %}">
+                <a href="{% url 'dashboard' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'dashboard' %}btn-primary text-white shadow-sm fw-bold{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
                     <i class="fa-solid fa-chart-line fs-5 w-24"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="{% url 'pos_view' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'pos_view' %}btn-primary text-white shadow{% else %}btn-outline-light border-0 text-light{% endif %}">
+                <a href="{% url 'pos_view' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'pos_view' %}btn-primary text-white shadow-sm fw-bold{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
                     <i class="fa-solid fa-cash-register fs-5 w-24 text-success"></i>
                     <span>POS Kassa</span>
                 </a>
 
-                <a href="{% url 'debtors_list' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'debtors_list' %}btn-primary text-white shadow{% else %}btn-outline-light border-0 text-light{% endif %}">
+                <a href="{% url 'debtors_list' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'debtors_list' %}btn-primary text-white shadow-sm fw-bold{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
                     <i class="fa-solid fa-address-book fs-5 w-24 text-danger"></i>
                     <span>Qarzdorlar Daftari</span>
                 </a>
 
-                <a href="{% url 'products_list' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'products_list' %}btn-primary text-white shadow{% else %}btn-outline-light border-0 text-light{% endif %}">
+                <a href="{% url 'products_list' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'products_list' %}btn-primary text-white shadow-sm fw-bold{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
                     <i class="fa-solid fa-boxes-stacked fs-5 w-24 text-warning"></i>
                     <span>Mahsulotlar</span>
                 </a>
 
-                <a href="{% url 'sales_history' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'sales_history' %}btn-primary text-white shadow{% else %}btn-outline-light border-0 text-light{% endif %}">
+                <a href="{% url 'sales_history' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'sales_history' %}btn-primary text-white shadow-sm fw-bold{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
                     <i class="fa-solid fa-receipt fs-5 w-24 text-info"></i>
                     <span>Sotuvlar Tarixi</span>
                 </a>
 
-                <a href="{% url 'analytics_view' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'analytics_view' %}btn-primary text-white shadow{% else %}btn-outline-light border-0 text-light{% endif %}">
+                <a href="{% url 'analytics_view' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'analytics_view' %}btn-primary text-white shadow-sm fw-bold{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
                     <i class="fa-solid fa-chart-pie fs-5 w-24 text-purple"></i>
                     <span>Tahlillar & Grafika</span>
                 </a>
 
-                <hr class="border-secondary my-2">
+                <hr class="border-secondary-subtle my-2">
 
-                <a href="{% url 'seed_demo_data' %}" class="btn btn-outline-info btn-sm rounded-pill d-flex align-items-center justify-content-center gap-2 py-2">
+                <a href="{% url 'seed_demo_data' %}" class="btn btn-outline-primary btn-sm rounded-pill d-flex align-items-center justify-content-center gap-2 py-2">
                     <i class="fa-solid fa-database"></i> Demo Ma'lumot Yuklash
                 </a>
             </div>

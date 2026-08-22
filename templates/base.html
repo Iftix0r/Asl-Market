@@ -15,36 +15,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Custom Glassmorphism CSS -->
+    <!-- Custom Glassmorphism Light CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-dark text-light">
+<body class="bg-body-tertiary text-dark">
 
-    <!-- Top Navigation Bar -->
+    <!-- Top Navigation Bar (Light Mode) -->
     <nav class="navbar navbar-expand-lg glass-nav sticky-top py-2 px-3">
         <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-white fs-4" href="{% url 'storefront' %}">
-                <div class="bg-primary text-white p-2 rounded-3 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-dark fs-4" href="{% url 'storefront' %}">
+                <div class="bg-primary text-white p-2 rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
                     <i class="fa-solid fa-store fs-5"></i>
                 </div>
                 <span>Asl<span class="text-primary">Market</span></span>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 rounded-pill">v3.0 ULTRA</span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 rounded-pill">v3.0 LIGHT</span>
             </a>
 
-            <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
+            <button class="navbar-toggler text-dark border-0" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
                 <i class="fa-solid fa-bars fs-3"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="topNav">
                 <div class="navbar-nav ms-auto d-flex align-items-center gap-2 mt-3 mt-lg-0">
-                    <a class="btn btn-outline-light rounded-pill px-3 d-flex align-items-center gap-2 {% if request.resolver_match.url_name == 'storefront' %}active bg-light text-dark{% endif %}" href="{% url 'storefront' %}">
+                    <a class="btn btn-outline-dark rounded-pill px-3 d-flex align-items-center gap-2 {% if request.resolver_match.url_name == 'storefront' %}active bg-dark text-white{% endif %}" href="{% url 'storefront' %}">
                         <i class="fa-solid fa-bag-shopping"></i> Storefront (Do'kon)
                     </a>
-                    <a class="btn btn-outline-warning rounded-pill px-3 d-flex align-items-center gap-2" href="{% url 'aslfood_dashboard' %}">
-                        <i class="fa-solid fa-utensils"></i> AslFood Oshxona
+                    <a class="btn btn-outline-warning text-dark border-warning rounded-pill px-3 d-flex align-items-center gap-2" href="{% url 'aslfood_dashboard' %}">
+                        <i class="fa-solid fa-utensils text-warning"></i> AslFood Oshxona
                     </a>
-                    <a class="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2 shadow" href="{% url 'dashboard' %}">
+                    <a class="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm" href="{% url 'dashboard' %}">
                         <i class="fa-solid fa-gauge-high"></i> Admin Panel
                     </a>
                 </div>
