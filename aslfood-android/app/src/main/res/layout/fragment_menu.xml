@@ -1,44 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="12dp">
+    android:background="@color/bg_body"
+    android:orientation="vertical">
 
-    <!-- Search Input -->
-    <EditText
-        android:id="@+id/etSearch"
+    <!-- ═══ Search ═══════════════════════════════════════════════════════════ -->
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:elevation="2dp"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="4dp"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
         android:hint="@string/search_hint"
-        android:padding="12dp"
-        android:textSize="14sp" />
+        app:startIconDrawable="@drawable/ic_search"
+        app:startIconTint="@color/text_placeholder"
+        app:boxCornerRadiusTopStart="16dp"
+        app:boxCornerRadiusTopEnd="16dp"
+        app:boxCornerRadiusBottomStart="16dp"
+        app:boxCornerRadiusBottomEnd="16dp"
+        app:boxBackgroundColor="@color/white"
+        app:boxStrokeColor="@color/border_card"
+        app:boxStrokeWidth="1dp"
+        app:hintTextColor="@color/text_placeholder">
 
-    <!-- Categories RecyclerView -->
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:imeOptions="actionSearch"
+            android:maxLines="1"
+            android:textSize="14sp"
+            android:textColor="@color/text_dark" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- ═══ Kategoriyalar ════════════════════════════════════════════════════ -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCategories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:clipToPadding="false"
         android:orientation="horizontal" />
 
-    <!-- Progress Bar -->
+    <!-- ═══ Loading ══════════════════════════════════════════════════════════ -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="24dp"
+        android:indeterminateTint="@color/amber_600"
         android:visibility="gone" />
 
-    <!-- Food Grid RecyclerView -->
+    <!-- ═══ Bo'sh holat ═══════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/tvMenuEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🍽️"
+            android:textSize="48sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/menu_empty"
+            android:textColor="@color/text_muted"
+            android:textSize="15sp"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- ═══ Taomlar grid ══════════════════════════════════════════════════════ -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFoodMenu"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:layout_marginTop="4dp"
+        android:paddingHorizontal="6dp"
+        android:paddingBottom="8dp"
+        android:clipToPadding="false" />
 
 </LinearLayout>

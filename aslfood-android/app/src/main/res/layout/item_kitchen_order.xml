@@ -1,19 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Muammo: card padding + inner LinearLayout padding ikki marta edi.
+    Muammo: status matni oddiy TextView — rang dinamik qo'yilmagan.
+    Yechim: card paddingini olib tashlash, faqat ichki padding. Status badge drawable bilan.
+-->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:padding="12dp">
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/border_card"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp">
 
+        <!-- Yuqori qator: buyurtma kodi + status badge -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
@@ -21,37 +35,54 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="sans-serif-black"
                 android:textColor="@color/amber_600"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="18sp" />
 
+            <!--
+                Status badge: KitchenOrderAdapter ichida
+                setBackgroundResource(status_badge_*.xml) bilan rang o'zgartiriladi.
+            -->
             <TextView
                 android:id="@+id/tvKitchenStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/emerald_600"
-                android:textSize="13sp"
+                android:background="@drawable/badge_bg"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:textColor="@color/white"
+                android:textSize="12sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <!-- Ajratuvchi -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/bg_surface" />
+
+        <!-- Mijoz + manzil -->
         <TextView
             android:id="@+id/tvKitchenCustomer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="@color/text_dark"
-            android:textSize="14sp" />
-
-        <Button
-            android:id="@+id/btnNextStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@color/amber_600"
-            android:textColor="@color/white"
+            android:lineSpacingMultiplier="1.5"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+        <!-- Keyingi status tugmasi -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNextStatus"
+            style="@style/AslFood.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:textSize="13sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:cornerRadius="12dp" />
 
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

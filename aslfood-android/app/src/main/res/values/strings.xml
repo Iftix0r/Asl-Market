@@ -1,13 +1,59 @@
 <resources>
     <string name="app_name">AslFood</string>
+    <string name="app_tagline">Tez va mazali taomlar yetkazib berish</string>
+
+    <!-- Navigation -->
     <string name="nav_menu">Menyu</string>
     <string name="nav_cart">Savat</string>
     <string name="nav_tracker">Kuzatish</string>
     <string name="nav_kitchen">Oshxona</string>
+
+    <!-- Login -->
+    <string name="login_title">Xush kelibsiz!</string>
+    <string name="login_subtitle">Kim siz?</string>
+    <string name="role_customer">Mijoz</string>
+    <string name="role_customer_desc">Taom buyurtma qiling</string>
+    <string name="role_kitchen">Oshpaz / Xodim</string>
+    <string name="role_kitchen_desc">Buyurtmalarni boshqarish</string>
+    <string name="pin_hint">PIN-kod kiriting (4 raqam)</string>
+    <string name="pin_wrong">Noto\'g\'ri PIN-kod</string>
+
+    <!-- Menu -->
     <string name="search_hint">Taom nomini qidirish...</string>
     <string name="all_categories">Barchasi</string>
+    <string name="menu_empty">Hozircha taomlar mavjud emas</string>
+    <string name="add_to_cart">Qo\'shish</string>
+    <string name="prep_time">%d daqiqa</string>
+
+    <!-- Cart -->
+    <string name="cart_title">Savatingiz</string>
+    <string name="cart_empty_title">Savat bo\'sh</string>
+    <string name="cart_empty_desc">Menyu sahifasidan taom tanlang</string>
+    <string name="cart_total">Jami: %s so\'m</string>
     <string name="checkout">BUYURTMA BERISH</string>
-    <string name="empty_cart">Savatingiz bo\'sh</string>
+    <string name="name_hint">Ismingiz (F.I.SH)</string>
+    <string name="phone_hint">Telefon raqamingiz (+998...)</string>
+    <string name="address_hint">Yetkazib berish manzili yoki stol #</string>
+    <string name="order_success_title">Buyurtma qabul qilindi! 🎉</string>
+    <string name="order_success_code">Buyurtma kodi: #%s</string>
+
+    <!-- Tracker -->
+    <string name="tracker_title">Buyurtmani Kuzatish</string>
     <string name="order_code_hint">Buyurtma kodi (masalan: FD-8812A)</string>
     <string name="track_button">Kuzatish</string>
+    <string name="order_not_found">Bunday buyurtma topilmadi</string>
+
+    <!-- Kitchen -->
+    <string name="kitchen_title">Oshxona Terminali</string>
+    <string name="kitchen_empty">Faol buyurtmalar yo\'q</string>
+    <string name="btn_start_prepare">Tayyorlashni Boshlash</string>
+    <string name="btn_ready_deliver">Tayyor — Berib Yuborish</string>
+    <string name="btn_completed">Topshirildi ✓</string>
+
+    <!-- Common -->
+    <string name="loading">Yuklanmoqda…</string>
+    <string name="error_network">Internet bilan muammo. Qaytadan urinib ko\'ring</string>
+    <string name="retry">Qayta urinish</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Bekor qilish</string>
 </resources>

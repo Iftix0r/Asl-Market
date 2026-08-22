@@ -12,20 +12,25 @@ class MainViewModel : ViewModel() {
 
     private val repository = FoodRepository()
 
-    // Menu State
+    // ─── Menu State ───────────────────────────────────────────────────────────
+
     private val _menuItems = MutableLiveData<List<FoodItem>>()
     val menuItems: LiveData<List<FoodItem>> = _menuItems
 
     private val _categories = MutableLiveData<List<FoodCategory>>()
     val categories: LiveData<List<FoodCategory>> = _categories
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    /** Faqat menyu/kategoriya yuklanishida ishlatiladi */
+    private val _isMenuLoading = MutableLiveData<Boolean>(false)
+    val isMenuLoading: LiveData<Boolean> = _isMenuLoading
+
+    // ─── Error (umumiy) ───────────────────────────────────────────────────────
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
-    // Cart State
+    // ─── Cart State ───────────────────────────────────────────────────────────
+
     private val _cartItems = MutableLiveData<MutableList<CartItem>>(mutableListOf())
     val cartItems: LiveData<MutableList<CartItem>> = _cartItems
 
@@ -35,22 +40,41 @@ class MainViewModel : ViewModel() {
     private val _cartCount = MutableLiveData<Int>(0)
     val cartCount: LiveData<Int> = _cartCount
 
-    // Tracked Order State
+    /** Buyurtma berilganda spinner */
+    private val _isOrderLoading = MutableLiveData<Boolean>(false)
+    val isOrderLoading: LiveData<Boolean> = _isOrderLoading
+
+    // ─── Order Result ─────────────────────────────────────────────────────────
+
+    private val _placedOrderResult = MutableLiveData<PlaceOrderResponse?>()
+    val placedOrderResult: LiveData<PlaceOrderResponse?> = _placedOrderResult
+
+    // ─── Tracker State ────────────────────────────────────────────────────────
+
     private val _trackedOrder = MutableLiveData<FoodOrder?>()
     val trackedOrder: LiveData<FoodOrder?> = _trackedOrder
 
-    // Kitchen Orders State
+    /** Faqat tracker qidiruvida ishlatiladi */
+    private val _isTrackLoading = MutableLiveData<Boolean>(false)
+    val isTrackLoading: LiveData<Boolean> = _isTrackLoading
+
+    // ─── Kitchen State ────────────────────────────────────────────────────────
+
     private val _kitchenOrders = MutableLiveData<List<FoodOrder>>()
     val kitchenOrders: LiveData<List<FoodOrder>> = _kitchenOrders
 
-    // Placed Order Result State
-    private val _placedOrderResult = MutableLiveData<PlaceOrderResponse?>()
-    val placedOrderResult: LiveData<PlaceOrderResponse?> = _placedOrderResult
+    /** Faqat kitchen yuklanishida ishlatiladi */
+    private val _isKitchenLoading = MutableLiveData<Boolean>(false)
+    val isKitchenLoading: LiveData<Boolean> = _isKitchenLoading
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
 
     init {
         fetchCategories()
         fetchMenu()
     }
+
+    // ─── Menu Functions ───────────────────────────────────────────────────────
 
     fun fetchCategories() {
         viewModelScope.launch {
@@ -62,20 +86,21 @@ class MainViewModel : ViewModel() {
 
     fun fetchMenu(categorySlug: String? = null, query: String? = null) {
         viewModelScope.launch {
-            _isLoading.value = true
+            _isMenuLoading.value = true
             repository.getMenu(categorySlug, query)
                 .onSuccess {
                     _menuItems.value = it
-                    _isLoading.value = false
+                    _isMenuLoading.value = false
                 }
                 .onFailure {
                     _errorMessage.value = it.message
-                    _isLoading.value = false
+                    _isMenuLoading.value = false
                 }
         }
     }
 
-    // Cart Functions
+    // ─── Cart Functions ───────────────────────────────────────────────────────
+
     fun addToCart(foodItem: FoodItem) {
         val currentList = _cartItems.value ?: mutableListOf()
         val existing = currentList.find { it.foodItem.id == foodItem.id }
@@ -110,8 +135,15 @@ class MainViewModel : ViewModel() {
         _cartTotal.value = items.sumOf { it.subtotal }
     }
 
-    // Place Order Function
-    fun placeOrder(customerName: String, phone: String, address: String, orderType: String, paymentMethod: String) {
+    // ─── Order Functions ──────────────────────────────────────────────────────
+
+    fun placeOrder(
+        customerName: String,
+        phone: String,
+        address: String,
+        orderType: String,
+        paymentMethod: String
+    ) {
         val items = _cartItems.value ?: return
         if (items.isEmpty()) return
 
@@ -119,16 +151,16 @@ class MainViewModel : ViewModel() {
         val request = PlaceOrderRequest(customerName, phone, address, orderType, paymentMethod, payloadItems)
 
         viewModelScope.launch {
-            _isLoading.value = true
+            _isOrderLoading.value = true
             repository.placeOrder(request)
                 .onSuccess {
                     _placedOrderResult.value = it
                     clearCart()
-                    _isLoading.value = false
+                    _isOrderLoading.value = false
                 }
                 .onFailure {
                     _errorMessage.value = it.message
-                    _isLoading.value = false
+                    _isOrderLoading.value = false
                 }
         }
     }
@@ -137,29 +169,42 @@ class MainViewModel : ViewModel() {
         _placedOrderResult.value = null
     }
 
-    // Track Order
+    // ─── Tracker Functions ────────────────────────────────────────────────────
+
     fun trackOrder(code: String) {
         viewModelScope.launch {
-            _isLoading.value = true
+            _isTrackLoading.value = true
             repository.trackOrder(code)
                 .onSuccess {
                     _trackedOrder.value = it
-                    _isLoading.value = false
+                    _isTrackLoading.value = false
                 }
                 .onFailure {
                     _errorMessage.value = it.message
                     _trackedOrder.value = null
-                    _isLoading.value = false
+                    _isTrackLoading.value = false
                 }
         }
     }
 
-    // Kitchen Orders
+    fun clearTrackedOrder() {
+        _trackedOrder.value = null
+    }
+
+    // ─── Kitchen Functions ────────────────────────────────────────────────────
+
     fun fetchKitchenOrders(status: String? = null) {
         viewModelScope.launch {
+            _isKitchenLoading.value = true
             repository.getOrders(status)
-                .onSuccess { _kitchenOrders.value = it }
-                .onFailure { _errorMessage.value = it.message }
+                .onSuccess {
+                    _kitchenOrders.value = it
+                    _isKitchenLoading.value = false
+                }
+                .onFailure {
+                    _errorMessage.value = it.message
+                    _isKitchenLoading.value = false
+                }
         }
     }
 
@@ -169,5 +214,9 @@ class MainViewModel : ViewModel() {
                 .onSuccess { fetchKitchenOrders() }
                 .onFailure { _errorMessage.value = it.message }
         }
+    }
+
+    fun clearError() {
+        _errorMessage.value = null
     }
 }

@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Muammo: MaterialCardView + ichki LinearLayout ikkalasida padding bor edi.
+    Yechim: Card padding olib tashlandi, faqat ichki padding qoldi.
+    Minus/Plus: 48x48dp — Material3 touch target standarti.
+-->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="6dp"
-    android:padding="8dp">
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/border_card"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="12dp">
 
+        <!-- Taom nomi + narx -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -20,8 +32,10 @@
 
             <TextView
                 android:id="@+id/tvCartFoodName"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:textColor="@color/text_dark"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -30,44 +44,63 @@
                 android:id="@+id/tvCartUnitPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:textColor="@color/text_muted"
-                android:textSize="12sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
-        <Button
+        <!-- Minus — 48x48dp -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnMinus"
             style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:padding="0dp"
-            android:text="-" />
+            android:text="−"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:strokeColor="@color/border_card"
+            app:cornerRadius="10dp" />
 
+        <!-- Miqdor -->
         <TextView
             android:id="@+id/tvQty"
-            android:layout_width="wrap_content"
+            android:layout_width="36dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
+            android:gravity="center"
             android:textColor="@color/text_dark"
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <Button
+        <!-- Plus — 48x48dp -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPlus"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:backgroundTint="@color/amber_600"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:padding="0dp"
-            android:text="+" />
+            android:text="+"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:cornerRadius="10dp" />
 
+        <!-- Jami narx -->
         <TextView
             android:id="@+id/tvSubtotal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="14dp"
+            android:minWidth="72dp"
+            android:gravity="end"
             android:textColor="@color/emerald_600"
             android:textSize="14sp"
             android:textStyle="bold" />
 
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

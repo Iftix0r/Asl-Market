@@ -2,18 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_menu"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:icon="@drawable/ic_nav_menu"
         android:title="@string/nav_menu" />
     <item
         android:id="@+id/nav_cart"
-        android:icon="@android:drawable/ic_menu_add"
+        android:icon="@drawable/ic_nav_cart"
         android:title="@string/nav_cart" />
     <item
         android:id="@+id/nav_tracker"
-        android:icon="@android:drawable/ic_menu_search"
+        android:icon="@drawable/ic_nav_tracker"
         android:title="@string/nav_tracker" />
     <item
         android:id="@+id/nav_kitchen"
-        android:icon="@android:drawable/ic_menu_manage"
+        android:icon="@drawable/ic_nav_kitchen"
         android:title="@string/nav_kitchen" />
 </menu>

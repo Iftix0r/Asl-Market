@@ -16,7 +16,11 @@ class TrackerFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: MainViewModel by activityViewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentTrackerBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -33,23 +37,40 @@ class TrackerFragment : Fragment() {
             viewModel.trackOrder(code)
         }
 
+        // Tracker uchun alohida isTrackLoading — menyu spinneriga ta'sir qilmaydi
+        viewModel.isTrackLoading.observe(viewLifecycleOwner) { loading ->
+            binding.pbTrackLoading.visibility = if (loading) View.VISIBLE else View.GONE
+            binding.btnTrack.isEnabled = !loading
+        }
+
         viewModel.trackedOrder.observe(viewLifecycleOwner) { order ->
             if (order != null) {
                 binding.cardOrderDetails.visibility = View.VISIBLE
                 binding.tvOrderCodeTitle.text = "#${order.orderCode}"
                 binding.tvStatusDisplay.text = order.statusDisplay ?: order.status
-                binding.tvOrderCustomer.text = "Mijoz: ${order.customerName}\nSana: ${order.createdAt}"
-                binding.tvOrderTotal.text = "Summa: ${order.totalAmount.toLong()} so'm"
+                binding.tvOrderCustomer.text = buildString {
+                    append("Mijoz: ${order.customerName}")
+                    append("\nTelefon: ${order.phone}")
+                    append("\nSana: ${order.createdAt}")
+                    order.deliveryAddress?.takeIf { it.isNotBlank() }
+                        ?.let { append("\nManzil: $it") }
+                }
+                binding.tvOrderTotal.text = "Summa: %,d so'm".format(order.totalAmount.toLong())
 
-                val itemsText = order.items?.joinToString("\n") { "• ${it.qty}x ${it.name} (${it.total.toLong()} so'm)" } ?: ""
+                val itemsText = order.items
+                    ?.joinToString("\n") { "• ${it.qty}× ${it.name}  —  ${it.total.toLong()} so'm" }
+                    ?: ""
                 binding.tvOrderItemsList.text = itemsText
             } else {
                 binding.cardOrderDetails.visibility = View.GONE
             }
         }
 
-        viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
-            binding.pbTrackLoading.visibility = if (loading) View.VISIBLE else View.GONE
+        viewModel.errorMessage.observe(viewLifecycleOwner) { msg ->
+            if (!msg.isNullOrEmpty()) {
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                viewModel.clearError()
+            }
         }
     }
 

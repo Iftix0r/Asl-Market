@@ -5,59 +5,71 @@
     android:layout_height="wrap_content"
     android:layout_margin="6dp"
     app:cardBackgroundColor="@color/white"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="3dp"
-    app:strokeWidth="0dp">
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/border_card"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- Rasm — 16dp top corner radius bilan mos -->
         <ImageView
             android:id="@+id/ivFoodImage"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="130dp"
             android:scaleType="centerCrop"
-            android:src="@android:drawable/ic_menu_gallery" />
+            android:background="@color/bg_surface" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:paddingHorizontal="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="12dp">
 
+            <!-- Kategoriya -->
             <TextView
                 android:id="@+id/tvCategory"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/amber_600"
                 android:textSize="11sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:letterSpacing="0.05" />
 
+            <!-- Taom nomi -->
             <TextView
                 android:id="@+id/tvFoodName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/text_dark"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
+            <!-- Tarkibi -->
             <TextView
                 android:id="@+id/tvIngredients"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
                 android:ellipsize="end"
                 android:maxLines="2"
+                android:lineSpacingMultiplier="1.3"
                 android:textColor="@color/text_muted"
                 android:textSize="11sp" />
 
+            <!-- Narx + Qo'shish tugmasi -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -67,23 +79,30 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textColor="@color/emerald_600"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
 
-                <Button
+                <!--
+                    Material3 min touch target: 48dp.
+                    FloatingActionButton.Small (40dp) yoki
+                    oddiy Button minHeight 48dp bilan ishlatamiz.
+                -->
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAddToCart"
-                    style="@style/Widget.Material3.Button.ElevatedButton"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:backgroundTint="@color/amber_600"
                     android:text="+"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
-                    android:padding="0dp" />
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
+                    app:cornerRadius="14dp" />
+
             </LinearLayout>
-
         </LinearLayout>
-
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

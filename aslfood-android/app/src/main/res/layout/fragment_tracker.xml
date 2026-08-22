@@ -1,109 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- ScrollView — kichik ekranlarda card tashqariga chiqib ketmasligi uchun -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Buyurtmani Real-Vaqtda Kuzatish"
-        android:textColor="@color/text_dark"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+    android:background="@color/bg_body"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <EditText
-            android:id="@+id/etOrderCode"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@color/white"
-            android:hint="@string/order_code_hint"
-            android:padding="12dp" />
-
-        <Button
-            android:id="@+id/btnTrack"
+        <!-- Sarlavha -->
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/amber_600"
-            android:text="@string/track_button" />
-    </LinearLayout>
+            android:text="@string/tracker_title"
+            android:textColor="@color/text_dark"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-    <ProgressBar
-        android:id="@+id/pbTrackLoading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:visibility="gone" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/app_tagline"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardOrderDetails"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:padding="16dp"
-        android:visibility="gone">
-
+        <!-- ═══ Qidiruv satri ═══════════════════════════════════════════════ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tvOrderCodeTitle"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="@color/amber_600"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:layout_weight="1"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                android:hint="@string/order_code_hint"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp"
+                app:boxBackgroundColor="@color/white"
+                app:boxStrokeColor="@color/border_card"
+                app:hintTextColor="@color/text_placeholder">
 
-            <TextView
-                android:id="@+id/tvStatusDisplay"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etOrderCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapCharacters"
+                    android:imeOptions="actionSearch"
+                    android:maxLines="1"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_dark"
+                    android:letterSpacing="0.08" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/btnTrack"
+                style="@style/AslFood.Button.Primary"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/badge_bg"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:layout_height="52dp"
+                android:layout_marginStart="10dp"
+                android:text="@string/track_button"
+                android:paddingHorizontal="20dp" />
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvOrderCustomer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/text_dark"
-                android:textSize="14sp" />
+        <!-- ═══ Loading ═══════════════════════════════════════════════════════ -->
+        <ProgressBar
+            android:id="@+id/pbTrackLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp"
+            android:indeterminateTint="@color/amber_600"
+            android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/tvOrderTotal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/emerald_600"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+        <!-- ═══ Buyurtma natijasi kartasi ════════════════════════════════════ -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardOrderDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="3dp"
+            app:strokeColor="@color/border_card"
+            app:strokeWidth="1dp">
 
-            <TextView
-                android:id="@+id/tvOrderItemsList"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/text_muted"
-                android:textSize="13sp" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+                android:orientation="vertical"
+                android:padding="20dp">
 
-</LinearLayout>
+                <!-- Kod + status — bir qatorda -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvOrderCodeTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-black"
+                        android:textColor="@color/amber_600"
+                        android:textSize="22sp" />
+
+                    <TextView
+                        android:id="@+id/tvStatusDisplay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/badge_bg"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="5dp"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Ajratuvchi -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="14dp"
+                    android:background="@color/bg_surface" />
+
+                <!-- Mijoz info -->
+                <TextView
+                    android:id="@+id/tvOrderCustomer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lineSpacingMultiplier="1.5"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <!-- Jami summa -->
+                <TextView
+                    android:id="@+id/tvOrderTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@color/emerald_600"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <!-- Ajratuvchi -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="@color/bg_surface" />
+
+                <!-- Taomlar ro'yxati -->
+                <TextView
+                    android:id="@+id/tvOrderItemsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lineSpacingMultiplier="1.6"
+                    android:textColor="@color/text_muted"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

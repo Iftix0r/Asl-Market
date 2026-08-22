@@ -1,22 +1,41 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Brand Colors -->
+    <color name="amber_50">#FFFBEB</color>
+    <color name="amber_100">#FEF3C7</color>
+    <color name="amber_400">#FBBF24</color>
     <color name="amber_500">#F59E0B</color>
     <color name="amber_600">#D97706</color>
     <color name="amber_700">#B45309</color>
-    <color name="amber_100">#FEF3C7</color>
 
+    <color name="emerald_50">#ECFDF5</color>
+    <color name="emerald_400">#34D399</color>
     <color name="emerald_500">#10B981</color>
     <color name="emerald_600">#059669</color>
 
     <color name="rose_500">#EF4444</color>
+    <color name="rose_600">#DC2626</color>
 
+    <color name="sky_500">#0EA5E9</color>
+
+    <!-- Surface Colors -->
     <color name="bg_body">#F8FAFC</color>
     <color name="bg_card">#FFFFFF</color>
+    <color name="bg_surface">#F1F5F9</color>
     <color name="border_card">#E2E8F0</color>
 
+    <!-- Text Colors -->
     <color name="text_dark">#0F172A</color>
+    <color name="text_secondary">#334155</color>
     <color name="text_muted">#64748B</color>
+    <color name="text_placeholder">#94A3B8</color>
+
+    <!-- Status Colors -->
+    <color name="status_new">#F59E0B</color>
+    <color name="status_preparing">#3B82F6</color>
+    <color name="status_delivering">#06B6D4</color>
+    <color name="status_completed">#10B981</color>
 
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
 </resources>
