@@ -16,7 +16,9 @@
     <string name="role_kitchen">Oshpaz / Xodim</string>
     <string name="role_kitchen_desc">Buyurtmalarni boshqarish</string>
     <string name="pin_hint">PIN-kod kiriting (4 raqam)</string>
+    <string name="pin_title">Oshxona PIN-kodi</string>
     <string name="pin_wrong">Noto\'g\'ri PIN-kod</string>
+    <string name="change_role">Rejimni o\'zgartirish</string>
 
     <!-- Menu -->
     <string name="search_hint">Taom nomini qidirish...</string>

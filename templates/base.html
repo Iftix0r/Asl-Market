@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}AslMarket.uz — Supermarket & AslFood Platformasi{% endblock %}</title>
+    <title>{% block title %}AslFood — Mazali taomlar{% endblock %}</title>
     <!-- Google Fonts Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,7 +39,7 @@
             <div class="collapse navbar-collapse" id="topNav">
                 <div class="navbar-nav ms-auto d-flex align-items-center gap-2 mt-3 mt-lg-0">
                     <a class="btn btn-outline-dark rounded-pill px-3 d-flex align-items-center gap-2 {% if request.resolver_match.url_name == 'storefront' %}active bg-dark text-white{% endif %}" href="{% url 'storefront' %}">
-                        <i class="fa-solid fa-bag-shopping"></i> Storefront (Do'kon)
+                        <i class="fa-solid fa-burger"></i> AslFood Menyu
                     </a>
                     <a class="btn btn-outline-warning text-dark border-warning rounded-pill px-3 d-flex align-items-center gap-2" href="{% url 'aslfood_dashboard' %}">
                         <i class="fa-solid fa-utensils text-warning"></i> AslFood Oshxona

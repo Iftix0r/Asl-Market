@@ -1,19 +1,16 @@
 {% extends 'base.html' %}
 
-{% block title %}AslMarket & AslFood — Supermarket va Fast-Food Do'koni{% endblock %}
+{% block title %}AslFood — Mazali taomlar{% endblock %}
 
 {% block content %}
 <div class="container py-4">
 
-    <!-- Store Navigation Tabs Header (Light Mode) -->
+    <!-- Food storefront header -->
     <div class="glass-card p-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3 bg-white">
         <div class="d-flex gap-2">
-            <a href="{% url 'storefront' %}?tab=supermarket" class="btn px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 {% if active_tab != 'food' %}btn-primary text-white shadow-sm{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
-                <i class="fa-solid fa-cart-shopping"></i> Supermarket Catalog
-            </a>
-            <a href="{% url 'storefront' %}?tab=food" class="btn px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 {% if active_tab == 'food' %}btn-warning text-dark shadow-sm{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
-                <i class="fa-solid fa-burger"></i> AslFood Fast-Food
-            </a>
+            <span class="btn px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 btn-warning text-dark shadow-sm">
+                <i class="fa-solid fa-burger"></i> AslFood
+            </span>
         </div>
 
         <button class="btn btn-outline-success rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#cartModal">
@@ -23,8 +20,7 @@
         </button>
     </div>
 
-    {% if active_tab == 'food' %}
-        <!-- ASLFOOD HERO BANNER (LIGHT) -->
+    <!-- ASLFOOD HERO BANNER (LIGHT) -->
         <div class="glass-card p-4 p-lg-5 mb-4 text-center position-relative overflow-hidden bg-white" style="background: linear-gradient(135deg, rgba(254, 243, 199, 0.8) 0%, rgba(255, 255, 255, 1) 100%); border-color: #fde68a;">
             <h1 class="fw-extrabold display-5 text-warning-emphasis mb-2">AslFood Issiq & Mazali Taomlar</h1>
             <p class="text-secondary fs-5 max-w-600 mx-auto mb-4">Lavash, Gamburger, Pizza va salqin ichimliklarni 15-20 daqiqada yetkazib beramiz!</p>
@@ -92,76 +88,6 @@
             {% endfor %}
         </div>
 
-    {% else %}
-        <!-- SUPERMARKET HERO BANNER (LIGHT) -->
-        <div class="glass-card p-4 p-lg-5 mb-4 text-center position-relative overflow-hidden bg-white" style="background: linear-gradient(135deg, rgba(238, 242, 255, 0.9) 0%, rgba(255, 255, 255, 1) 100%); border-color: #c7d2fe;">
-            <h1 class="fw-extrabold display-5 text-primary mb-2">AslMarket Sifatli Mahsulotlar Katalogi</h1>
-            <p class="text-secondary fs-5 max-w-600 mx-auto mb-4">Har kuni yangi oziq-ovqatlar, shirinliklar, ichimliklar va maishiy tovarlar!</p>
-
-            <form method="GET" action="{% url 'storefront' %}" class="max-w-600 mx-auto">
-                <input type="hidden" name="tab" value="supermarket">
-                <div class="input-group input-group-lg glass-card p-1 bg-white border-primary-subtle">
-                    <span class="input-group-text bg-transparent border-0 text-primary"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    <input type="text" name="q" value="{{ query }}" class="form-control bg-transparent border-0 text-dark shadow-none" placeholder="Mahsulot yoki shtrix-kod qidirish...">
-                    <button type="submit" class="btn btn-primary rounded-3 px-4">Qidirish</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Supermarket Category Filter Chips -->
-        <div class="d-flex flex-wrap gap-2 mb-4">
-            <a href="{% url 'storefront' %}?tab=supermarket" class="btn btn-sm rounded-pill px-3 {% if not selected_category %}btn-primary text-white fw-bold{% else %}btn-outline-secondary text-dark{% endif %}">
-                Barchasi
-            </a>
-            {% for cat in categories %}
-                <a href="{% url 'storefront' %}?tab=supermarket&category={{ cat.slug }}" class="btn btn-sm rounded-pill px-3 {% if selected_category == cat.slug %}btn-primary text-white fw-bold{% else %}btn-outline-secondary text-dark{% endif %}">
-                    {{ cat.name }}
-                </a>
-            {% endfor %}
-        </div>
-
-        <!-- Supermarket Products Grid -->
-        <div class="row g-4">
-            {% for product in products %}
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <div class="glass-card h-100 d-flex flex-column overflow-hidden bg-white">
-                        <div class="position-relative" style="height: 180px; background: #f1f5f9;">
-                            {% if product.image_url %}
-                                <img src="{{ product.image_url }}" class="w-100 h-100 object-fit-cover" alt="{{ product.name }}">
-                            {% else %}
-                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
-                                    <i class="fa-solid fa-box fs-1"></i>
-                                </div>
-                            {% endif %}
-                            {% if product.is_low_stock %}
-                                <span class="badge bg-danger position-absolute top-0 end-0 m-2">Oz qoldi: {{ product.stock }} dona</span>
-                            {% else %}
-                                <span class="badge bg-success bg-opacity-90 position-absolute top-0 end-0 m-2">Mavjud: {{ product.stock }} dona</span>
-                            {% endif %}
-                        </div>
-                        <div class="p-3 d-flex flex-column flex-grow-1">
-                            <span class="text-primary text-uppercase fw-bold" style="font-size: 0.75rem;">{{ product.category.name }}</span>
-                            <h5 class="fw-bold text-dark mb-2">{{ product.name }}</h5>
-                            <div class="d-flex align-items-center justify-content-between mt-auto">
-                                <span class="fs-5 fw-bold text-primary">{{ product.price|floatformat:0 }} so'm</span>
-                                <button onclick="addToCart('market', '{{ product.id }}', '{{ product.name|escapejs }}', {{ product.price }})" class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
-                                    <i class="fa-solid fa-cart-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% empty %}
-                <div class="col-12 text-center py-5">
-                    <div class="glass-card p-5 bg-white">
-                        <i class="fa-solid fa-box-open fs-1 text-primary mb-3"></i>
-                        <h3>Mahsulotlar topilmadi</h3>
-                        <p class="text-muted">Iltimos, boshqa toifani tanlang yoki qidiruvni o'zgartiring.</p>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
 </div>
 
 <!-- SHOPPING CART MODAL (LIGHT) -->
@@ -215,11 +141,8 @@
 {% block extra_js %}
 <script>
     let currentCart = JSON.parse(localStorage.getItem('asl_cart') || '[]');
-    let currentTab = "{{ active_tab }}";
-
-    if (currentTab === 'food') {
-        document.getElementById('addressRow').style.display = 'block';
-    }
+    const currentTab = 'food';
+    document.getElementById('addressRow').style.display = 'block';
 
     function saveCart() {
         localStorage.setItem('asl_cart', JSON.stringify(currentCart));
@@ -317,7 +240,7 @@
             return;
         }
 
-        const endpoint = (currentTab === 'food') ? "{% url 'aslfood_order_api' %}" : "{% url 'online_checkout_api' %}";
+        const endpoint = "{% url 'aslfood_order_api' %}";
         const payload = {
             cart: currentCart,
             items: currentCart,

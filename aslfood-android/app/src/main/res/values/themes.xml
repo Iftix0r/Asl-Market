@@ -51,6 +51,14 @@
         <item name="cornerRadius">12dp</item>
     </style>
 
+    <style name="PinButton" parent="Widget.Material3.Button">
+        <item name="android:minWidth">72dp</item>
+        <item name="android:minHeight">72dp</item>
+        <item name="android:insetTop">4dp</item>
+        <item name="android:insetBottom">4dp</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
     <!--
         Status badge stillari.
         MUHIM: dot-notation da Android "AslFood.StatusBadge" degan ota stil qidiradi.

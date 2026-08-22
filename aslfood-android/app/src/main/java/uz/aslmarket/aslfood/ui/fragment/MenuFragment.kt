@@ -47,6 +47,8 @@ class MenuFragment : Fragment() {
         setupAdapters()
         setupSearch()
         observeViewModel()
+        viewModel.fetchCategories()
+        viewModel.fetchMenu()
     }
 
     private fun setupAdapters() {

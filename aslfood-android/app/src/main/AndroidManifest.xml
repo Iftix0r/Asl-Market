@@ -20,6 +20,11 @@
 
         <activity
             android:name=".ui.activity.MainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.activity.RoleSelectActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

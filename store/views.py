@@ -21,31 +21,22 @@ from .models import (
 # ==========================================================================
 
 def storefront(request):
-    """Public customer-facing storefront view (Supports Supermarket & Fast Food)"""
+    """Public customer-facing AslFood menu."""
     query = request.GET.get('q', '').strip()
     cat_slug = request.GET.get('category', '').strip()
-    active_tab = request.GET.get('tab', 'supermarket').strip()
-
-    products = Product.objects.select_related('category').all()
-    categories = Category.objects.all()
 
     food_items = FoodItem.objects.select_related('category').filter(is_available=True)
     food_categories = FoodCategory.objects.all()
 
     if cat_slug:
-        products = products.filter(category__slug=cat_slug)
         food_items = food_items.filter(category__slug=cat_slug)
     if query:
-        products = products.filter(Q(name__icontains=query) | Q(barcode__icontains=query) | Q(description__icontains=query))
         food_items = food_items.filter(Q(name__icontains=query) | Q(ingredients__icontains=query))
 
     context = {
-        'products': products,
-        'categories': categories,
         'food_items': food_items,
         'food_categories': food_categories,
         'selected_category': cat_slug,
-        'active_tab': active_tab,
         'query': query
     }
     return render(request, 'storefront.html', context)

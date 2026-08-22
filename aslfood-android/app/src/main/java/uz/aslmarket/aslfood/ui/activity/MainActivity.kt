@@ -5,6 +5,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import uz.aslmarket.aslfood.R
+import uz.aslmarket.aslfood.data.local.RoleManager
+import uz.aslmarket.aslfood.data.model.AppRole
 import uz.aslmarket.aslfood.databinding.ActivityMainBinding
 import uz.aslmarket.aslfood.ui.fragment.CartFragment
 import uz.aslmarket.aslfood.ui.fragment.KitchenFragment
@@ -23,12 +25,14 @@ class MainActivity : AppCompatActivity() {
     private val trackerFragment  by lazy { TrackerFragment() }
     private val kitchenFragment  by lazy { KitchenFragment() }
 
-    private var activeFragment: Fragment = menuFragment
+    private lateinit var role: AppRole
+    private lateinit var activeFragment: Fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        role = RoleManager.getRole(this) ?: AppRole.CUSTOMER
 
         setupFragments(savedInstanceState)
         setupBottomNavigation()
@@ -37,28 +41,39 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupFragments(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) {
-            // Barcha fragmentlarni qo'sh, faqat menu ko'rinsin
-            supportFragmentManager.beginTransaction()
-                .add(R.id.fragmentContainer, kitchenFragment,  TAG_KITCHEN).hide(kitchenFragment)
-                .add(R.id.fragmentContainer, trackerFragment,  TAG_TRACKER).hide(trackerFragment)
-                .add(R.id.fragmentContainer, cartFragment,     TAG_CART).hide(cartFragment)
-                .add(R.id.fragmentContainer, menuFragment,     TAG_MENU)
-                .commit()
-            activeFragment = menuFragment
+            val transaction = supportFragmentManager.beginTransaction()
+            if (role == AppRole.KITCHEN) {
+                transaction.add(R.id.fragmentContainer, kitchenFragment, TAG_KITCHEN)
+                activeFragment = kitchenFragment
+            } else {
+                transaction
+                    .add(R.id.fragmentContainer, trackerFragment, TAG_TRACKER).hide(trackerFragment)
+                    .add(R.id.fragmentContainer, cartFragment, TAG_CART).hide(cartFragment)
+                    .add(R.id.fragmentContainer, menuFragment, TAG_MENU)
+                activeFragment = menuFragment
+            }
+            transaction.commit()
         } else {
-            // Konfiguratsiya o'zgarganda (rotation) fragmentlarni topib olish
-            activeFragment = supportFragmentManager.findFragmentByTag(TAG_MENU)
-                ?: menuFragment
+            val activeTag = if (role == AppRole.KITCHEN) TAG_KITCHEN else TAG_MENU
+            activeFragment = supportFragmentManager.findFragmentByTag(activeTag)
+                ?: if (role == AppRole.KITCHEN) kitchenFragment else menuFragment
         }
     }
 
     private fun setupBottomNavigation() {
+        binding.bottomNavigation.menu.findItem(R.id.nav_kitchen).isVisible = role == AppRole.KITCHEN
+        if (role == AppRole.KITCHEN) {
+            binding.bottomNavigation.menu.findItem(R.id.nav_menu).isVisible = false
+            binding.bottomNavigation.menu.findItem(R.id.nav_cart).isVisible = false
+            binding.bottomNavigation.menu.findItem(R.id.nav_tracker).isVisible = false
+            binding.bottomNavigation.selectedItemId = R.id.nav_kitchen
+        }
         binding.bottomNavigation.setOnItemSelectedListener { menuItem ->
             val target = when (menuItem.itemId) {
-                R.id.nav_menu    -> menuFragment
+                R.id.nav_menu    -> if (role == AppRole.CUSTOMER) menuFragment else return@setOnItemSelectedListener false
                 R.id.nav_cart    -> cartFragment
                 R.id.nav_tracker -> trackerFragment
-                R.id.nav_kitchen -> kitchenFragment
+                R.id.nav_kitchen -> if (role == AppRole.CUSTOMER) kitchenFragment else kitchenFragment
                 else             -> return@setOnItemSelectedListener false
             }
             showFragment(target)
