@@ -16,7 +16,7 @@ DEBUG = False
 # cPanel dan environment variable orqali yoki to'g'ridan-to'g'ri kiriting
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
-    'o'zingizning-yangi-secret-key-bu-yerga'  # ishlatishdan oldin almashtiring
+    'change-this-to-a-new-random-secret-key-before-use'
 )
 
 ALLOWED_HOSTS = [
@@ -30,7 +30,7 @@ ALLOWED_HOSTS = [
 
 BASE_DIR_PROD = Path(os.environ.get(
     'DJANGO_BASE_DIR',
-    '/home/aslmarke/aslmarket'   # cPanel username va papka nomini to'g'rilang
+    '/home/host7905/aslmarket'
 ))
 
 DATABASES = {
