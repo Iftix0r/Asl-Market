@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">AslFood</string>
+    <string name="nav_menu">Menyu</string>
+    <string name="nav_cart">Savat</string>
+    <string name="nav_tracker">Kuzatish</string>
+    <string name="nav_kitchen">Oshxona</string>
+    <string name="search_hint">Taom nomini qidirish...</string>
+    <string name="all_categories">Barchasi</string>
+    <string name="checkout">BUYURTMA BERISH</string>
+    <string name="empty_cart">Savatingiz bo\'sh</string>
+    <string name="order_code_hint">Buyurtma kodi (masalan: FD-8812A)</string>
+    <string name="track_button">Kuzatish</string>
+</resources>
