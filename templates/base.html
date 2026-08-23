@@ -5,71 +5,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AslFood — Mazali taomlar{% endblock %}</title>
-    <!-- Google Fonts Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Custom Glassmorphism Light CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-body-tertiary text-dark">
 
-    <!-- Top Navigation Bar (Light Mode) -->
-    <nav class="navbar navbar-expand-lg glass-nav sticky-top py-2 px-3">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-dark fs-4" href="{% url 'storefront' %}">
-                <div class="bg-primary text-white p-2 rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
-                    <i class="fa-solid fa-store fs-5"></i>
+    <!-- ═══ Navbar ═══════════════════════════════════════════════════════════ -->
+    <nav class="navbar navbar-expand-lg glass-nav sticky-top py-0 px-0 border-bottom border-secondary-subtle shadow-sm">
+        <div class="container-fluid px-3 px-lg-4" style="min-height: 60px;">
+
+            <!-- Brand -->
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-dark me-4"
+               href="{% url 'storefront' %}" style="font-size: 1.15rem;">
+                <div class="d-flex align-items-center justify-content-center rounded-2 bg-warning shadow-sm"
+                     style="width:34px; height:34px; flex-shrink:0;">
+                    <i class="fa-solid fa-utensils text-white" style="font-size: 0.85rem;"></i>
                 </div>
-                <span>Asl<span class="text-primary">Market</span></span>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 rounded-pill">v3.0 LIGHT</span>
+                <span>Asl<span class="text-warning">Food</span></span>
             </a>
 
-            <button class="navbar-toggler text-dark border-0" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
-                <i class="fa-solid fa-bars fs-3"></i>
+            <!-- Mobile toggler -->
+            <button class="navbar-toggler border-0 text-dark ms-auto me-1"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#topNav"
+                    aria-controls="topNav" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i>
             </button>
 
+            <!-- Nav links -->
             <div class="collapse navbar-collapse" id="topNav">
-                <div class="navbar-nav ms-auto d-flex align-items-center gap-2 mt-3 mt-lg-0">
-                    <a class="btn btn-outline-dark rounded-pill px-3 d-flex align-items-center gap-2 {% if request.resolver_match.url_name == 'storefront' %}active bg-dark text-white{% endif %}" href="{% url 'storefront' %}">
-                        <i class="fa-solid fa-burger"></i> AslFood Menyu
-                    </a>
-                    <a class="btn btn-outline-warning text-dark border-warning rounded-pill px-3 d-flex align-items-center gap-2" href="{% url 'aslfood_dashboard' %}">
-                        <i class="fa-solid fa-utensils text-warning"></i> AslFood Oshxona
-                    </a>
-                    <a class="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm" href="{% url 'aslfood_dashboard' %}">
-                        <i class="fa-solid fa-gauge-high"></i> Panel
-                    </a>
-                </div>
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-1 py-2 py-lg-0">
+
+                    <!-- Menyu -->
+                    <li class="nav-item">
+                        <a href="{% url 'storefront' %}"
+                           class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                                  {% if request.resolver_match.url_name == 'storefront' %}
+                                  fw-semibold text-warning bg-warning-subtle
+                                  {% else %}
+                                  text-dark
+                                  {% endif %}">
+                            <i class="fa-solid fa-burger fa-fw"></i>
+                            <span>Menyu</span>
+                        </a>
+                    </li>
+
+                    <!-- Oshxona Terminali -->
+                    <li class="nav-item">
+                        <a href="{% url 'aslfood_dashboard' %}"
+                           class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                                  {% if request.resolver_match.url_name == 'aslfood_dashboard' %}
+                                  fw-semibold text-warning bg-warning-subtle
+                                  {% else %}
+                                  text-dark
+                                  {% endif %}">
+                            <i class="fa-solid fa-fire-burner fa-fw text-warning"></i>
+                            <span>Oshxona</span>
+                        </a>
+                    </li>
+
+                    <!-- Taomlar Menyusi -->
+                    <li class="nav-item">
+                        <a href="{% url 'aslfood_menu_list' %}"
+                           class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                                  {% if request.resolver_match.url_name == 'aslfood_menu_list' %}
+                                  fw-semibold text-warning bg-warning-subtle
+                                  {% else %}
+                                  text-dark
+                                  {% endif %}">
+                            <i class="fa-solid fa-book-open fa-fw"></i>
+                            <span>Taomlar</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item d-none d-lg-block">
+                        <div class="vr mx-1 opacity-25" style="height: 28px; margin-top: 6px;"></div>
+                    </li>
+
+                    <!-- Django Admin -->
+                    <li class="nav-item">
+                        <a href="/admin/"
+                           class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2
+                                  px-3 py-1 rounded-2 text-dark border-secondary-subtle"
+                           target="_blank">
+                            <i class="fa-solid fa-screwdriver-wrench fa-fw"></i>
+                            <span class="d-none d-lg-inline">Admin</span>
+                        </a>
+                    </li>
+
+                </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Page Content -->
+    <!-- ═══ Main Content ══════════════════════════════════════════════════════ -->
     <main>
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Toast Notification Container -->
+    <!-- ═══ Toast ════════════════════════════════════════════════════════════ -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
-        <div id="appToast" class="toast align-items-center text-white bg-success border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="appToast" class="toast align-items-center text-white bg-success border-0 shadow-lg"
+             role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body d-flex align-items-center gap-2" id="toastMessage">
                     <i class="fa-solid fa-circle-check fs-5"></i> Bajarildi!
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         lucide.createIcons();
@@ -84,8 +136,7 @@
                 toastEl.className = "toast align-items-center text-white bg-success border-0 shadow-lg";
                 toastMsg.innerHTML = `<i class="fa-solid fa-circle-check fs-5"></i> ${message}`;
             }
-            const bsToast = new bootstrap.Toast(toastEl);
-            bsToast.show();
+            bootstrap.Toast.getOrCreateInstance(toastEl).show();
         }
     </script>
     {% block extra_js %}{% endblock %}

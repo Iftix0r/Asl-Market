@@ -1,46 +1,79 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container-fluid py-4 px-3 px-lg-4">
-    <div class="row g-4">
-        <!-- Sidebar Navigation Column (Light Mode) -->
-        <div class="col-12 col-lg-3 col-xl-2">
-            <div class="glass-card p-3 d-flex flex-column gap-2 sticky-top bg-white" style="top: 80px; border-color: rgba(245, 158, 11, 0.3);">
-                <div class="p-2 rounded-3 bg-warning-subtle text-dark border border-warning-subtle d-flex align-items-center gap-2 mb-2">
-                    <i class="fa-solid fa-utensils fs-4 text-warning"></i>
-                    <div>
-                        <div class="fw-bold lh-1 text-dark" style="font-size: 0.95rem;">AslFood Kitchen</div>
-                        <div class="text-muted" style="font-size: 0.75rem;">Oshxona & Kuryer</div>
+<div class="container-fluid py-3 px-3 px-lg-4">
+    <div class="row g-3">
+
+        <!-- ═══ Sidebar ══════════════════════════════════════════════════════ -->
+        <div class="col-12 col-lg-2 col-xl-2">
+            <div class="d-flex flex-column gap-1 sticky-top bg-white rounded-3 border border-secondary-subtle p-2 shadow-sm"
+                 style="top: 70px;">
+
+                <!-- Logo blok -->
+                <div class="d-flex align-items-center gap-2 px-2 py-2 mb-1 border-bottom border-secondary-subtle">
+                    <div class="d-flex align-items-center justify-content-center rounded-2 bg-warning"
+                         style="width:30px;height:30px;flex-shrink:0;">
+                        <i class="fa-solid fa-fire-burner text-white" style="font-size:0.75rem;"></i>
+                    </div>
+                    <div class="lh-1">
+                        <div class="fw-bold text-dark" style="font-size:0.85rem;">AslFood Panel</div>
+                        <div class="text-muted" style="font-size:0.7rem;">Boshqaruv markazi</div>
                     </div>
                 </div>
 
-                <a href="{% url 'aslfood_dashboard' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'aslfood_dashboard' %}btn-warning text-dark fw-bold shadow-sm{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
-                    <i class="fa-solid fa-fire-burner fs-5 w-24 text-warning"></i>
-                    <span>Oshxona Terminali</span>
+                <!-- Oshxona Terminali -->
+                <a href="{% url 'aslfood_dashboard' %}"
+                   class="btn text-start d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                          {% if request.resolver_match.url_name == 'aslfood_dashboard' %}
+                          btn-warning text-dark fw-semibold
+                          {% else %}
+                          btn-light text-secondary border-0
+                          {% endif %}">
+                    <i class="fa-solid fa-fire-burner fa-fw"></i>
+                    <span>Oshxona</span>
+                    {% if new_orders %}
+                    <span class="badge bg-danger ms-auto rounded-pill">{{ new_orders.count }}</span>
+                    {% endif %}
                 </a>
 
-                <a href="{% url 'aslfood_menu_list' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 {% if request.resolver_match.url_name == 'aslfood_menu_list' %}btn-warning text-dark fw-bold shadow-sm{% else %}btn-outline-secondary border-0 text-dark{% endif %}">
-                    <i class="fa-solid fa-book-open fs-5 w-24 text-warning"></i>
-                    <span>Taomlar Menyusi</span>
+                <!-- Taomlar Menyusi -->
+                <a href="{% url 'aslfood_menu_list' %}"
+                   class="btn text-start d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                          {% if request.resolver_match.url_name == 'aslfood_menu_list' or request.resolver_match.url_name == 'aslfood_add_item' %}
+                          btn-warning text-dark fw-semibold
+                          {% else %}
+                          btn-light text-secondary border-0
+                          {% endif %}">
+                    <i class="fa-solid fa-book-open fa-fw"></i>
+                    <span>Taomlar</span>
                 </a>
 
-                <a href="{% url 'aslfood_dashboard' %}" class="btn text-start d-flex align-items-center gap-3 px-3 py-2 rounded-3 btn-outline-secondary border-0 text-dark">
-                    <i class="fa-solid fa-store fs-5 w-24 text-primary"></i>
-                    <span>Panel Asosiy</span>
+                <!-- Storefront -->
+                <a href="{% url 'storefront' %}"
+                   class="btn text-start d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                          btn-light text-secondary border-0">
+                    <i class="fa-solid fa-store fa-fw"></i>
+                    <span>Storefront</span>
                 </a>
 
-                <hr class="border-secondary-subtle my-2">
+                <hr class="border-secondary-subtle my-1">
 
-                <a href="{% url 'aslfood_seed_data' %}" class="btn btn-outline-warning text-dark btn-sm rounded-pill d-flex align-items-center justify-content-center gap-2 py-2">
-                    <i class="fa-solid fa-wand-magic-sparkles text-warning"></i> Demo Taomlar Yuklash
+                <!-- Seed (pastda, xavfli harakat sifatida ajratilgan) -->
+                <a href="{% url 'aslfood_seed_data' %}"
+                   class="btn btn-sm btn-outline-secondary text-muted d-flex align-items-center
+                          justify-content-center gap-2 py-2 rounded-2">
+                    <i class="fa-solid fa-database fa-fw" style="font-size:0.75rem;"></i>
+                    <span style="font-size:0.75rem;">Demo data</span>
                 </a>
+
             </div>
         </div>
 
-        <!-- Main Panel View Slot -->
-        <div class="col-12 col-lg-9 col-xl-10">
+        <!-- ═══ Asosiy kontent ════════════════════════════════════════════════ -->
+        <div class="col-12 col-lg-10 col-xl-10">
             {% block panel_content %}{% endblock %}
         </div>
+
     </div>
 </div>
 {% endblock %}
