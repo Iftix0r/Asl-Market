@@ -1,5 +1,5 @@
 """
-AslFood Telegram Bot — Guruhga buyurtma xabarlari yuboruvchi helper.
+AslFood Telegram Bot — Guruhga va mijozlarga xabarlar yuboruvchi helper.
 Django settings dan TELEGRAM_BOT_TOKEN va TELEGRAM_GROUP_CHAT_ID o'qiladi.
 """
 import urllib.request
@@ -10,15 +10,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def _send_message(text: str, parse_mode: str = "HTML") -> bool:
+def _send_message(chat_id: str, text: str, parse_mode: str = "HTML") -> bool:
     """Low-level Telegram sendMessage helper (sync, no external deps)."""
     from django.conf import settings
 
     bot_token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
-    chat_id = getattr(settings, "TELEGRAM_GROUP_CHAT_ID", "")
 
     if not bot_token or not chat_id:
-        logger.warning("TELEGRAM_BOT_TOKEN yoki TELEGRAM_GROUP_CHAT_ID settings.py da yo'q!")
         return False
 
     try:
@@ -32,15 +30,18 @@ def _send_message(text: str, parse_mode: str = "HTML") -> bool:
         urllib.request.urlopen(req, timeout=5)
         return True
     except Exception as e:
-        logger.error(f"Telegram xabari yuborishda xato: {e}")
+        logger.error(f"Telegram xabari yuborishda xato (chat_id: {chat_id}): {e}")
         return False
 
 
 def send_order_to_group(order) -> bool:
     """
-    Yangi buyurtma kelganda Telegram guruhga chiroyli xabar yuboradi.
+    Yangi buyurtma kelganda Telegram guruhga xabar yuboradi.
     `order` — FoodOrder instance.
     """
+    from django.conf import settings
+    group_chat_id = getattr(settings, "TELEGRAM_GROUP_CHAT_ID", "")
+
     ORDER_TYPE_EMOJI = {
         "delivery": "🛵 Dostavka",
         "pickup":   "🏃 Olib ketish",
@@ -80,14 +81,22 @@ def send_order_to_group(order) -> bool:
         f"⏰ <b>Vaqt:</b> {order.created_at.strftime('%H:%M, %d.%m.%Y')}"
     )
 
-    return _send_message(text)
+    if group_chat_id:
+        _send_message(group_chat_id, text)
+    return True
 
 
 def send_status_update_to_group(order) -> bool:
     """
     Buyurtma holati o'zgarganda guruhga xabar yuboradi.
     """
+    from django.conf import settings
+    group_chat_id = getattr(settings, "TELEGRAM_GROUP_CHAT_ID", "")
+    if not group_chat_id:
+        return False
+
     STATUS_EMOJI = {
+        "new":        "🟡 Yangi buyurtma",
         "preparing":  "🍳 Tayyorlanmoqda",
         "delivering": "🛵 Kuryerda yo'lda",
         "completed":  "✅ Topshirildi",
@@ -100,4 +109,54 @@ def send_status_update_to_group(order) -> bool:
         f"👤 {order.customer_name} | 📱 {order.phone}\n"
         f"📊 Holat: <b>{status_str}</b>"
     )
-    return _send_message(text)
+    return _send_message(group_chat_id, text)
+
+
+def send_status_update_to_customer(order) -> bool:
+    """
+    Buyurtma holati o'zgarganda (yangi, tayyorlanmoqda, kuryerda, topshirildi, bekor qilindi)
+    bot orqali mijozning shaxsiy Telegramiga xabar yuboradi.
+    """
+    target_chat_id = order.telegram_id
+    if not target_chat_id and order.bot_user:
+        target_chat_id = order.bot_user.telegram_id
+
+    if not target_chat_id:
+        return False
+
+    STATUS_MESSAGES = {
+        "new": (
+            f"🟡 <b>Buyurtmangiz qabul qilindi!</b>\n\n"
+            f"📦 Buyurtma kodi: <b>#{order.order_code}</b>\n"
+            f"💰 Jami: <b>{int(order.total_amount):,} so'm</b>\n\n"
+            f"Oshxona oshpazlarimiz buyurtmangizni ko'rib chiqmoqda 🍳"
+        ),
+        "preparing": (
+            f"🍳 <b>Buyurtmangiz tayyorlanmoqda!</b>\n\n"
+            f"📦 Buyurtma kodi: <b>#{order.order_code}</b>\n\n"
+            f"Oshxonamizda mazali taomingiz tayyorlanmoqda 😋"
+        ),
+        "delivering": (
+            f"🛵 <b>Buyurtmangiz yo'lga chiqdi!</b>\n\n"
+            f"📦 Buyurtma kodi: <b>#{order.order_code}</b>\n"
+            f"📍 Manzil: <b>{order.delivery_address or 'Dostavka'}</b>\n\n"
+            f"Kuryerimiz taomingizni tez fursatda yetkazib beradi! 🚀"
+        ),
+        "completed": (
+            f"✅ <b>Buyurtma topshirildi!</b>\n\n"
+            f"📦 Buyurtma kodi: <b>#{order.order_code}</b>\n"
+            f"💰 Jami: <b>{int(order.total_amount):,} so'm</b>\n\n"
+            f"AslFood ni tanlaganingiz uchun rahmat! Yoqimli ishtha! 🍔🍕"
+        ),
+        "cancelled": (
+            f"🔴 <b>Buyurtmangiz bekor qilindi</b>\n\n"
+            f"📦 Buyurtma kodi: <b>#{order.order_code}</b>\n\n"
+            f"Qo'shimcha savollaringiz bo'lsa, @aslfoodsupport bilan bog'laning."
+        )
+    }
+
+    text = STATUS_MESSAGES.get(order.status)
+    if not text:
+        return False
+
+    return _send_message(str(target_chat_id), text)
