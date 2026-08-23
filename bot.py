@@ -91,14 +91,18 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Faqat guruh adminlari ko'ra oladi"""
     from store.models import FoodOrder
+    from asgiref.sync import sync_to_async
 
-    active = FoodOrder.objects.filter(
-        status__in=["new", "preparing", "delivering"]
-    ).order_by("created_at")[:10]
+    active = await sync_to_async(list)(
+        FoodOrder.objects.filter(
+            status__in=["new", "preparing", "delivering"]
+        ).order_by("created_at")[:10]
+    )
 
     if not active:
         await update.message.reply_text("✅ Hozircha faol buyurtmalar yo'q.")
         return
+
 
     STATUS_EMOJI = {
         "new": "🟡 Yangi",

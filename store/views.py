@@ -512,43 +512,40 @@ def send_telegram_notification(text):
 
 # ==========================================================================
 # TELEGRAM BOT WEBHOOK VIEWS
-# ==========================================================================
-
-_telegram_bot_app = None
-
-async def _get_telegram_bot_app():
-    global _telegram_bot_app
-    if _telegram_bot_app is None:
-        from bot import create_bot_app
-        _telegram_bot_app = create_bot_app()
-        if _telegram_bot_app:
-            await _telegram_bot_app.initialize()
-    return _telegram_bot_app
-
-
 @csrf_exempt
-async def telegram_webhook(request):
+def telegram_webhook(request):
     """
     Telegram Webhook Endpoint (/api/telegram/webhook/)
     Telegram serverlaridan keluvchi POST so'rovlarini qabul qiladi.
+    cPanel / Passenger WSGI hamda ASGI serverlar uchun 100% xavfsiz.
     """
     if request.method != 'POST':
         return HttpResponse("AslFood Telegram Webhook Endpoint Active", status=200)
 
     try:
         data = json.loads(request.body.decode('utf-8'))
-        app = await _get_telegram_bot_app()
-        if not app:
-            return HttpResponse("Bot token missing or invalid", status=500)
-
+        from bot import create_bot_app
         from telegram import Update
-        update = Update.de_json(data, app.bot)
-        await app.process_update(update)
+        import asyncio
+
+        async def process_update_async():
+            app = create_bot_app()
+            if not app:
+                return False
+            async with app:
+                await app.start()
+                update = Update.de_json(data, app.bot)
+                await app.process_update(update)
+                await app.stop()
+            return True
+
+        asyncio.run(process_update_async())
         return HttpResponse("OK", status=200)
     except Exception as e:
         import logging
-        logging.getLogger(__name__).error(f"Telegram webhook error: {e}")
-        return HttpResponse(f"Error: {e}", status=400)
+        logging.getLogger(__name__).error(f"Telegram webhook error: {e}", exc_info=True)
+        return HttpResponse(f"Error: {e}", status=500)
+
 
 
 def set_telegram_webhook(request):
