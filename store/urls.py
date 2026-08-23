@@ -32,6 +32,7 @@ urlpatterns = [
 
     # Orders
     path('api/food/orders/', views.api_food_orders, name='api_food_orders'),
+    path('api/food/orders/user/<str:telegram_id>/', views.api_food_orders_user, name='api_food_orders_user'),
     path('api/food/orders/place/', views.api_food_place_order, name='api_food_place_order'),
     path('api/food/orders/status/', views.api_food_order_status_update, name='api_food_order_status_update'),
     path('api/food/orders/<int:pk>/', views.api_food_order_detail, name='api_food_order_detail'),

@@ -298,10 +298,70 @@
         .empty-state { text-align: center; padding: 60px 16px; }
         .empty-icon { font-size: 60px; margin-bottom: 16px; }
         .empty-text { color: var(--tg-hint); font-size: 15px; }
+
+        /* ---- Bottom Navigation ---- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--tg-bg); border-top: 1px solid rgba(0,0,0,0.07);
+            display: flex; justify-content: space-around; padding: 10px 0;
+            z-index: 90; padding-bottom: env(safe-area-inset-bottom, 10px);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            color: var(--tg-hint); font-size: 11px; font-weight: 600;
+            text-decoration: none; cursor: pointer; transition: color .2s;
+        }
+        .nav-item.active { color: var(--accent); }
+        .nav-icon { font-size: 22px; }
+
+        /* ---- Profile Section ---- */
+        .profile-section {
+            display: none; padding: 20px 16px; padding-bottom: 90px;
+        }
+        .profile-header {
+            display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+            background: var(--tg-secondary-bg); padding: 16px; border-radius: 16px;
+        }
+        .profile-pic {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #e5e7eb; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; overflow: hidden; flex-shrink: 0;
+        }
+        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-info { flex: 1; }
+        .profile-name { font-size: 18px; font-weight: 700; color: var(--tg-text); }
+        .profile-id { font-size: 13px; color: var(--tg-hint); margin-top: 4px; }
+
+        .orders-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+        .order-history-list { display: flex; flex-direction: column; gap: 12px; }
+        .history-card {
+            background: var(--tg-secondary-bg); border-radius: 12px;
+            padding: 14px; border: 1px solid rgba(0,0,0,0.05);
+        }
+        .history-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .history-code { font-weight: 700; font-size: 14px; }
+        .history-date { font-size: 12px; color: var(--tg-hint); }
+        .history-status { font-size: 13px; font-weight: 600; margin-top: 4px; }
+        .history-items { font-size: 13px; color: var(--tg-hint); margin-top: 8px; line-height: 1.4; }
+        .history-total { font-weight: 700; font-size: 14px; margin-top: 8px; text-align: right; color: var(--accent); }
     </style>
 </head>
 <body>
 
+<!-- ===== BOTTOM NAVIGATION ===== -->
+<div class="bottom-nav">
+    <div class="nav-item active" id="nav-menu" onclick="switchTab('menu')">
+        <div class="nav-icon">🏠</div>
+        <div>Menyu</div>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+        <div class="nav-icon">👤</div>
+        <div>Profil</div>
+    </div>
+</div>
+
+<!-- ===== MENU VIEW ===== -->
+<div id="menuView">
 <!-- ===== HEADER ===== -->
 <div class="app-header">
     <div class="brand">
@@ -355,6 +415,26 @@
         <div class="empty-text">Hozircha taomlar mavjud emas</div>
     </div>
     {% endfor %}
+</div>
+</div> <!-- End menuView -->
+
+<!-- ===== PROFILE VIEW ===== -->
+<div id="profileView" class="profile-section">
+    <div class="profile-header">
+        <div class="profile-pic" id="profilePic">👤</div>
+        <div class="profile-info">
+            <div class="profile-name" id="profileName">Mehmon</div>
+            <div class="profile-id" id="profileId"></div>
+        </div>
+    </div>
+    
+    <div class="orders-title">Mening buyurtmalarim</div>
+    <div class="order-history-list" id="orderHistoryList">
+        <div class="empty-state" style="padding: 20px;">
+            <div class="empty-icon" style="font-size: 40px; margin-bottom: 8px;">🛒</div>
+            <div class="empty-text">Yuklanmoqda...</div>
+        </div>
+    </div>
 </div>
 
 <!-- ===== OVERLAY ===== -->
@@ -435,6 +515,8 @@
 // =====================================================
 const tg = window.Telegram?.WebApp;
 
+let telegramId = '';
+
 if (tg) {
     tg.ready();
     tg.expand(); // To'liq ekranga chiqarish
@@ -444,6 +526,73 @@ if (tg) {
 // Telegram user ma'lumotlari
 const tgUser = tg?.initDataUnsafe?.user;
 const customerName = tgUser ? (tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '')) : 'Telegram Foydalanuvchisi';
+if (tgUser && tgUser.id) {
+    telegramId = tgUser.id.toString();
+}
+
+// Init Profile View
+if (tgUser) {
+    document.getElementById('profileName').textContent = customerName;
+    document.getElementById('profileId').textContent = 'ID: ' + tgUser.id;
+    if (tgUser.photo_url) {
+        document.getElementById('profilePic').innerHTML = `<img src="${tgUser.photo_url}" alt="Profile">`;
+    }
+}
+
+// =====================================================
+// TABS & PROFILE
+// =====================================================
+function switchTab(tab) {
+    document.getElementById('nav-menu').classList.remove('active');
+    document.getElementById('nav-profile').classList.remove('active');
+    document.getElementById('menuView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+
+    if (tab === 'menu') {
+        document.getElementById('nav-menu').classList.add('active');
+        document.getElementById('menuView').style.display = 'block';
+        updateUI(); 
+    } else if (tab === 'profile') {
+        document.getElementById('nav-profile').classList.add('active');
+        document.getElementById('profileView').style.display = 'block';
+        if (tg) tg.MainButton.hide(); 
+        document.getElementById('floatCartBtn').style.display = 'none';
+        loadOrders();
+    }
+}
+
+async function loadOrders() {
+    if (!telegramId) {
+        document.getElementById('orderHistoryList').innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon" style="font-size:40px;margin-bottom:8px">😔</div><div class="empty-text">Telegram ID topilmadi</div></div>';
+        return;
+    }
+    
+    try {
+        const res = await fetch(`/api/food/orders/user/${telegramId}/`);
+        const data = await res.json();
+        const list = document.getElementById('orderHistoryList');
+        
+        if (data.success && data.orders.length > 0) {
+            list.innerHTML = data.orders.map(o => `
+                <div class="history-card">
+                    <div class="history-header">
+                        <span class="history-code">#${o.order_code}</span>
+                        <span class="history-date">${o.created_at}</span>
+                    </div>
+                    <div class="history-status">${o.status_display}</div>
+                    <div class="history-items">
+                        ${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}
+                    </div>
+                    <div class="history-total">${o.total_amount.toLocaleString()} so'm</div>
+                </div>
+            `).join('');
+        } else {
+            list.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon" style="font-size:40px;margin-bottom:8px">🛒</div><div class="empty-text">Hali buyurtmalar yo\'q</div></div>';
+        }
+    } catch (e) {
+        document.getElementById('orderHistoryList').innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-text">Xatolik yuz berdi. Qayta urinib ko\'ring.</div></div>';
+    }
+}
 
 // =====================================================
 // STATE
@@ -487,7 +636,9 @@ function updateUI() {
 
     // Float button
     const btn = document.getElementById('floatCartBtn');
-    if (count > 0) {
+    // Faqat menyu tabida ko'rsatish
+    const isMenu = document.getElementById('menuView').style.display !== 'none';
+    if (count > 0 && isMenu) {
         btn.style.display = 'flex';
         document.getElementById('floatCartText').textContent = `Savat (${count}) — ${total.toLocaleString()} so'm`;
     } else {
@@ -625,6 +776,7 @@ async function placeOrder() {
         order_type: orderType,
         payment_method: 'naqd',
         comment: comment,
+        telegram_id: telegramId,
         items: Object.entries(cart).map(([id, item]) => ({ id: parseInt(id), qty: item.qty }))
     };
 

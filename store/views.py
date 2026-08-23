@@ -77,6 +77,7 @@ def aslfood_order_api(request):
             order_type = data.get('order_type', 'delivery').strip()
             payment_method = data.get('payment_method', 'naqd').strip()
             comment = data.get('comment', '').strip()
+            telegram_id = data.get('telegram_id', '').strip()
             items = data.get('items', [])
 
             if not items:
@@ -94,6 +95,7 @@ def aslfood_order_api(request):
                     order_type=order_type,
                     payment_method=payment_method,
                     comment=comment,
+                    telegram_id=telegram_id,
                     total_amount=0,
                     status='new'
                 )
@@ -411,6 +413,24 @@ def api_food_orders(request):
             'status': o.status,
             'status_display': o.get_status_display(),
             'created_at': o.created_at.strftime('%Y-%m-%d %H:%M')
+        })
+    return JsonResponse({'success': True, 'orders': data})
+
+def api_food_orders_user(request, telegram_id):
+    """GET /api/food/orders/user/<telegram_id>/ — Fetch user's past orders"""
+    orders = FoodOrder.objects.filter(telegram_id=telegram_id).order_by('-created_at')[:20]
+    data = []
+    for order in orders:
+        items = order.items.all()
+        item_data = [{'name': i.food_name, 'qty': i.quantity, 'price': float(i.unit_price)} for i in items]
+        data.append({
+            'id': order.id,
+            'order_code': order.order_code,
+            'total_amount': float(order.total_amount),
+            'status': order.status,
+            'status_display': order.get_status_display(),
+            'created_at': order.created_at.strftime('%Y-%m-%d %H:%M'),
+            'items': item_data
         })
     return JsonResponse({'success': True, 'orders': data})
 
