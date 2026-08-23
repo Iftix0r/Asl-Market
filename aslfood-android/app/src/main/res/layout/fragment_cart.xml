@@ -27,17 +27,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/cart_empty_title"
+            android:text="Savat bo'sh — Buyurtma yaratish uchun taom tanlang"
             android:textColor="@color/text_dark"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:text="@string/cart_empty_desc"
+            android:text="«Taomlar» bo'limidan taomlarni «Qo'shish» tugmasini bosing"
             android:textColor="@color/text_muted"
             android:textSize="14sp" />
     </LinearLayout>
@@ -58,7 +59,7 @@
         android:id="@+id/cardCheckout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
+        android:layout="12dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="4dp"
         app:cardBackgroundColor="@color/white"
@@ -80,19 +81,61 @@
                 android:textStyle="bold"
                 android:gravity="end" />
 
-            <!-- Ajratuvchi chiziq -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginVertical="12dp"
+                android:layout_marginVertical="10dp"
                 android:background="@color/bg_surface" />
+
+            <!-- Buyurtma turi (RadioGroup) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Buyurtma Turi:"
+                android:textColor="@color/text_dark"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/rgOrderType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbDelivery"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="🛵 Dostavka"
+                    android:textSize="12sp" />
+
+                <RadioButton
+                    android:id="@+id/rbPickup"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🏃 Takeaway"
+                    android:textSize="12sp" />
+
+                <RadioButton
+                    android:id="@+id/rbTable"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🍽️ Zalda/Stol"
+                    android:textSize="12sp" />
+            </RadioGroup>
 
             <!-- Ism -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-                android:hint="@string/name_hint"
+                android:hint="Mijoz ismi (masalan: Alisher yoki Stol #2)"
                 app:boxCornerRadiusTopStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
@@ -110,9 +153,9 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="6dp"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-                android:hint="@string/phone_hint"
+                android:hint="Telefon raqam (+998...)"
                 app:boxCornerRadiusTopStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
@@ -126,13 +169,14 @@
                     android:imeOptions="actionNext" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Manzil -->
+            <!-- Manzil / Stol -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="6dp"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-                android:hint="@string/address_hint"
+                android:hint="Manzil yoki Stol #"
                 app:boxCornerRadiusTopStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
@@ -150,15 +194,16 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp">
+                android:layout_marginTop="12dp">
 
                 <Button
                     android:id="@+id/btnSubmitOrder"
                     style="@style/AslFood.Button.Primary"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:text="@string/checkout"
-                    android:textSize="15sp" />
+                    android:text="➕ BUYURTMANI TIZIMGA QO'SHISH"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
                 <ProgressBar
                     android:id="@+id/pbOrderLoading"

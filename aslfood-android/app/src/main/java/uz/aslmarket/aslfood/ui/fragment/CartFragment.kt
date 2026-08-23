@@ -1,4 +1,4 @@
-package uz.aslmarket.aslfood.ui.fragment
+                                                                                                                                                                                                                                                                                                                                                package uz.aslmarket.aslfood.ui.fragment
 
 import android.app.Dialog
 import android.os.Bundle
@@ -24,6 +24,7 @@ class CartFragment : Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
 
     private lateinit var cartAdapter: CartAdapter
+    private var selectedOrderType = "delivery"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,6 +39,7 @@ class CartFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        setupOrderTypeSelection()
         setupSubmitButton()
         observeViewModel()
     }
@@ -50,30 +52,51 @@ class CartFragment : Fragment() {
         binding.rvCartItems.adapter = cartAdapter
     }
 
-    private fun setupSubmitButton() {
-        binding.btnSubmitOrder.setOnClickListener {
-            val name = binding.etCustomerName.text.toString().trim()
-            val phone = binding.etPhone.text.toString().trim()
-            val address = binding.etAddress.text.toString().trim()
-
-            when {
-                name.isEmpty() -> {
-                    binding.etCustomerName.error = "Ismingizni kiriting"
-                    binding.etCustomerName.requestFocus()
+    private fun setupOrderTypeSelection() {
+        binding.rgOrderType.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.rbDelivery -> {
+                    selectedOrderType = "delivery"
+                    binding.tilAddress.hint = "Dostavka manzili"
                 }
-                phone.isEmpty() -> {
-                    binding.etPhone.error = "Telefon raqamingizni kiriting"
-                    binding.etPhone.requestFocus()
+                R.id.rbPickup -> {
+                    selectedOrderType = "pickup"
+                    binding.tilAddress.hint = "Olib ketish vaqti / Izoh (ixtiyoriy)"
                 }
-                else -> {
-                    viewModel.placeOrder(name, phone, address, "delivery", "naqd")
+                R.id.rbTable -> {
+                    selectedOrderType = "table"
+                    binding.tilAddress.hint = "Stol raqami (masalan: Stol #4)"
                 }
             }
         }
     }
 
+    private fun setupSubmitButton() {
+        binding.btnSubmitOrder.setOnClickListener {
+            val name = binding.etCustomerName.text.toString().trim()
+            var phone = binding.etPhone.text.toString().trim()
+            var address = binding.etAddress.text.toString().trim()
+
+            if (name.isEmpty()) {
+                binding.etCustomerName.error = "Mijoz ismini yoki stol nomini kiriting"
+                binding.etCustomerName.requestFocus()
+                return@setOnClickListener
+            }
+
+            if (phone.isEmpty()) {
+                phone = "+998000000000" // Zalda buyurtma bo'lsa standart telefon
+            }
+
+            if (selectedOrderType == "table" && address.isEmpty()) {
+                address = "Zalda / Stol"
+            }
+
+            viewModel.placeOrder(name, phone, address, selectedOrderType, "naqd")
+        }
+    }
+
     private fun observeViewModel() {
-        // Savat elementlari — bo'sh/to'liq holatni boshqarish
+        // Savat elementlari
         viewModel.cartItems.observe(viewLifecycleOwner) { items ->
             cartAdapter.updateData(items)
             val isEmpty = items.isEmpty()
@@ -94,7 +117,7 @@ class CartFragment : Fragment() {
             if (loading) {
                 binding.btnSubmitOrder.text = ""
             } else {
-                binding.btnSubmitOrder.text = getString(R.string.checkout)
+                binding.btnSubmitOrder.text = "➕ BUYURTMANI TIZIMGA QO'SHISH"
             }
         }
 
@@ -114,20 +137,14 @@ class CartFragment : Fragment() {
         }
     }
 
-    /**
-     * Buyurtma muvaffaqiyatli qabul qilinganda chiroyli dialog ko'rsatadi.
-     * Foydalanuvchi buyurtma kodini dialog ichida ko'radi.
-     */
     private fun showOrderSuccessDialog(orderCode: String) {
         val ctx = context ?: return
         val dialog = Dialog(ctx)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.dialog_order_success)
 
-        // Rounded corners uchun window transparent bo'lishi shart
         dialog.window?.apply {
             setBackgroundDrawableResource(android.R.color.transparent)
-            // Ekran kengligining 88% — kichik va katta ekranlarda mos ko'rinadi
             val width = (ctx.resources.displayMetrics.widthPixels * 0.88).toInt()
             setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
