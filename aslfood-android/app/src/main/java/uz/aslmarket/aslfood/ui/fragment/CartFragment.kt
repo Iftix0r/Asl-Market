@@ -1,4 +1,4 @@
-                                                                                                                                                                                                                                                                                                                                                package uz.aslmarket.aslfood.ui.fragment
+package uz.aslmarket.aslfood.ui.fragment
 
 import android.app.Dialog
 import android.os.Bundle

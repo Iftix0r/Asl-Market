@@ -61,7 +61,15 @@ class MenuFragment : Fragment() {
             ).show()
         }
 
-        binding.rvFoodMenu.layoutManager = GridLayoutManager(requireContext(), 2)
+        val screenWidthDp = resources.configuration.screenWidthDp
+        val spanCount = when {
+            screenWidthDp >= 1000 -> 5
+            screenWidthDp >= 720  -> 4
+            screenWidthDp >= 550  -> 3
+            else                  -> 2
+        }
+
+        binding.rvFoodMenu.layoutManager = GridLayoutManager(requireContext(), spanCount)
         binding.rvFoodMenu.adapter = foodAdapter
 
         binding.rvCategories.layoutManager =
