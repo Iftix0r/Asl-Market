@@ -1,0 +1,185 @@
+{% extends 'aslfood/food_panel_base.html' %}
+{% block title %}Buyurtmalar — AslFood Panel{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold text-dark mb-1"><i class="fa-solid fa-receipt text-warning me-2"></i>Buyurtmalar</h4>
+    <p class="text-muted small mb-0">Barcha buyurtmalar — filter, qidiruv, holat boshqaruvi</p>
+  </div>
+  <!-- Statistika kartalar -->
+  <div class="d-flex flex-wrap gap-2">
+    <div class="glass-card px-3 py-2 bg-white border-warning border-opacity-50 text-center" style="min-width:110px;">
+      <div class="text-muted small">Bugungi tushum</div>
+      <div class="fw-bold text-warning fs-6">{{ total_revenue|floatformat:0 }} so'm</div>
+    </div>
+    <div class="glass-card px-3 py-2 bg-white border-danger border-opacity-50 text-center" style="min-width:110px;">
+      <div class="text-muted small">Qarz summasi</div>
+      <div class="fw-bold text-danger fs-6">{{ total_debt_amount|floatformat:0 }} so'm</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Filter paneli ══════════════════════════════════════════════════════ -->
+<form method="get" class="glass-card p-3 bg-white mb-4">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-md-3">
+      <label class="form-label text-muted small mb-1">Qidiruv</label>
+      <input type="text" name="q" value="{{ search }}" placeholder="Kod, ism, telefon..."
+             class="form-control form-control-sm rounded-2">
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label text-muted small mb-1">Holat</label>
+      <select name="status" class="form-select form-select-sm rounded-2">
+        <option value="">Barchasi</option>
+        {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label text-muted small mb-1">To'lov</label>
+      <select name="payment" class="form-select form-select-sm rounded-2">
+        <option value="">Barchasi</option>
+        {% for val, label in payment_choices %}
+          <option value="{{ val }}" {% if payment_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label text-muted small mb-1">Dan</label>
+      <input type="date" name="date_from" value="{{ date_from }}" class="form-control form-control-sm rounded-2">
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label text-muted small mb-1">Gacha</label>
+      <input type="date" name="date_to" value="{{ date_to }}" class="form-control form-control-sm rounded-2">
+    </div>
+    <div class="col-12 col-md-1 d-flex gap-1">
+      <button type="submit" class="btn btn-warning btn-sm w-100 rounded-2 fw-bold">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <a href="{% url 'aslfood_orders' %}" class="btn btn-outline-secondary btn-sm rounded-2">
+        <i class="fa-solid fa-xmark"></i>
+      </a>
+    </div>
+  </div>
+</form>
+
+<!-- ═══ Jadval ═════════════════════════════════════════════════════════════ -->
+{% if orders %}
+<div class="glass-card bg-white p-0 overflow-hidden">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 small">
+      <thead class="table-light border-bottom">
+        <tr>
+          <th class="px-3 py-2 text-muted fw-semibold">#Kod</th>
+          <th class="py-2 text-muted fw-semibold">Mijoz</th>
+          <th class="py-2 text-muted fw-semibold d-none d-md-table-cell">Taomlar</th>
+          <th class="py-2 text-muted fw-semibold">Summa</th>
+          <th class="py-2 text-muted fw-semibold">To'lov</th>
+          <th class="py-2 text-muted fw-semibold">Holat</th>
+          <th class="py-2 text-muted fw-semibold d-none d-lg-table-cell">Vaqt</th>
+          <th class="py-2 text-muted fw-semibold">Amal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr class="{% if order.payment_method == 'qarz' and order.status != 'cancelled' %}table-warning{% endif %}">
+          <td class="px-3 py-2">
+            <span class="fw-bold text-warning-emphasis">#{{ order.order_code }}</span><br>
+            <span class="text-muted" style="font-size:0.7rem;">{{ order.get_order_type_display }}</span>
+          </td>
+          <td class="py-2">
+            <div class="fw-semibold text-dark">{{ order.customer_name }}</div>
+            <div class="text-muted" style="font-size:0.75rem;">{{ order.phone }}</div>
+            {% if order.delivery_address %}
+            <div class="text-muted" style="font-size:0.7rem;">📍 {{ order.delivery_address|truncatechars:25 }}</div>
+            {% endif %}
+          </td>
+          <td class="py-2 d-none d-md-table-cell">
+            {% for item in order.items.all %}
+              <div class="text-dark" style="font-size:0.75rem;">
+                <span class="text-warning fw-bold">{{ item.quantity }}×</span> {{ item.food_name }}
+              </div>
+            {% endfor %}
+          </td>
+          <td class="py-2">
+            <span class="fw-bold text-success">{{ order.total_amount|floatformat:0 }} so'm</span>
+          </td>
+          <td class="py-2">
+            {% if order.payment_method == 'qarz' %}
+              <span class="badge bg-danger rounded-pill">📝 Qarz</span>
+              {% if order.is_debt_paid %}
+                <br><span class="badge bg-success rounded-pill mt-1" style="font-size:0.65rem;">✅ To'landi</span>
+              {% endif %}
+            {% elif order.payment_method == 'karta' %}
+              <span class="badge bg-primary rounded-pill">💳 Karta</span>
+            {% else %}
+              <span class="badge bg-secondary rounded-pill">💵 Naqd</span>
+            {% endif %}
+          </td>
+          <td class="py-2">
+            {% if order.status == 'new' %}
+              <span class="badge bg-warning text-dark rounded-pill">🟡 Yangi</span>
+            {% elif order.status == 'preparing' %}
+              <span class="badge bg-primary rounded-pill">🍳 Tayyorlanmoqda</span>
+            {% elif order.status == 'delivering' %}
+              <span class="badge bg-info text-dark rounded-pill">🛵 Yo'lda</span>
+            {% elif order.status == 'completed' %}
+              <span class="badge bg-success rounded-pill">✅ Topshirildi</span>
+            {% elif order.status == 'cancelled' %}
+              <span class="badge bg-secondary rounded-pill">❌ Bekor</span>
+            {% endif %}
+          </td>
+          <td class="py-2 d-none d-lg-table-cell text-muted" style="font-size:0.75rem;">
+            {{ order.created_at|date:"d.m.Y" }}<br>{{ order.created_at|date:"H:i" }}
+          </td>
+          <td class="py-2">
+            <div class="d-flex gap-1 flex-wrap">
+              <a href="{% url 'aslfood_receipt_view' order.id %}" target="_blank"
+                 class="btn btn-outline-secondary btn-sm rounded-2 py-1 px-2" title="Chek">
+                <i class="fa-solid fa-print" style="font-size:0.7rem;"></i>
+              </a>
+              {% if order.status not in 'completed,cancelled' %}
+              <button onclick="cancelOrder({{ order.id }}, '{{ order.order_code }}')"
+                      class="btn btn-outline-danger btn-sm rounded-2 py-1 px-2" title="Bekor qilish">
+                <i class="fa-solid fa-ban" style="font-size:0.7rem;"></i>
+              </button>
+              {% endif %}
+              {% if order.bot_user %}
+              <a href="{% url 'aslfood_customer_detail' order.bot_user.id %}"
+                 class="btn btn-outline-warning btn-sm rounded-2 py-1 px-2" title="Mijoz profili">
+                <i class="fa-solid fa-user" style="font-size:0.7rem;"></i>
+              </a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="fa-solid fa-receipt fa-3x mb-3 opacity-25"></i>
+  <p>Buyurtmalar topilmadi</p>
+  <a href="{% url 'aslfood_orders' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Filterlarni tozalash</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function cancelOrder(orderId, code) {
+  if (!confirm(`#${code} buyurtmani bekor qilmoqchimisiz?`)) return;
+  const res = await fetch(`/panel/orders/${orderId}/cancel/`, {method:'POST', headers:{'X-CSRFToken': getCsrf()}});
+  const data = await res.json();
+  if (data.success) { showToast('Buyurtma bekor qilindi'); setTimeout(()=>location.reload(), 500); }
+  else showToast(data.error || 'Xato', true);
+}
+function getCsrf() {
+  return document.cookie.split(';').find(c=>c.trim().startsWith('csrftoken='))?.split('=')[1] || '';
+}
+</script>
+{% endblock %}

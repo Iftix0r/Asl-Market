@@ -1,0 +1,258 @@
+{% extends 'aslfood/food_panel_base.html' %}
+{% block title %}Qarzdorlar — AslFood Panel{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold text-dark mb-1">
+      <i class="fa-solid fa-money-bill-wave text-danger me-2"></i>Qarzdorlar
+    </h4>
+    <p class="text-muted small mb-0">Qarzga berilgan buyurtmalar va qo'lda kiritilgan qarzlar</p>
+  </div>
+  <button class="btn btn-danger btn-sm rounded-2 fw-bold" data-bs-toggle="modal" data-bs-target="#addDebtModal">
+    <i class="fa-solid fa-plus me-1"></i>Qarz qo'shish
+  </button>
+</div>
+
+<!-- ═══ Statistika ═════════════════════════════════════════════════════════ -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="glass-card p-3 bg-white text-center border-danger border-opacity-50">
+      <div class="text-muted small mb-1">To'lanmagan qarzlar</div>
+      <div class="fs-5 fw-bold text-danger">{{ unpaid_count }} ta</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="glass-card p-3 bg-white text-center border-danger border-opacity-50">
+      <div class="text-muted small mb-1">Umumiy qarz</div>
+      <div class="fs-5 fw-bold text-danger">{{ total_unpaid|floatformat:0 }} so'm</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="glass-card p-3 bg-white text-center border-warning border-opacity-50">
+      <div class="text-muted small mb-1">Qoldiq (qisman)</div>
+      <div class="fs-5 fw-bold text-warning">{{ total_remaining|floatformat:0 }} so'm</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="glass-card p-3 bg-white text-center border-success border-opacity-50">
+      <div class="text-muted small mb-1">To'langan (jami)</div>
+      <div class="fs-5 fw-bold text-success">{{ total_paid|floatformat:0 }} so'm</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Filter ════════════════════════════════════════════════════════════ -->
+<form method="get" class="glass-card p-3 bg-white mb-4">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-md-5">
+      <input type="text" name="q" value="{{ search }}" placeholder="Mijoz ismi yoki telefon..."
+             class="form-control form-control-sm rounded-2">
+    </div>
+    <div class="col-6 col-md-3">
+      <select name="status" class="form-select form-select-sm rounded-2">
+        <option value="">Barcha holatlar</option>
+        <option value="unpaid"  {% if status_filter == 'unpaid' %}selected{% endif %}>🔴 To'lanmagan</option>
+        <option value="partial" {% if status_filter == 'partial' %}selected{% endif %}>🟡 Qisman</option>
+        <option value="paid"    {% if status_filter == 'paid' %}selected{% endif %}>✅ To'langan</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-2 d-flex gap-1">
+      <button type="submit" class="btn btn-warning btn-sm rounded-2 flex-grow-1 fw-bold">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <a href="{% url 'aslfood_debts' %}" class="btn btn-outline-secondary btn-sm rounded-2">
+        <i class="fa-solid fa-xmark"></i>
+      </a>
+    </div>
+  </div>
+</form>
+
+<!-- ═══ Jadval ═════════════════════════════════════════════════════════════ -->
+{% if debts %}
+<div class="glass-card bg-white p-0 overflow-hidden">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle small mb-0">
+      <thead class="table-light border-bottom">
+        <tr>
+          <th class="px-3 py-2 text-muted fw-semibold">Mijoz</th>
+          <th class="py-2 text-muted fw-semibold">Qarz</th>
+          <th class="py-2 text-muted fw-semibold">To'langan</th>
+          <th class="py-2 text-muted fw-semibold">Qoldiq</th>
+          <th class="py-2 text-muted fw-semibold">Holat</th>
+          <th class="py-2 text-muted fw-semibold d-none d-md-table-cell">Sana / Muddat</th>
+          <th class="py-2 text-muted fw-semibold">Amallar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for debt in debts %}
+        <tr class="{% if debt.status == 'unpaid' %}table-danger bg-opacity-10{% elif debt.status == 'partial' %}table-warning bg-opacity-10{% endif %}">
+          <td class="px-3 py-2">
+            <div class="fw-semibold text-dark">{{ debt.customer_name }}</div>
+            <div class="text-muted" style="font-size:0.75rem;">{{ debt.phone|default:"—" }}</div>
+            {% if debt.order %}
+              <div style="font-size:0.7rem;">
+                <a href="{% url 'aslfood_receipt_view' debt.order.id %}" target="_blank"
+                   class="text-warning text-decoration-none">#{{ debt.order.order_code }}</a>
+              </div>
+            {% endif %}
+            {% if debt.bot_user %}
+              <div style="font-size:0.7rem;">
+                <a href="{% url 'aslfood_customer_detail' debt.bot_user.id %}"
+                   class="text-primary text-decoration-none">
+                  <i class="fa-solid fa-user fa-xs"></i> Profil
+                </a>
+              </div>
+            {% endif %}
+          </td>
+          <td class="py-2 fw-bold text-danger">{{ debt.total_amount|floatformat:0 }} so'm</td>
+          <td class="py-2 text-success">{{ debt.paid_amount|floatformat:0 }} so'm</td>
+          <td class="py-2 fw-bold {% if debt.remaining > 0 %}text-danger{% else %}text-success{% endif %}">
+            {{ debt.remaining|floatformat:0 }} so'm
+          </td>
+          <td class="py-2">
+            {% if debt.status == 'paid' %}
+              <span class="badge bg-success rounded-pill">✅ To'langan</span>
+              {% if debt.paid_at %}
+                <div class="text-muted mt-1" style="font-size:0.65rem;">{{ debt.paid_at|date:"d.m.Y" }}</div>
+              {% endif %}
+            {% elif debt.status == 'partial' %}
+              <span class="badge bg-warning text-dark rounded-pill">🟡 Qisman</span>
+            {% else %}
+              <span class="badge bg-danger rounded-pill">🔴 To'lanmagan</span>
+            {% endif %}
+          </td>
+          <td class="py-2 d-none d-md-table-cell text-muted" style="font-size:0.75rem;">
+            {{ debt.created_at|date:"d.m.Y" }}
+            {% if debt.due_date %}
+              <br><span class="{% if debt.due_date < today %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                Muddat: {{ debt.due_date|date:"d.m.Y" }}
+              </span>
+            {% endif %}
+            {% if debt.note %}
+              <div class="text-muted mt-1" style="font-size:0.7rem;">💬 {{ debt.note|truncatechars:30 }}</div>
+            {% endif %}
+          </td>
+          <td class="py-2">
+            <div class="d-flex gap-1 flex-wrap">
+              {% if debt.status != 'paid' %}
+              <!-- To'liq to'landi -->
+              <button onclick="markPaid({{ debt.id }}, null)"
+                      class="btn btn-success btn-sm rounded-2 py-1 px-2" title="To'liq to'landi">
+                <i class="fa-solid fa-check" style="font-size:0.7rem;"></i>
+              </button>
+              <!-- Qisman to'lash -->
+              <button onclick="markPartial({{ debt.id }}, {{ debt.remaining }})"
+                      class="btn btn-warning btn-sm rounded-2 py-1 px-2" title="Qisman to'lash">
+                <i class="fa-solid fa-coins" style="font-size:0.7rem;"></i>
+              </button>
+              <!-- Eslatma yuborish -->
+              <button onclick="sendReminder({{ debt.id }})"
+                      class="btn btn-outline-primary btn-sm rounded-2 py-1 px-2" title="Eslatma yuborish">
+                <i class="fa-solid fa-bell" style="font-size:0.7rem;"></i>
+              </button>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="fa-solid fa-circle-check fa-3x mb-3 text-success opacity-50"></i>
+  <p class="fw-semibold">Qarzdorlar yo'q!</p>
+  <p class="small">Hamma qarzlar to'langan yoki filtr natijasi bo'sh.</p>
+</div>
+{% endif %}
+
+<!-- ═══ Qarz qo'shish modal ════════════════════════════════════════════════ -->
+<div class="modal fade" id="addDebtModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_debt">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">
+            <i class="fa-solid fa-plus text-danger me-2"></i>Qo'lda qarz qo'shish
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body px-4">
+          <div class="mb-3">
+            <label class="form-label text-muted small">Mijoz ismi *</label>
+            <input type="text" name="customer_name" required placeholder="Ism Familiya"
+                   class="form-control rounded-2">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small">Telefon raqam</label>
+            <input type="text" name="phone" placeholder="+998 XX XXX XX XX"
+                   class="form-control rounded-2">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small">Qarz summasi (so'm) *</label>
+            <input type="number" name="amount" required placeholder="50000"
+                   class="form-control rounded-2">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small">To'lov muddati</label>
+            <input type="date" name="due_date" class="form-control rounded-2">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small">Izoh</label>
+            <textarea name="note" rows="2" placeholder="Qarz sababi..."
+                      class="form-control rounded-2" style="resize:none;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary rounded-2" data-bs-dismiss="modal">Bekor</button>
+          <button type="submit" class="btn btn-danger rounded-2 fw-bold px-4">
+            <i class="fa-solid fa-plus me-1"></i>Qo'shish
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCsrf() {
+  return document.cookie.split(';').find(c=>c.trim().startsWith('csrftoken='))?.split('=')[1]||'';
+}
+
+async function markPaid(debtId, amount) {
+  if (!confirm(amount ? `${amount.toLocaleString()} so'm to'landi deb belgilash?` : "To'liq to'landi deb belgilaysizmi?")) return;
+  const res = await fetch(`/panel/debts/${debtId}/paid/`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+    body: JSON.stringify(amount ? {amount} : {})
+  });
+  const data = await res.json();
+  if (data.success) { showToast("Qarz to'landi belgilandi!"); setTimeout(()=>location.reload(),500); }
+  else showToast(data.error||'Xato', true);
+}
+
+function markPartial(debtId, remaining) {
+  const amount = prompt(`Qancha to'landi? (Qoldiq: ${Number(remaining).toLocaleString()} so'm)`);
+  if (!amount || isNaN(amount) || Number(amount) <= 0) return;
+  markPaid(debtId, Number(amount));
+}
+
+async function sendReminder(debtId) {
+  if (!confirm("Telegram orqali eslatma yuborilsinmi?")) return;
+  const res = await fetch(`/panel/debts/${debtId}/notify/`, {
+    method:'POST', headers:{'X-CSRFToken':getCsrf()}
+  });
+  const data = await res.json();
+  if (data.success) {
+    const where = [data.group_sent&&'guruhga', data.customer_sent&&'mijozga'].filter(Boolean).join(' va ');
+    showToast(`Eslatma ${where||'yuborildi'}!`);
+  } else showToast(data.error||'Xato', true);
+}
+</script>
+{% endblock %}

@@ -10,7 +10,13 @@ urlpatterns = [
 
     # AslFood Kitchen & Fast Food Panel routes (/panel/...)
     path('panel/', views.aslfood_dashboard, name='aslfood_dashboard'),
+    path('panel/orders/', views.aslfood_orders, name='aslfood_orders'),
+    path('panel/orders/<int:pk>/cancel/', views.aslfood_order_cancel, name='aslfood_order_cancel'),
     path('panel/customers/', views.aslfood_customers, name='aslfood_customers'),
+    path('panel/customers/<int:pk>/', views.aslfood_customer_detail, name='aslfood_customer_detail'),
+    path('panel/debts/', views.aslfood_debts, name='aslfood_debts'),
+    path('panel/debts/<int:pk>/paid/', views.aslfood_debt_mark_paid, name='aslfood_debt_mark_paid'),
+    path('panel/debts/<int:pk>/notify/', views.aslfood_debt_notify, name='aslfood_debt_notify'),
     path('panel/status-update/', views.aslfood_update_status_api, name='aslfood_update_status_api'),
     path('panel/menu/', views.aslfood_menu_list, name='aslfood_menu_list'),
     path('panel/menu/add/', views.aslfood_add_item, name='aslfood_add_item'),

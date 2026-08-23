@@ -123,6 +123,76 @@ class FoodOrder(models.Model):
     def __str__(self):
         return f"Order #{self.order_code} - {self.customer_name} ({self.get_status_display()})"
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        # Qarzga berilgan yangi buyurtma uchun avtomatik Debt yozuvi
+        if is_new and self.payment_method == 'qarz':
+            Debt.objects.get_or_create(
+                order=self,
+                defaults={
+                    'bot_user':      self.bot_user,
+                    'customer_name': self.customer_name,
+                    'phone':         self.phone,
+                    'total_amount':  self.total_amount,
+                    'status':        'unpaid',
+                }
+            )
+
+
+class Debt(models.Model):
+    """Qarzga berilgan buyurtmalar / alohida qarz yozuvlari"""
+    DEBT_STATUS = (
+        ('unpaid',  'To\'lanmagan 🔴'),
+        ('partial', 'Qisman to\'langan 🟡'),
+        ('paid',    'To\'langan ✅'),
+    )
+
+    # Qarz manbayi — buyurtmadan avtomatik yoki qo'lda qo'shilgan
+    order      = models.OneToOneField(
+        'FoodOrder', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='debt', verbose_name="Bog'liq buyurtma"
+    )
+    bot_user   = models.ForeignKey(
+        'BotUser', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='debts', verbose_name="Bot foydalanuvchisi"
+    )
+    # Manuel qo'shilganda (bot usersiz)
+    customer_name = models.CharField(max_length=150, verbose_name="Mijoz ismi")
+    phone         = models.CharField(max_length=30, blank=True, null=True, verbose_name="Telefon")
+
+    total_amount   = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Qarz summasi (so'm)")
+    paid_amount    = models.DecimalField(max_digits=12, decimal_places=0, default=0, verbose_name="To'langan summa")
+    status         = models.CharField(max_length=10, choices=DEBT_STATUS, default='unpaid', db_index=True, verbose_name="Holat")
+    note           = models.TextField(blank=True, null=True, verbose_name="Izoh")
+
+    created_at     = models.DateTimeField(default=timezone.now, verbose_name="Qarz sanasi")
+    due_date       = models.DateField(null=True, blank=True, verbose_name="To'lov muddati")
+    paid_at        = models.DateTimeField(null=True, blank=True, verbose_name="To'langan vaqt")
+
+    class Meta:
+        verbose_name = "Qarz"
+        verbose_name_plural = "Qarzdorlar"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.customer_name} — {int(self.total_amount):,} so'm ({self.get_status_display()})"
+
+    @property
+    def remaining(self):
+        return self.total_amount - self.paid_amount
+
+    def mark_paid(self, amount=None):
+        """Qarzni to'liq yoki qisman to'landi deb belgilash."""
+        if amount is None or amount >= self.remaining:
+            self.paid_amount = self.total_amount
+            self.status = 'paid'
+            self.paid_at = timezone.now()
+        else:
+            self.paid_amount += amount
+            self.status = 'partial' if self.paid_amount > 0 else 'unpaid'
+        self.save()
+
 
 class FoodOrderItem(models.Model):
     order = models.ForeignKey(FoodOrder, on_delete=models.CASCADE, related_name="items")

@@ -31,9 +31,21 @@
                           {% endif %}">
                     <i class="fa-solid fa-fire-burner fa-fw"></i>
                     <span>Oshxona</span>
-                    {% if new_orders %}
-                    <span class="badge bg-danger ms-auto rounded-pill">{{ new_orders.count }}</span>
+                    {% if new_orders_count %}
+                    <span class="badge bg-danger ms-auto rounded-pill">{{ new_orders_count }}</span>
                     {% endif %}
+                </a>
+
+                <!-- Buyurtmalar -->
+                <a href="{% url 'aslfood_orders' %}"
+                   class="btn text-start d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                          {% if request.resolver_match.url_name == 'aslfood_orders' %}
+                          btn-warning text-dark fw-semibold
+                          {% else %}
+                          btn-light text-secondary border-0
+                          {% endif %}">
+                    <i class="fa-solid fa-receipt fa-fw"></i>
+                    <span>Buyurtmalar</span>
                 </a>
 
                 <!-- Taomlar Menyusi -->
@@ -51,13 +63,28 @@
                 <!-- Mijozlar -->
                 <a href="{% url 'aslfood_customers' %}"
                    class="btn text-start d-flex align-items-center gap-2 px-3 py-2 rounded-2
-                          {% if request.resolver_match.url_name == 'aslfood_customers' %}
+                          {% if request.resolver_match.url_name == 'aslfood_customers' or request.resolver_match.url_name == 'aslfood_customer_detail' %}
                           btn-warning text-dark fw-semibold
                           {% else %}
                           btn-light text-secondary border-0
                           {% endif %}">
                     <i class="fa-solid fa-users fa-fw"></i>
                     <span>Mijozlar</span>
+                </a>
+
+                <!-- Qarzdorlar -->
+                <a href="{% url 'aslfood_debts' %}"
+                   class="btn text-start d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                          {% if request.resolver_match.url_name == 'aslfood_debts' %}
+                          btn-danger text-white fw-semibold
+                          {% else %}
+                          btn-light text-secondary border-0
+                          {% endif %}">
+                    <i class="fa-solid fa-money-bill-wave fa-fw {% if request.resolver_match.url_name != 'aslfood_debts' %}text-danger{% endif %}"></i>
+                    <span>Qarzdorlar</span>
+                    {% if unpaid_debts_count %}
+                    <span class="badge bg-danger ms-auto rounded-pill">{{ unpaid_debts_count }}</span>
+                    {% endif %}
                 </a>
 
                 <!-- Storefront -->

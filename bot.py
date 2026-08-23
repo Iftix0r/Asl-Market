@@ -24,7 +24,7 @@ import django
 django.setup()
 
 from django.conf import settings
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -32,11 +32,15 @@ from telegram.ext import (
     CallbackQueryHandler,
     ContextTypes,
     filters,
+    ConversationHandler,
 )
 
-BOT_TOKEN = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
-WEBAPP_URL = getattr(settings, "WEBAPP_BASE_URL", "").rstrip("/") + "/"
+BOT_TOKEN     = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
+WEBAPP_URL    = getattr(settings, "WEBAPP_BASE_URL", "").rstrip("/") + "/"
 GROUP_CHAT_ID = getattr(settings, "TELEGRAM_GROUP_CHAT_ID", "")
+
+# ConversationHandler holati
+WAITING_PHONE = 1
 
 
 # =====================================================

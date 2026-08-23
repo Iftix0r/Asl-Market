@@ -8,8 +8,12 @@ from django.utils import timezone
 import json
 import uuid
 
-from .models import BotUser, FoodCategory, FoodItem, FoodOrder, FoodOrderItem
-from .telegram_notify import send_order_to_group, send_status_update_to_group, send_status_update_to_customer
+from .models import BotUser, FoodCategory, FoodItem, FoodOrder, FoodOrderItem, Debt
+from .telegram_notify import (
+    send_order_to_group, send_status_update_to_group,
+    send_status_update_to_customer,
+    send_debt_reminder_to_group, send_debt_notification_to_customer,
+)
 
 
 # ==========================================================================
@@ -92,6 +96,211 @@ def aslfood_customers(request):
         'total_orders_count': total_orders_count,
     }
     return render(request, 'aslfood/customers.html', context)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Mijoz detail
+# ─────────────────────────────────────────────────────────────────────────────
+
+def aslfood_customer_detail(request, pk):
+    """Bitta mijozning to'liq profili — ma'lumotlar, buyurtmalar, qarzlar."""
+    customer = get_object_or_404(BotUser, pk=pk)
+    orders   = FoodOrder.objects.filter(bot_user=customer).prefetch_related('items').order_by('-created_at')
+    debts    = Debt.objects.filter(bot_user=customer).order_by('-created_at')
+
+    total_spent   = orders.filter(status='completed').aggregate(t=Sum('total_amount'))['t'] or 0
+    total_debt    = debts.filter(status__in=['unpaid', 'partial']).aggregate(t=Sum('total_amount'))['t'] or 0
+    orders_count  = orders.count()
+
+    # Admin izoh saqlash
+    if request.method == 'POST':
+        note = request.POST.get('note', '').strip()
+        customer.note = note
+        customer.save(update_fields=['note'])
+        return redirect('aslfood_customer_detail', pk=pk)
+
+    context = {
+        'customer':     customer,
+        'orders':       orders,
+        'debts':        debts,
+        'total_spent':  total_spent,
+        'total_debt':   total_debt,
+        'orders_count': orders_count,
+    }
+    return render(request, 'aslfood/customer_detail.html', context)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Buyurtmalar bo'limi
+# ─────────────────────────────────────────────────────────────────────────────
+
+def aslfood_orders(request):
+    """Barcha buyurtmalar ro'yxati — filter, qidiruv, statistika."""
+    status_filter  = request.GET.get('status', '')
+    payment_filter = request.GET.get('payment', '')
+    search         = request.GET.get('q', '').strip()
+    date_from      = request.GET.get('date_from', '')
+    date_to        = request.GET.get('date_to', '')
+
+    orders = FoodOrder.objects.prefetch_related('items').select_related('bot_user').order_by('-created_at')
+
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+    if payment_filter:
+        orders = orders.filter(payment_method=payment_filter)
+    if search:
+        from django.db.models import Q
+        orders = orders.filter(
+            Q(order_code__icontains=search) |
+            Q(customer_name__icontains=search) |
+            Q(phone__icontains=search)
+        )
+    if date_from:
+        orders = orders.filter(created_at__date__gte=date_from)
+    if date_to:
+        orders = orders.filter(created_at__date__lte=date_to)
+
+    # Statistika
+    total_revenue = orders.filter(status='completed').aggregate(t=Sum('total_amount'))['t'] or 0
+    total_debt_amount = orders.filter(payment_method='qarz', status__in=['new','preparing','delivering','completed']).aggregate(t=Sum('total_amount'))['t'] or 0
+
+    context = {
+        'orders':            orders[:200],
+        'total_revenue':     total_revenue,
+        'total_debt_amount': total_debt_amount,
+        'status_filter':     status_filter,
+        'payment_filter':    payment_filter,
+        'search':            search,
+        'date_from':         date_from,
+        'date_to':           date_to,
+        'status_choices':    FoodOrder.ORDER_STATUS,
+        'payment_choices':   FoodOrder.PAYMENT_METHODS,
+    }
+    return render(request, 'aslfood/orders.html', context)
+
+
+@csrf_exempt
+def aslfood_order_cancel(request, pk):
+    """Buyurtmani bekor qilish."""
+    if request.method == 'POST':
+        order = get_object_or_404(FoodOrder, pk=pk)
+        order.status = 'cancelled'
+        order.save(update_fields=['status'])
+        try:
+            send_status_update_to_group(order)
+            send_status_update_to_customer(order)
+        except Exception:
+            pass
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'POST talab qilinadi'})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Qarzdorlar bo'limi
+# ─────────────────────────────────────────────────────────────────────────────
+
+def aslfood_debts(request):
+    """Qarzdorlar ro'yxati — filtr, statistika."""
+    status_filter = request.GET.get('status', '')
+    search        = request.GET.get('q', '').strip()
+
+    debts = Debt.objects.select_related('bot_user', 'order').order_by('-created_at')
+
+    if status_filter:
+        debts = debts.filter(status=status_filter)
+    if search:
+        from django.db.models import Q
+        debts = debts.filter(
+            Q(customer_name__icontains=search) |
+            Q(phone__icontains=search)
+        )
+
+    # Statistika
+    total_unpaid   = Debt.objects.filter(status='unpaid').aggregate(t=Sum('total_amount'))['t'] or 0
+    total_paid     = Debt.objects.filter(status='paid').aggregate(t=Sum('total_amount'))['t'] or 0
+    unpaid_count   = Debt.objects.filter(status__in=['unpaid', 'partial']).count()
+    # Qoldiq qarz: total_amount - paid_amount summasini hisoblash
+    from django.db.models import F, ExpressionWrapper, DecimalField
+    active_debts_qs = Debt.objects.filter(status__in=['unpaid', 'partial'])
+    total_remaining = active_debts_qs.annotate(
+        rem=ExpressionWrapper(F('total_amount') - F('paid_amount'), output_field=DecimalField())
+    ).aggregate(t=Sum('rem'))['t'] or 0
+
+    # Qo'lda qarz qo'shish
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add_debt':
+            customer_name = request.POST.get('customer_name', '').strip()
+            phone         = request.POST.get('phone', '').strip()
+            amount        = request.POST.get('amount', 0)
+            note          = request.POST.get('note', '').strip()
+            due_date      = request.POST.get('due_date') or None
+            if customer_name and amount:
+                Debt.objects.create(
+                    customer_name=customer_name,
+                    phone=phone,
+                    total_amount=amount,
+                    note=note,
+                    due_date=due_date,
+                    status='unpaid',
+                )
+        return redirect('aslfood_debts')
+
+    context = {
+        'debts':           debts,
+        'total_unpaid':    total_unpaid,
+        'total_remaining': total_remaining,
+        'total_paid':      total_paid,
+        'unpaid_count':    unpaid_count,
+        'status_filter':   status_filter,
+        'search':          search,
+    }
+    return render(request, 'aslfood/debts.html', context)
+
+
+@csrf_exempt
+def aslfood_debt_mark_paid(request, pk):
+    """Qarzni to'landi deb belgilash — to'liq yoki qisman."""
+    if request.method == 'POST':
+        debt = get_object_or_404(Debt, pk=pk)
+        try:
+            data   = json.loads(request.body)
+            amount = data.get('amount')  # None = to'liq
+            amount = float(amount) if amount else None
+        except Exception:
+            amount = None
+
+        debt.mark_paid(amount)
+
+        # Agar buyurtmaga bog'liq bo'lsa — orderda ham belgilash
+        if debt.order:
+            debt.order.is_debt_paid = (debt.status == 'paid')
+            debt.order.debt_paid_at = debt.paid_at
+            debt.order.save(update_fields=['is_debt_paid', 'debt_paid_at'])
+
+        return JsonResponse({
+            'success':    True,
+            'status':     debt.status,
+            'paid_amount': float(debt.paid_amount),
+            'remaining':   float(debt.remaining),
+        })
+    return JsonResponse({'success': False, 'error': 'POST talab qilinadi'})
+
+
+@csrf_exempt
+def aslfood_debt_notify(request, pk):
+    """Qarzdorga Telegram + guruhga eslatma yuborish."""
+    if request.method == 'POST':
+        debt = get_object_or_404(Debt, pk=pk)
+        g_ok = False
+        c_ok = False
+        try:
+            g_ok = send_debt_reminder_to_group(debt)
+            c_ok = send_debt_notification_to_customer(debt)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+        return JsonResponse({'success': True, 'group_sent': g_ok, 'customer_sent': c_ok})
+    return JsonResponse({'success': False, 'error': 'POST talab qilinadi'})
 
 
 @csrf_exempt
