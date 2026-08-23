@@ -304,17 +304,40 @@
         /* ---- Bottom Navigation ---- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: var(--tg-bg); border-top: 1px solid rgba(0,0,0,0.07);
-            display: flex; justify-content: space-around; padding: 10px 0;
-            z-index: 90; padding-bottom: env(safe-area-inset-bottom, 10px);
+            background: var(--tg-bg); border-top: 1px solid rgba(0,0,0,0.08);
+            display: flex; justify-content: space-around;
+            z-index: 90;
+            padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
         }
         .nav-item {
-            display: flex; flex-direction: column; align-items: center; gap: 2px;
-            color: var(--tg-hint); font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            color: var(--tg-hint); font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
             text-decoration: none; cursor: pointer; transition: color .2s;
+            padding: 4px 20px; position: relative;
         }
         .nav-item.active { color: var(--accent); }
-        .nav-icon { font-size: 22px; }
+        .nav-item.active .nav-icon { transform: scale(1.15); }
+        .nav-icon { font-size: 22px; transition: transform .2s; }
+        .nav-badge {
+            position: absolute; top: 0; right: 8px;
+            background: #ef4444; color: #fff;
+            font-size: 10px; font-weight: 800;
+            min-width: 18px; height: 18px;
+            border-radius: 9px; display: none;
+            align-items: center; justify-content: center;
+            padding: 0 4px; border: 2px solid var(--tg-bg);
+        }
+        .nav-badge.visible { display: flex; }
+
+        /* ---- Cart View (as tab) ---- */
+        .cart-view {
+            display: none; padding: 16px 16px 100px; flex-direction: column; gap: 12px;
+        }
+        .cart-view-title {
+            font-size: 18px; font-weight: 800; margin-bottom: 4px;
+            display: flex; align-items: center; gap: 8px;
+        }
 
         /* ---- Profile Section ---- */
         .profile-section {
@@ -355,6 +378,11 @@
     <div class="nav-item active" id="nav-menu" onclick="switchTab('menu')">
         <i class="ph ph-house nav-icon"></i>
         <div>Menyu</div>
+    </div>
+    <div class="nav-item" id="nav-cart" onclick="switchTab('cart')">
+        <i class="ph ph-shopping-cart-simple nav-icon"></i>
+        <span class="nav-badge" id="cartBadge">0</span>
+        <div>Savat</div>
     </div>
     <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">
         <i class="ph ph-user nav-icon"></i>
@@ -420,6 +448,64 @@
 </div>
 </div> <!-- End menuView -->
 
+<!-- ===== CART VIEW (Tab) ===== -->
+<div id="cartView" class="cart-view">
+    <div class="cart-view-title"><i class="ph-fill ph-shopping-cart"></i> Savatingiz</div>
+    <div id="cartItemsListTab"></div>
+
+    <!-- ORDER TYPE -->
+    <div class="order-form" id="cartFormTab" style="display:none;">
+        <div class="form-label">Buyurtma turi</div>
+        <div class="order-types">
+            <button class="otype-btn active" data-type="delivery" onclick="selectOrderType(this)">
+                <i class="ph ph-moped"></i>Dostavka
+            </button>
+            <button class="otype-btn" data-type="pickup" onclick="selectOrderType(this)">
+                <i class="ph ph-person-simple-walk"></i>Olib ketish
+            </button>
+            <button class="otype-btn" data-type="table" onclick="selectOrderType(this)">
+                <i class="ph ph-storefront"></i>Zal/Stol
+            </button>
+        </div>
+
+        <div id="addressWrap">
+            <div class="form-label">Manzil</div>
+            <input class="form-input" id="addressInput" type="text" placeholder="Ko'cha, uy raqami...">
+        </div>
+        <div id="tableWrap" style="display:none;">
+            <div class="form-label">Stol raqami</div>
+            <input class="form-input" id="tableInput" type="text" placeholder="Masalan: 5">
+        </div>
+        <div class="form-label">Telefon raqam</div>
+        <input class="form-input" id="phoneInput" type="tel" placeholder="+998 90 123 45 67">
+        <div class="form-label">Izoh (ixtiyoriy)</div>
+        <input class="form-input" id="commentInput" type="text" placeholder="Masalan: Ko'kat solmang">
+
+        <div class="cart-total-bar">
+            <span class="cart-total-label">Jami summa:</span>
+            <span class="cart-total-amount" id="cartTotalAmount">0 so'm</span>
+        </div>
+        <button class="confirm-btn" id="confirmBtn" onclick="placeOrder()">
+            <i class="ph-bold ph-check-circle"></i> Buyurtma berish
+        </button>
+    </div>
+</div>
+<div id="profileView" class="profile-section">
+    <div class="profile-header">
+        <div class="profile-pic" id="profilePic"><i class="ph-fill ph-user"></i></div>
+        <div class="profile-info">
+            <div class="profile-name" id="profileName">Mehmon</div>
+            <div class="profile-id" id="profileId"></div>
+        </div>
+    </div>
+    
+    <div class="orders-title">Mening buyurtmalarim</div>
+    <div class="order-history-list" id="orderHistoryList">
+        <div class="empty-state" style="padding: 20px;">
+            <div class="empty-icon" style="font-size: 40px; margin-bottom: 8px;"><i class="ph ph-spinner-gap"></i></div>
+            <div class="empty-text">Yuklanmoqda...</div>
+</div>
+
 <!-- ===== PROFILE VIEW ===== -->
 <div id="profileView" class="profile-section">
     <div class="profile-header">
@@ -440,61 +526,7 @@
 </div>
 
 <!-- ===== OVERLAY ===== -->
-<div class="overlay" id="overlay" onclick="closeCart()"></div>
-
-<!-- ===== FLOATING CART BUTTON ===== -->
-<button class="float-cart-btn" id="floatCartBtn" onclick="openCart()">
-    <i class="ph ph-shopping-cart-simple"></i> <span id="floatCartText">Savat (0)</span>
-</button>
-
-<!-- ===== CART BOTTOM SHEET ===== -->
-<div class="cart-sheet" id="cartSheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title"><i class="ph-fill ph-shopping-cart"></i> Savatingiz</div>
-
-    <div id="cartItemsList"></div>
-
-    <!-- ORDER TYPE -->
-    <div class="order-form">
-        <div class="form-label">Buyurtma turi</div>
-        <div class="order-types">
-            <button class="otype-btn active" data-type="delivery" onclick="selectOrderType(this)">
-                <i class="ph ph-moped"></i>Dostavka
-            </button>
-            <button class="otype-btn" data-type="pickup" onclick="selectOrderType(this)">
-                <i class="ph ph-person-simple-walk"></i>Olib ketish
-            </button>
-            <button class="otype-btn" data-type="table" onclick="selectOrderType(this)">
-                <i class="ph ph-storefront"></i>Zal/Stol
-            </button>
-        </div>
-
-        <div id="addressWrap">
-            <div class="form-label">Manzil</div>
-            <input class="form-input" id="addressInput" type="text" placeholder="Ko'cha, uy raqami...">
-        </div>
-
-        <div id="tableWrap" style="display:none;">
-            <div class="form-label">Stol raqami</div>
-            <input class="form-input" id="tableInput" type="text" placeholder="Masalan: 5">
-        </div>
-
-        <div class="form-label">Telefon raqam</div>
-        <input class="form-input" id="phoneInput" type="tel" placeholder="+998 90 123 45 67">
-
-        <div class="form-label">Izoh (ixtiyoriy)</div>
-        <input class="form-input" id="commentInput" type="text" placeholder="Masalan: Ko'kat solmang">
-    </div>
-
-    <div class="cart-total-bar">
-        <span class="cart-total-label">Jami summa:</span>
-        <span class="cart-total-amount" id="cartTotalAmount">0 so'm</span>
-    </div>
-
-    <button class="confirm-btn" id="confirmBtn" onclick="placeOrder()">
-        <i class="ph-bold ph-check-circle"></i> Buyurtma berish
-    </button>
-</div>
+<div class="overlay" id="overlay"></div>
 
 <!-- ===== SUCCESS SCREEN ===== -->
 <div class="success-screen" id="successScreen">
@@ -542,23 +574,32 @@ if (tgUser) {
 }
 
 // =====================================================
-// TABS & PROFILE
+// TABS & NAVIGATION
 // =====================================================
 function switchTab(tab) {
-    document.getElementById('nav-menu').classList.remove('active');
-    document.getElementById('nav-profile').classList.remove('active');
-    document.getElementById('menuView').style.display = 'none';
-    document.getElementById('profileView').style.display = 'none';
+    // Remove all active states
+    ['nav-menu','nav-cart','nav-profile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    });
+    // Hide all views
+    ['menuView','cartView','profileView'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
 
     if (tab === 'menu') {
         document.getElementById('nav-menu').classList.add('active');
         document.getElementById('menuView').style.display = 'block';
-        updateUI(); 
+        if (tg) tg.MainButton.hide();
+    } else if (tab === 'cart') {
+        document.getElementById('nav-cart').classList.add('active');
+        document.getElementById('cartView').style.display = 'flex';
+        renderCartTab();
     } else if (tab === 'profile') {
         document.getElementById('nav-profile').classList.add('active');
         document.getElementById('profileView').style.display = 'block';
-        if (tg) tg.MainButton.hide(); 
-        document.getElementById('floatCartBtn').style.display = 'none';
+        if (tg) tg.MainButton.hide();
         loadOrders();
     }
 }
@@ -636,15 +677,11 @@ function updateUI() {
     const count = totalItems();
     const total = totalAmount();
 
-    // Float button
-    const btn = document.getElementById('floatCartBtn');
-    // Faqat menyu tabida ko'rsatish
-    const isMenu = document.getElementById('menuView').style.display !== 'none';
-    if (count > 0 && isMenu) {
-        btn.style.display = 'flex';
-        document.getElementById('floatCartText').textContent = `Savat (${count}) — ${total.toLocaleString()} so'm`;
-    } else {
-        btn.style.display = 'none';
+    // Cart badge on nav
+    const badge = document.getElementById('cartBadge');
+    if (badge) {
+        badge.textContent = count;
+        badge.classList.toggle('visible', count > 0);
     }
 
     // Card badges & qty controls
@@ -660,20 +697,12 @@ function updateUI() {
         }
     });
 
-    // Total in sheet
-    document.getElementById('cartTotalAmount').textContent = total.toLocaleString() + ' so\'m';
+    // Total in cart view
+    const totalEl = document.getElementById('cartTotalAmount');
+    if (totalEl) totalEl.textContent = total.toLocaleString() + " so'm";
 
-    // Telegram MainButton
-    if (tg) {
-        if (count > 0) {
-            tg.MainButton.setText(`🛒 Savat — ${count} ta | ${total.toLocaleString()} so'm`);
-            tg.MainButton.show();
-            tg.MainButton.color = '#f59e0b';
-            tg.MainButton.textColor = '#ffffff';
-        } else {
-            tg.MainButton.hide();
-        }
-    }
+    // Telegram MainButton (only show on cart tab)
+    if (tg) tg.MainButton.hide();
 }
 
 function renderCartItems() {
@@ -689,7 +718,7 @@ function renderCartItems() {
         <div class="cart-item">
             ${item.imageUrl
                 ? `<img class="cart-item-img" src="${item.imageUrl}" alt="${item.name}">`
-                : `<div class="cart-item-emoji">🍔</div>`
+                : `<div class="cart-item-emoji"><i class="ph ph-fork-knife"></i></div>`
             }
             <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
@@ -705,24 +734,53 @@ function renderCartItems() {
 }
 
 // =====================================================
-// CART SHEET
+// CART RENDER (Tab view)
 // =====================================================
-function openCart() {
-    renderCartItems();
-    document.getElementById('cartSheet').classList.add('open');
-    document.getElementById('overlay').classList.add('show');
-    if (tg) tg.MainButton.hide();
-}
+function renderCartTab() {
+    const list = document.getElementById('cartItemsListTab');
+    const form = document.getElementById('cartFormTab');
+    const items = Object.entries(cart);
 
-function closeCart() {
-    document.getElementById('cartSheet').classList.remove('open');
-    document.getElementById('overlay').classList.remove('show');
+    if (items.length === 0) {
+        list.innerHTML = '<div class="empty-state" style="padding:40px 0"><div class="empty-icon"><i class="ph ph-shopping-cart-simple"></i></div><div class="empty-text">Savat bo\'sh. Menyu bo\'limidan taom tanlang!</div></div>';
+        form.style.display = 'none';
+        return;
+    }
+    form.style.display = 'block';
+    list.innerHTML = items.map(([id, item]) => `
+        <div class="cart-item">
+            ${item.imageUrl
+                ? `<img class="cart-item-img" src="${item.imageUrl}" alt="${item.name}">`
+                : `<div class="cart-item-emoji"><i class="ph ph-fork-knife"></i></div>`
+            }
+            <div class="cart-item-info">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-price">${(item.price * item.qty).toLocaleString()} so'm</div>
+            </div>
+            <div class="qty-control">
+                <button class="qty-btn minus" onclick="changeQtyTab(${id}, -1)">−</button>
+                <span class="qty-num">${item.qty}</span>
+                <button class="qty-btn plus" onclick="changeQtyTab(${id}, 1)">+</button>
+            </div>
+        </div>
+    `).join('');
     updateUI();
 }
 
-// Telegram MainButton → Savat ochish
+function changeQtyTab(id, delta) {
+    changeQty(id, delta);
+    renderCartTab();
+}
+
+// =====================================================
+// CART SHEET (Legacy - keep for overlay close support)
+// =====================================================
+function openCart() { switchTab('cart'); }
+function closeCart() { /* no-op, cart is a tab now */ }
+
+// Telegram MainButton → Savat tabiga o'tish
 if (tg) {
-    tg.MainButton.onClick(() => openCart());
+    tg.MainButton.onClick(() => switchTab('cart'));
 }
 
 // =====================================================
@@ -791,7 +849,6 @@ async function placeOrder() {
         const data = await res.json();
 
         if (data.success) {
-            closeCart();
             showSuccess(data.order_code, data.total_amount);
             if (tg) {
                 tg.HapticFeedback?.notificationOccurred('success');
@@ -800,12 +857,12 @@ async function placeOrder() {
         } else {
             showToast(data.error || 'Xatolik yuz berdi!');
             btn.disabled = false;
-            btn.textContent = '✅ Buyurtma berish';
+            btn.innerHTML = '<i class="ph-bold ph-check-circle"></i> Buyurtma berish';
         }
     } catch (e) {
         showToast('Aloqa xatosi. Qaytadan urining.');
         btn.disabled = false;
-        btn.textContent = '✅ Buyurtma berish';
+        btn.innerHTML = '<i class="ph-bold ph-check-circle"></i> Buyurtma berish';
     }
 }
 
@@ -825,6 +882,7 @@ function resetAfterOrder() {
     document.getElementById('tableInput').value = '';
     document.getElementById('commentInput').value = '';
     updateUI();
+    switchTab('menu');
 }
 
 // =====================================================
