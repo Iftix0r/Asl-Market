@@ -17,8 +17,8 @@
 <body class="bg-body-tertiary text-dark">
 
     <!-- ═══ Navbar ═══════════════════════════════════════════════════════════ -->
-    <nav class="navbar navbar-expand-lg glass-nav sticky-top py-0 px-0 border-bottom border-secondary-subtle shadow-sm">
-        <div class="container-fluid px-3 px-lg-4" style="min-height: 60px;">
+    <nav class="navbar navbar-expand-lg glass-nav sticky-top py-1 px-0 border-bottom border-secondary-subtle shadow-sm" style="z-index: 1030;">
+        <div class="container-fluid px-3 px-lg-4" style="min-height: 56px;">
 
             <!-- Brand -->
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-dark me-4"
@@ -31,17 +31,17 @@
             </a>
 
             <!-- Mobile toggler -->
-            <button class="navbar-toggler border-0 text-dark ms-auto me-1"
+            <button class="navbar-toggler border-0 text-dark ms-auto me-1 p-2"
                     type="button" data-bs-toggle="collapse" data-bs-target="#topNav"
-                    aria-controls="topNav" aria-expanded="false">
-                <i class="fa-solid fa-bars"></i>
+                    aria-controls="topNav" aria-expanded="false" aria-label="Navigatsiyani ochish">
+                <i class="fa-solid fa-bars fs-5"></i>
             </button>
 
             <!-- Nav links -->
             <div class="collapse navbar-collapse" id="topNav">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-1 py-2 py-lg-0">
 
-                    <!-- Menyu -->
+                    <!-- Menyu (Storefront) -->
                     <li class="nav-item">
                         <a href="{% url 'storefront' %}"
                            class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2
@@ -50,7 +50,7 @@
                                   {% else %}
                                   text-dark
                                   {% endif %}">
-                            <i class="fa-solid fa-burger fa-fw"></i>
+                            <i class="fa-solid fa-burger fa-fw text-warning"></i>
                             <span>Menyu</span>
                         </a>
                     </li>
@@ -73,28 +73,42 @@
                     <li class="nav-item">
                         <a href="{% url 'aslfood_menu_list' %}"
                            class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2
-                                  {% if request.resolver_match.url_name == 'aslfood_menu_list' %}
+                                  {% if request.resolver_match.url_name == 'aslfood_menu_list' or request.resolver_match.url_name == 'aslfood_add_item' %}
                                   fw-semibold text-warning bg-warning-subtle
                                   {% else %}
                                   text-dark
                                   {% endif %}">
-                            <i class="fa-solid fa-book-open fa-fw"></i>
+                            <i class="fa-solid fa-book-open fa-fw text-warning"></i>
                             <span>Taomlar</span>
                         </a>
                     </li>
 
-                    <li class="nav-item d-none d-lg-block">
-                        <div class="vr mx-1 opacity-25" style="height: 28px; margin-top: 6px;"></div>
+                    <!-- Mijozlar -->
+                    <li class="nav-item">
+                        <a href="{% url 'aslfood_customers' %}"
+                           class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                                  {% if request.resolver_match.url_name == 'aslfood_customers' %}
+                                  fw-semibold text-warning bg-warning-subtle
+                                  {% else %}
+                                  text-dark
+                                  {% endif %}">
+                            <i class="fa-solid fa-users fa-fw text-warning"></i>
+                            <span>Mijozlar</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item d-none d-lg-block my-auto">
+                        <div class="vr mx-2 opacity-25" style="height: 24px;"></div>
                     </li>
 
                     <!-- Django Admin -->
-                    <li class="nav-item">
+                    <li class="nav-item mt-1 mt-lg-0">
                         <a href="/admin/"
-                           class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2
-                                  px-3 py-1 rounded-2 text-dark border-secondary-subtle"
+                           class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center gap-2
+                                  px-3 py-1.5 rounded-2 text-dark border-secondary-subtle"
                            target="_blank">
                             <i class="fa-solid fa-screwdriver-wrench fa-fw"></i>
-                            <span class="d-none d-lg-inline">Admin</span>
+                            <span>Admin</span>
                         </a>
                     </li>
 
