@@ -36,7 +36,7 @@
                 android:id="@+id/tvCategory"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/amber_600"
+                android:textColor="@color/primary_brand"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.05" />
@@ -92,7 +92,7 @@
                     style="@style/Widget.Material3.Button"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:backgroundTint="@color/amber_600"
+                    android:backgroundTint="@color/primary_brand"
                     android:text="+"
                     android:textColor="@color/white"
                     android:textSize="22sp"
