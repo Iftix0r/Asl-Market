@@ -32,7 +32,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        role = RoleManager.getRole(this) ?: AppRole.CUSTOMER
+
+        // Ilova faqat Xodimlar uchun — default AppRole.KITCHEN
+        role = RoleManager.getRole(this) ?: AppRole.KITCHEN
 
         setupNav()
         setupFragments(savedInstanceState)
@@ -44,61 +46,42 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupNav() {
         val menu = binding.bottomNavigation.menu
-        if (role == AppRole.KITCHEN) {
-            // Oshxona: faqat bitta tab — "Oshxona"
-            menu.findItem(R.id.nav_menu).isVisible    = false
-            menu.findItem(R.id.nav_cart).isVisible    = false
-            menu.findItem(R.id.nav_tracker).isVisible = false
-            menu.findItem(R.id.nav_kitchen).isVisible = true
-            binding.bottomNavigation.selectedItemId   = R.id.nav_kitchen
-            // Header cart badge mijozda kerak emas
-            binding.tvCartBadge.visibility = View.GONE
-        } else {
-            // Mijoz: Menyu, Savat, Kuzatish — Oshxona yo'q
-            menu.findItem(R.id.nav_menu).isVisible    = true
-            menu.findItem(R.id.nav_cart).isVisible    = true
-            menu.findItem(R.id.nav_tracker).isVisible = true
-            menu.findItem(R.id.nav_kitchen).isVisible = false
-            binding.bottomNavigation.selectedItemId   = R.id.nav_menu
-        }
+        // Xodimlar uchun barcha 4 ta bo'lim ochiq: Oshxona Kanban, Taomlar, Kassa va Tarix
+        menu.findItem(R.id.nav_kitchen).isVisible = true
+        menu.findItem(R.id.nav_menu).isVisible    = true
+        menu.findItem(R.id.nav_cart).isVisible    = true
+        menu.findItem(R.id.nav_tracker).isVisible = true
+
+        binding.bottomNavigation.selectedItemId = R.id.nav_kitchen
+        binding.tvCartBadge.visibility = View.GONE
     }
 
     // ─── Fragment setup ────────────────────────────────────────────────────────
 
     private fun setupFragments(savedInstanceState: Bundle?) {
         if (savedInstanceState != null) {
-            // Rotation: fragmentlarni tag bilan topamiz
-            activeFragment = supportFragmentManager.findFragmentByTag(
-                if (role == AppRole.KITCHEN) TAG_KITCHEN else TAG_MENU
-            ) ?: buildInitialFragment()
+            activeFragment = supportFragmentManager.findFragmentByTag(TAG_KITCHEN) ?: kitchenFragment
             return
         }
 
         val tx = supportFragmentManager.beginTransaction()
-        if (role == AppRole.KITCHEN) {
-            tx.add(R.id.fragmentContainer, kitchenFragment, TAG_KITCHEN)
-            activeFragment = kitchenFragment
-        } else {
-            tx.add(R.id.fragmentContainer, trackerFragment, TAG_TRACKER).hide(trackerFragment)
-               .add(R.id.fragmentContainer, cartFragment,   TAG_CART).hide(cartFragment)
-               .add(R.id.fragmentContainer, menuFragment,   TAG_MENU)
-            activeFragment = menuFragment
-        }
+        tx.add(R.id.fragmentContainer, trackerFragment, TAG_TRACKER).hide(trackerFragment)
+          .add(R.id.fragmentContainer, cartFragment,    TAG_CART).hide(cartFragment)
+          .add(R.id.fragmentContainer, menuFragment,    TAG_MENU).hide(menuFragment)
+          .add(R.id.fragmentContainer, kitchenFragment, TAG_KITCHEN)
+        activeFragment = kitchenFragment
         tx.commit()
     }
-
-    private fun buildInitialFragment(): Fragment =
-        if (role == AppRole.KITCHEN) kitchenFragment else menuFragment
 
     // ─── Bottom nav ────────────────────────────────────────────────────────────
 
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             val target: Fragment = when (item.itemId) {
+                R.id.nav_kitchen -> kitchenFragment
                 R.id.nav_menu    -> menuFragment
                 R.id.nav_cart    -> cartFragment
                 R.id.nav_tracker -> trackerFragment
-                R.id.nav_kitchen -> kitchenFragment
                 else             -> return@setOnItemSelectedListener false
             }
             showFragment(target)
@@ -108,7 +91,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun showFragment(target: Fragment) {
         if (target == activeFragment) return
-        // Agar fragment hali qo'shilmagan bo'lsa (lazy add)
         if (!target.isAdded) {
             supportFragmentManager.beginTransaction()
                 .hide(activeFragment)
@@ -123,10 +105,7 @@ class MainActivity : AppCompatActivity() {
         activeFragment = target
     }
 
-    // ─── Cart badge (faqat CUSTOMER rejimda) ───────────────────────────────────
-
     private fun observeCartBadge() {
-        if (role == AppRole.KITCHEN) return
         viewModel.cartCount.observe(this) { count ->
             binding.tvCartBadge.visibility = if (count > 0) View.VISIBLE else View.GONE
             binding.tvCartBadge.text = count.toString()
@@ -134,9 +113,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val TAG_KITCHEN = "tag_kitchen"
         private const val TAG_MENU    = "tag_menu"
         private const val TAG_CART    = "tag_cart"
         private const val TAG_TRACKER = "tag_tracker"
-        private const val TAG_KITCHEN = "tag_kitchen"
     }
 }

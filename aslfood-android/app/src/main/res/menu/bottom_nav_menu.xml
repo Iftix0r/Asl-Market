@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/nav_kitchen"
+        android:icon="@drawable/ic_nav_kitchen"
+        android:title="Oshxona" />
+    <item
         android:id="@+id/nav_menu"
         android:icon="@drawable/ic_nav_menu"
-        android:title="@string/nav_menu" />
+        android:title="Taomlar" />
     <item
         android:id="@+id/nav_cart"
         android:icon="@drawable/ic_nav_cart"
-        android:title="@string/nav_cart" />
+        android:title="Kassa" />
     <item
         android:id="@+id/nav_tracker"
         android:icon="@drawable/ic_nav_tracker"
-        android:title="@string/nav_tracker" />
-    <item
-        android:id="@+id/nav_kitchen"
-        android:icon="@drawable/ic_nav_kitchen"
-        android:title="@string/nav_kitchen" />
+        android:title="Tarix" />
 </menu>

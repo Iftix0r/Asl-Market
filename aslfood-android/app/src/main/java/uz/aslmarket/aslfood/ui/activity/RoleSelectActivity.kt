@@ -16,28 +16,24 @@ class RoleSelectActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        RoleManager.getRole(this)?.let {
+        // Agar xodim roli allaqachon biriktirilgan bo'lsa — to'g'ridan-to'g'ri asosiy terminalga o'tiladi
+        if (RoleManager.getRole(this) != null) {
             openMain()
             return
         }
 
         binding = ActivityRoleSelectBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setupRoleSelection()
+
+        // Mijoz kartasini yashirish — ilova faqat xodimlar uchun!
+        binding.cardCustomer.visibility = View.GONE
+        binding.cardPin.visibility = View.VISIBLE
+        binding.tvPinError.visibility = View.GONE
+
+        setupPinKeyboard()
     }
 
-    private fun setupRoleSelection() {
-        binding.cardCustomer.setOnClickListener {
-            RoleManager.setRole(this, AppRole.CUSTOMER)
-            openMain()
-        }
-        binding.cardKitchen.setOnClickListener {
-            binding.cardPin.visibility = View.VISIBLE
-            binding.tvPinError.visibility = View.GONE
-            pin.clear()
-            updatePinDots()
-        }
-
+    private fun setupPinKeyboard() {
         val digitButtons = mapOf(
             0 to binding.btn0, 1 to binding.btn1, 2 to binding.btn2,
             3 to binding.btn3, 4 to binding.btn4, 5 to binding.btn5,
