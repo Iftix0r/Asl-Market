@@ -14,8 +14,9 @@ class BotUserOrderInline(admin.TabularInline):
 
 @admin.register(BotUser)
 class BotUserAdmin(admin.ModelAdmin):
-    list_display = ('profile_image', 'full_name', 'phone', 'username', 'telegram_id', 'total_orders', 'total_spent', 'is_blocked', 'last_seen')
-    list_filter = ('is_blocked', 'language_code', 'joined_at', 'last_seen')
+    list_display = ('profile_image', 'full_name', 'phone', 'username', 'telegram_id', 'is_admin', 'total_orders', 'total_spent', 'is_blocked', 'last_seen')
+    list_filter = ('is_admin', 'is_blocked', 'language_code', 'joined_at', 'last_seen')
+    list_editable = ('is_admin',)
     search_fields = ('first_name', 'last_name', 'username', 'phone', 'telegram_id')
     readonly_fields = ('telegram_id', 'joined_at', 'last_seen', 'total_orders', 'total_spent', 'profile_image')
     fieldsets = (
@@ -23,7 +24,7 @@ class BotUserAdmin(admin.ModelAdmin):
             'fields': ('profile_image', 'first_name', 'last_name', 'phone', 'photo_url', 'username', 'language_code'),
         }),
         ('Telegram va faollik', {
-            'fields': ('telegram_id', 'is_blocked', 'joined_at', 'last_seen'),
+            'fields': ('telegram_id', 'is_admin', 'is_blocked', 'joined_at', 'last_seen'),
         }),
         ('Buyurtmalar statistikasi', {
             'fields': ('total_orders', 'total_spent'),

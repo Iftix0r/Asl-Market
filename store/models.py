@@ -16,6 +16,7 @@ class BotUser(models.Model):
     photo_url     = models.URLField(max_length=500,  blank=True, null=True, verbose_name="Profil rasmi URL")
     language_code = models.CharField(max_length=10,  blank=True, null=True, verbose_name="Til kodi")
     is_blocked    = models.BooleanField(default=False, verbose_name="Bloklangan")
+    is_admin      = models.BooleanField(default=False, verbose_name="Admin (botdan panel ochadi)")
     joined_at     = models.DateTimeField(default=timezone.now, verbose_name="Ro'yxatdan o'tgan vaqt")
     last_seen     = models.DateTimeField(default=timezone.now, verbose_name="Oxirgi faollik")
     note          = models.TextField(blank=True, null=True, verbose_name="Izoh (admin uchun)")

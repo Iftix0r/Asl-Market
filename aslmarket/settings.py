@@ -137,3 +137,8 @@ TELEGRAM_GROUP_CHAT_ID = "-1003873950737"
 # Masalan: "https://aslfood.uz" yoki "https://yourdomain.com"
 WEBAPP_BASE_URL = "https://aslmarket.uz"
 
+# Admin Telegram ID lari (botda /id yuboring). Bo'sh bo'lsa, Django admindagi BotUser.is_admin ishlatiladi.
+TELEGRAM_ADMIN_IDS = [
+    # 123456789,
+]
+

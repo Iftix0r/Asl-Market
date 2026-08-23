@@ -165,38 +165,54 @@ def _order_keyboard(order_id: int, status: str) -> dict | None:
 
 def send_order_to_group(order) -> bool:
     """
-    Yangi buyurtma kelganda guruhga inline tugmali xabar yuboradi.
+    Yangi buyurtma kelganda guruhga va adminlarga inline tugmali xabar yuboradi.
     Qarzga berilgan buyurtmada alohida ogohlantirish ko'rsatiladi.
     """
-    gid = _group_id()
-    if not gid:
-        return False
+    from store.telegram_ui import admin_id_set, admin_order_keyboard
 
     title = "🔔 <b>YANGI BUYURTMA</b>"
     if order.payment_method == "qarz":
         title = "⚠️ <b>YANGI BUYURTMA — QARZGA!</b>"
 
-    text     = _order_text(order, title)
-    keyboard = _order_keyboard(order.id, order.status)
-    result   = _send(gid, text, keyboard)
-    return bool(result.get("ok"))
+    text = _order_text(order, title)
+    ok = False
+
+    gid = _group_id()
+    if gid:
+        result = _send(gid, text, _order_keyboard(order.id, order.status))
+        ok = bool(result.get("ok"))
+
+    admin_kb = admin_order_keyboard(order.id, order.status)
+    for aid in admin_id_set():
+        if gid and str(aid) == str(gid):
+            continue
+        if _send(str(aid), text, admin_kb).get("ok"):
+            ok = True
+    return ok
 
 
 def send_status_update_to_group(order) -> bool:
     """
-    Holat paneldan o'zgartirilganda guruhga qisqa xabar.
+    Holat paneldan o'zgartirilganda guruhga va adminlarga qisqa xabar.
     (Guruh inline tugmasidan emas, Django paneldan o'zgartirilsa.)
     """
-    gid = _group_id()
-    if not gid:
-        return False
+    from store.telegram_ui import admin_id_set
+
     text = (
         f"🔄 <b>#{order.order_code}</b> yangilandi\n"
         f"👤 {order.customer_name} | 📱 {order.phone}\n"
         f"📊 {_STATUS_EMOJI.get(order.status, order.status)}"
     )
-    result = _send(gid, text)
-    return bool(result.get("ok"))
+    ok = False
+    gid = _group_id()
+    if gid:
+        ok = bool(_send(gid, text).get("ok"))
+    for aid in admin_id_set():
+        if gid and str(aid) == str(gid):
+            continue
+        if _send(str(aid), text).get("ok"):
+            ok = True
+    return ok
 
 
 def send_debt_reminder_to_group(debt) -> bool:
@@ -219,7 +235,15 @@ def send_debt_reminder_to_group(debt) -> bool:
         f"📅 Sana: {debt.created_at.strftime('%d.%m.%Y')}"
     )
     result = _send(gid, text)
-    return bool(result.get("ok"))
+    ok = bool(result.get("ok"))
+
+    from store.telegram_ui import admin_id_set
+    for aid in admin_id_set():
+        if str(aid) == str(gid):
+            continue
+        if _send(str(aid), text).get("ok"):
+            ok = True
+    return ok
 
 
 def send_status_update_to_customer(order) -> bool:
