@@ -127,7 +127,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # TELEGRAM BOT CONFIGURATION
 # ==========================================================================
 # Bot tokenini @BotFather dan oling va shu yerga kiriting:
-TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+TELEGRAM_BOT_TOKEN = "8781759197:AAGdMaVnTsNPCMinScUns0jexgmnHZuPeME"
 
 # Buyurtmalar tushirilishi kerak bo'lgan guruh ID'si (minus bilan):
 # Guruh ID'ni bilish uchun: guruhga @userinfobot qo'shing yoki
