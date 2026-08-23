@@ -3,18 +3,14 @@
 
     <!-- ═══ Asosiy tema ══════════════════════════════════════════════════════ -->
     <style name="Theme.AslFood" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/amber_600</item>
+        <item name="colorPrimary">@color/primary_brand</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorPrimaryContainer">@color/amber_100</item>
-        <item name="colorOnPrimaryContainer">@color/amber_700</item>
+        <item name="colorPrimaryContainer">@color/primary_brand_light</item>
+        <item name="colorOnPrimaryContainer">@color/primary_brand_dark</item>
         <item name="colorSecondary">@color/emerald_600</item>
         <item name="colorOnSecondary">@color/white</item>
         <item name="colorSurface">@color/bg_card</item>
         <item name="colorOnSurface">@color/text_dark</item>
-        <!--
-            "colorBackground" (namespace-siz) Material3 da yo'q —
-            android:colorBackground va android:windowBackground ishlatiladi.
-        -->
         <item name="android:colorBackground">@color/bg_body</item>
         <item name="android:windowBackground">@color/bg_body</item>
         <item name="android:statusBarColor">@color/white</item>
@@ -25,9 +21,9 @@
 
     <!-- ═══ Splash tema ══════════════════════════════════════════════════════ -->
     <style name="Theme.AslFood.Splash" parent="Theme.AslFood">
-        <item name="android:statusBarColor">@color/amber_600</item>
+        <item name="android:statusBarColor">@color/primary_brand</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowBackground">@color/amber_600</item>
+        <item name="android:windowBackground">@color/primary_brand</item>
     </style>
 
     <!-- ═══ Widget stillari ══════════════════════════════════════════════════ -->
@@ -39,15 +35,15 @@
     </style>
 
     <style name="AslFood.Button.Primary" parent="Widget.Material3.Button">
-        <item name="backgroundTint">@color/amber_600</item>
+        <item name="backgroundTint">@color/primary_brand</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:textStyle">bold</item>
         <item name="cornerRadius">12dp</item>
     </style>
 
     <style name="AslFood.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="strokeColor">@color/amber_600</item>
-        <item name="android:textColor">@color/amber_600</item>
+        <item name="strokeColor">@color/primary_brand</item>
+        <item name="android:textColor">@color/primary_brand</item>
         <item name="cornerRadius">12dp</item>
     </style>
 
@@ -59,14 +55,7 @@
         <item name="android:textSize">20sp</item>
     </style>
 
-    <!--
-        Status badge stillari.
-        MUHIM: dot-notation da Android "AslFood.StatusBadge" degan ota stil qidiradi.
-        Yechim: har bir stilga parent="android:Widget.TextView" berib, mustaqil qilish.
-        Yoki dot-notation o'rniga _ ishlatish.
-        Bu yerda parent ko'rsatildi — xato yo'qoladi.
-    -->
-
+    <!-- Status badge stillari -->
     <style name="AslFood.StatusBadge" parent="android:Widget.TextView">
         <item name="android:textColor">@color/white</item>
         <item name="android:textSize">12sp</item>

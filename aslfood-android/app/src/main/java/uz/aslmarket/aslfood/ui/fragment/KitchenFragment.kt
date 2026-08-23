@@ -121,11 +121,11 @@ class KitchenFragment : Fragment() {
         )
         allChips.forEach { chip ->
             if (chip == selected) {
-                chip.setBackgroundResource(R.drawable.badge_bg)
+                chip.setBackgroundResource(R.drawable.chip_selected)
                 chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
             } else {
                 chip.setBackgroundResource(R.drawable.chip_unselected)
-                chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.amber_700))
+                chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary))
             }
         }
     }
