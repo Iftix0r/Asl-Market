@@ -67,6 +67,21 @@ def aslfood_dashboard(request):
 
 def aslfood_customers(request):
     """Customer directory with Telegram profile data and order history."""
+    # Auto-link unlinked orders to BotUsers if telegram_id exists
+    unlinked_orders = FoodOrder.objects.filter(bot_user__isnull=True).exclude(telegram_id__isnull=True).exclude(telegram_id='')
+    for o_unlinked in unlinked_orders:
+        buser, _ = BotUser.objects.get_or_create(
+            telegram_id=str(o_unlinked.telegram_id),
+            defaults={
+                'first_name': o_unlinked.customer_name,
+                'phone': o_unlinked.phone,
+                'joined_at': o_unlinked.created_at,
+                'last_seen': o_unlinked.created_at,
+            }
+        )
+        o_unlinked.bot_user = buser
+        o_unlinked.save(update_fields=['bot_user'])
+
     customers = BotUser.objects.prefetch_related('orders').all()
     total_customers = customers.count()
     total_orders_count = sum(len(c.orders.all()) for c in customers)
@@ -101,6 +116,21 @@ def aslfood_order_api(request):
                 total_amount = 0
                 order_code = "FD-" + str(uuid.uuid4())[:8].upper()
 
+                bot_user = None
+                if telegram_id:
+                    bot_user, _ = BotUser.objects.get_or_create(
+                        telegram_id=str(telegram_id),
+                        defaults={
+                            'first_name': customer_name,
+                            'phone': phone,
+                            'joined_at': timezone.now(),
+                            'last_seen': timezone.now(),
+                        }
+                    )
+                    if phone and not bot_user.phone:
+                        bot_user.phone = phone
+                        bot_user.save(update_fields=['phone'])
+
                 order = FoodOrder.objects.create(
                     order_code=order_code,
                     customer_name=customer_name,
@@ -110,6 +140,7 @@ def aslfood_order_api(request):
                     payment_method=payment_method,
                     comment=comment,
                     telegram_id=telegram_id,
+                    bot_user=bot_user,
                     total_amount=0,
                     status='new'
                 )
@@ -575,6 +606,71 @@ def send_telegram_notification(text):
 
 # ==========================================================================
 # TELEGRAM BOT WEBHOOK VIEWS
+def _upsert_bot_user_from_telegram_dict(data):
+    """
+    Extracts user details from Telegram update payload and saves/updates BotUser in DB.
+    Guarantees that ANY interaction with the bot persists the customer to Django DB.
+    """
+    try:
+        from_user = None
+        if isinstance(data, dict):
+            if 'message' in data and isinstance(data['message'], dict):
+                from_user = data['message'].get('from')
+            elif 'edited_message' in data and isinstance(data['edited_message'], dict):
+                from_user = data['edited_message'].get('from')
+            elif 'callback_query' in data and isinstance(data['callback_query'], dict):
+                from_user = data['callback_query'].get('from')
+            elif 'inline_query' in data and isinstance(data['inline_query'], dict):
+                from_user = data['inline_query'].get('from')
+            elif 'my_chat_member' in data and isinstance(data['my_chat_member'], dict):
+                from_user = data['my_chat_member'].get('from')
+
+        if not from_user or not isinstance(from_user, dict):
+            return None
+
+        tg_id = str(from_user.get('id', '')).strip()
+        if not tg_id:
+            return None
+
+        first_name = from_user.get('first_name', '') or ''
+        last_name = from_user.get('last_name', '') or ''
+        username = from_user.get('username')
+        language_code = from_user.get('language_code')
+
+        obj, created = BotUser.objects.get_or_create(
+            telegram_id=tg_id,
+            defaults={
+                'first_name': first_name,
+                'last_name': last_name,
+                'username': username,
+                'language_code': language_code,
+                'joined_at': timezone.now(),
+                'last_seen': timezone.now(),
+            }
+        )
+        if not created:
+            updated_fields = ['last_seen']
+            obj.last_seen = timezone.now()
+            if first_name and obj.first_name != first_name:
+                obj.first_name = first_name
+                updated_fields.append('first_name')
+            if last_name and obj.last_name != last_name:
+                obj.last_name = last_name
+                updated_fields.append('last_name')
+            if username and obj.username != username:
+                obj.username = username
+                updated_fields.append('username')
+            if language_code and obj.language_code != language_code:
+                obj.language_code = language_code
+                updated_fields.append('language_code')
+            obj.save(update_fields=updated_fields)
+        return obj
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error in _upsert_bot_user_from_telegram_dict: {e}")
+        return None
+
+
 def _handle_telegram_update_builtin(data):
     """
     Built-in pure Python Telegram update handler.
@@ -705,6 +801,7 @@ def telegram_webhook(request):
 
     try:
         data = json.loads(request.body.decode('utf-8'))
+        _upsert_bot_user_from_telegram_dict(data)
     except Exception:
         return HttpResponse("Invalid JSON", status=400)
 
