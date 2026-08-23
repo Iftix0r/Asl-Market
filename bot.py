@@ -40,11 +40,72 @@ GROUP_CHAT_ID = getattr(settings, "TELEGRAM_GROUP_CHAT_ID", "")
 
 
 # =====================================================
+# Yordamchi: BotUser DB ga saqlash / yangilash
+# =====================================================
+async def _upsert_bot_user(user) -> None:
+    """
+    Har bir /start, /menu yoki xabar kelganda foydalanuvchini
+    DB ga yozadi yoki mavjud bo'lsa yangilaydi.
+    """
+    from store.models import BotUser
+    from asgiref.sync import sync_to_async
+    from django.utils import timezone
+
+    if not user:
+        return
+
+    # Profil rasmi URL ni olishga urinish (bot token bilan)
+    photo_url = None
+    try:
+        from telegram import Bot
+        bot = Bot(token=BOT_TOKEN)
+        photos = await bot.get_user_profile_photos(user.id, limit=1)
+        if photos.total_count > 0:
+            file = await bot.get_file(photos.photos[0][-1].file_id)
+            photo_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file.file_path}"
+    except Exception:
+        pass  # Rasm olish ixtiyoriy — xato bo'lsa o'tkazib yuborish
+
+    def _save():
+        obj, created = BotUser.objects.get_or_create(
+            telegram_id=str(user.id),
+            defaults={
+                'first_name':    user.first_name or '',
+                'last_name':     user.last_name  or '',
+                'username':      user.username,
+                'language_code': user.language_code,
+                'photo_url':     photo_url,
+                'joined_at':     timezone.now(),
+                'last_seen':     timezone.now(),
+            }
+        )
+        if not created:
+            # Mavjud bo'lsa — ma'lumotlarni yangilash
+            obj.first_name    = user.first_name or ''
+            obj.last_name     = user.last_name  or ''
+            obj.username      = user.username
+            obj.language_code = user.language_code
+            obj.last_seen     = timezone.now()
+            if photo_url:
+                obj.photo_url = photo_url
+            obj.save(update_fields=[
+                'first_name', 'last_name', 'username',
+                'language_code', 'last_seen', 'photo_url'
+            ])
+        return obj
+
+    await sync_to_async(_save)()
+
+
+# =====================================================
 # /start — Foydalanuvchini kutib olish + Web App tugmasi
 # =====================================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     first_name = user.first_name if user else "Mehmon"
+
+    # Foydalanuvchini DB ga saqlash / yangilash
+    await _upsert_bot_user(user)
 
     keyboard = [
         [
@@ -75,6 +136,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 # /menu — Tezkor menyu tugmasi
 # =====================================================
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await _upsert_bot_user(update.effective_user)
     keyboard = [
         [InlineKeyboardButton("🍔 Menyuni ochish", web_app=WebAppInfo(url=WEBAPP_URL))]
     ]

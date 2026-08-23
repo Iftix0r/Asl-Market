@@ -6,6 +6,47 @@ from django.utils import timezone
 # ASLFOOD - FAST FOOD & RESTAURANT MODELS
 # ==========================================================================
 
+class BotUser(models.Model):
+    """Telegram bot orqali ro'yxatdan o'tgan mijozlar"""
+    telegram_id   = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="Telegram ID")
+    first_name    = models.CharField(max_length=100, blank=True, default='', verbose_name="Ismi")
+    last_name     = models.CharField(max_length=100, blank=True, default='', verbose_name="Familiyasi")
+    username      = models.CharField(max_length=100, blank=True, null=True, verbose_name="@username")
+    phone         = models.CharField(max_length=30,  blank=True, null=True, verbose_name="Telefon raqam")
+    photo_url     = models.URLField(max_length=500,  blank=True, null=True, verbose_name="Profil rasmi URL")
+    language_code = models.CharField(max_length=10,  blank=True, null=True, verbose_name="Til kodi")
+    is_blocked    = models.BooleanField(default=False, verbose_name="Bloklangan")
+    joined_at     = models.DateTimeField(default=timezone.now, verbose_name="Ro'yxatdan o'tgan vaqt")
+    last_seen     = models.DateTimeField(default=timezone.now, verbose_name="Oxirgi faollik")
+    note          = models.TextField(blank=True, null=True, verbose_name="Izoh (admin uchun)")
+
+    class Meta:
+        verbose_name = "Bot Foydalanuvchisi"
+        verbose_name_plural = "Bot Foydalanuvchilari"
+        ordering = ['-last_seen']
+
+    def __str__(self):
+        name = f"{self.first_name} {self.last_name}".strip() or self.username or self.telegram_id
+        return f"{name} (tg:{self.telegram_id})"
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}".strip() or self.username or f"ID:{self.telegram_id}"
+
+    @property
+    def total_orders(self):
+        return self.orders.count()
+
+    @property
+    def total_spent(self):
+        from django.db.models import Sum
+        result = self.orders.filter(status='completed').aggregate(t=Sum('total_amount'))['t']
+        return result or 0
+
+    @property
+    def display_phone(self):
+        return self.phone or "—"
+
 class FoodCategory(models.Model):
     name = models.CharField(max_length=100, verbose_name="Taom kategoriyasi (Lavash, Pizza...)")
     slug = models.SlugField(unique=True, max_length=100, db_index=True)
@@ -58,8 +99,12 @@ class FoodOrder(models.Model):
     payment_method = models.CharField(max_length=20, default='naqd', verbose_name="To'lov usuli")
     order_type = models.CharField(max_length=20, choices=ORDER_TYPES, default='delivery', verbose_name="Buyurtma turi")
     status = models.CharField(max_length=20, choices=ORDER_STATUS, default='new', db_index=True, verbose_name="Buyurtma holati")
-    comment = models.CharField(max_length=500, blank=True, null=True, verbose_name="Mijoz izohi")
+    comment    = models.CharField(max_length=500, blank=True, null=True, verbose_name="Mijoz izohi")
     telegram_id = models.CharField(max_length=50, blank=True, null=True, db_index=True, verbose_name="Telegram ID")
+    bot_user   = models.ForeignKey(
+        'BotUser', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='orders', verbose_name="Bot foydalanuvchisi"
+    )
     created_at = models.DateTimeField(default=timezone.now, verbose_name="Buyurtma vaqti")
 
     class Meta:
