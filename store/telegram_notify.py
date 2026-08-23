@@ -102,9 +102,8 @@ def _order_text(order, title: str = "🔔 YANGI BUYURTMA") -> str:
         items_txt = "  (taomlar yuklanmadi)\n"
 
     addr_line    = f"📍 <b>Manzil:</b> {order.delivery_address}\n" if order.delivery_address else ""
-    comment_line = f"💬 <b>Izoh:</b> {order.comment}\n"          if getattr(order, "comment", None) else ""
+    comment_line = f"💬 <b>Izoh:</b> {order.comment}\n" if getattr(order, "comment", None) else ""
 
-    # Qarz ogohlantirish — katta va ko'zga ko'rinadigan
     debt_block = ""
     if order.payment_method == "qarz":
         debt_block = (
@@ -113,23 +112,29 @@ def _order_text(order, title: str = "🔔 YANGI BUYURTMA") -> str:
             "└─────────────────────────┘\n"
         )
 
+    sep = "─" * 32
+    order_type_str  = _ORDER_TYPE.get(order.order_type, order.order_type)
+    payment_str     = _PAYMENT.get(order.payment_method, order.payment_method)
+    status_str      = _STATUS_EMOJI.get(order.status, order.status)
+    created_str     = order.created_at.strftime("%H:%M — %d.%m.%Y")
+
     return (
         f"{title}\n"
-        f"{'─' * 32}\n"
+        f"{sep}\n"
         f"👤 <b>{order.customer_name}</b>\n"
         f"📱 {order.phone}\n"
-        f"📦 {_ORDER_TYPE.get(order.order_type, order.order_type)}\n"
+        f"📦 {order_type_str}\n"
         f"{addr_line}"
         f"{comment_line}"
-        f"{'─' * 32}\n"
+        f"{sep}\n"
         f"🍽 <b>Tarkib:</b>\n{items_txt}"
-        f"{'─' * 32}\n"
+        f"{sep}\n"
         f"💰 <b>Jami:</b> {int(order.total_amount):,} so'm\n"
-        f"💵 <b>To'lov:</b> {_PAYMENT.get(order.payment_method, order.payment_method)}\n"
+        f"💵 <b>To'lov:</b> {payment_str}\n"
         f"{debt_block}"
-        f"📊 <b>Holat:</b> {_STATUS_EMOJI.get(order.status, order.status)}\n"
+        f"📊 <b>Holat:</b> {status_str}\n"
         f"🏷 <b>Kod:</b> #{order.order_code}\n"
-        f"⏰ {order.created_at.strftime('%H:%M — %d.%m.%Y')}"
+        f"⏰ {created_str}"
     )
 
 
@@ -201,13 +206,15 @@ def send_debt_reminder_to_group(debt) -> bool:
     gid = _group_id()
     if not gid:
         return False
+    paid_line = ("✅ To'langan: " + str(int(debt.paid_amount)) + " so'm") if debt.paid_amount else ""
+    separator = "─" * 28
     text = (
         f"💰 <b>QARZ ESLATMASI</b>\n"
-        f"{'─' * 28}\n"
+        f"{separator}\n"
         f"👤 <b>{debt.customer_name}</b>\n"
         f"📱 {debt.phone or '—'}\n"
         f"💸 Qarz: <b>{int(debt.total_amount):,} so'm</b>\n"
-        f"{'✅ To\'langan: ' + str(int(debt.paid_amount)) + ' so\'m' if debt.paid_amount else ''}\n"
+        f"{paid_line}\n"
         f"🔴 Qoldiq: <b>{int(debt.remaining):,} so'm</b>\n"
         f"📅 Sana: {debt.created_at.strftime('%d.%m.%Y')}"
     )
@@ -271,12 +278,13 @@ def send_debt_notification_to_customer(debt) -> bool:
     if not chat_id:
         return False
 
+    paid_line2 = ("To'langan: " + str(int(debt.paid_amount)) + " so'm\n") if debt.paid_amount else ""
     text = (
         f"💸 <b>Qarz eslatmasi</b>\n\n"
         f"Hurmatli <b>{debt.customer_name}</b>,\n\n"
         f"Sizda AslFood da to'lanmagan qarz mavjud:\n"
         f"💰 Qarz summasi: <b>{int(debt.total_amount):,} so'm</b>\n"
-        f"{'✅ To\'langan: ' + str(int(debt.paid_amount)) + ' so\'m\n' if debt.paid_amount else ''}"
+        f"{paid_line2}"
         f"🔴 Qoldiq: <b>{int(debt.remaining):,} so'm</b>\n"
         f"📅 Sana: {debt.created_at.strftime('%d.%m.%Y')}\n\n"
         f"Iltimos, qarzingizni to'lang yoki biz bilan bog'laning."
