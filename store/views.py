@@ -8,7 +8,7 @@ from django.utils import timezone
 import json
 import uuid
 
-from .models import FoodCategory, FoodItem, FoodOrder, FoodOrderItem
+from .models import BotUser, FoodCategory, FoodItem, FoodOrder, FoodOrderItem
 from .telegram_notify import send_order_to_group, send_status_update_to_group
 
 
@@ -63,6 +63,12 @@ def aslfood_dashboard(request):
         'total_food_sales': total_food_sales,
     }
     return render(request, 'aslfood/dashboard.html', context)
+
+
+def aslfood_customers(request):
+    """Customer directory with Telegram profile data and order history."""
+    customers = BotUser.objects.prefetch_related('orders').all()
+    return render(request, 'aslfood/customers.html', {'customers': customers})
 
 
 @csrf_exempt

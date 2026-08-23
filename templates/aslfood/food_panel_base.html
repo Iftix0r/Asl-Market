@@ -48,6 +48,18 @@
                     <span>Taomlar</span>
                 </a>
 
+                <!-- Mijozlar -->
+                <a href="{% url 'aslfood_customers' %}"
+                   class="btn text-start d-flex align-items-center gap-2 px-3 py-2 rounded-2
+                          {% if request.resolver_match.url_name == 'aslfood_customers' %}
+                          btn-warning text-dark fw-semibold
+                          {% else %}
+                          btn-light text-secondary border-0
+                          {% endif %}">
+                    <i class="fa-solid fa-users fa-fw"></i>
+                    <span>Mijozlar</span>
+                </a>
+
                 <!-- Storefront -->
                 <a href="{% url 'storefront' %}"
                    class="btn text-start d-flex align-items-center gap-2 px-3 py-2 rounded-2
