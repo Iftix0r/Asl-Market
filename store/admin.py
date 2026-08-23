@@ -1,34 +1,31 @@
 from django.contrib import admin
-from .models import Category, Product, Debtor, Payment, Sale, SaleItem
+from .models import FoodCategory, FoodItem, FoodOrder, FoodOrderItem
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+
+@admin.register(FoodCategory)
+class FoodCategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
 
-@admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'cost_price', 'stock', 'barcode')
-    list_filter = ('category',)
-    search_fields = ('name', 'barcode')
 
-@admin.register(Debtor)
-class DebtorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone', 'amount', 'created_at', 'elapsed_time_str', 'status', 'overdue_level')
-    list_filter = ('status', 'created_at')
-    search_fields = ('name', 'phone')
+@admin.register(FoodItem)
+class FoodItemAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'price', 'preparation_time_mins', 'is_available')
+    list_filter = ('category', 'is_available')
+    search_fields = ('name', 'ingredients')
+    list_editable = ('is_available',)
 
-@admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('debtor', 'amount', 'date', 'note')
-    list_filter = ('date',)
 
-class SaleItemInline(admin.TabularInline):
-    model = SaleItem
+class FoodOrderItemInline(admin.TabularInline):
+    model = FoodOrderItem
     extra = 0
+    readonly_fields = ('food_name', 'quantity', 'unit_price')
 
-@admin.register(Sale)
-class SaleAdmin(admin.ModelAdmin):
-    list_display = ('sale_code', 'customer_name', 'total_amount', 'payment_method', 'date')
-    list_filter = ('payment_method', 'date')
-    inlines = [SaleItemInline]
+
+@admin.register(FoodOrder)
+class FoodOrderAdmin(admin.ModelAdmin):
+    list_display = ('order_code', 'customer_name', 'phone', 'total_amount', 'order_type', 'status', 'created_at')
+    list_filter = ('status', 'order_type', 'created_at')
+    search_fields = ('order_code', 'customer_name', 'phone')
+    list_editable = ('status',)
+    inlines = [FoodOrderItemInline]
