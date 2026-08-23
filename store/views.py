@@ -76,6 +76,7 @@ def aslfood_order_api(request):
             delivery_address = data.get('delivery_address', 'Zalda / Takeaway').strip()
             order_type = data.get('order_type', 'delivery').strip()
             payment_method = data.get('payment_method', 'naqd').strip()
+            comment = data.get('comment', '').strip()
             items = data.get('items', [])
 
             if not items:
@@ -92,6 +93,7 @@ def aslfood_order_api(request):
                     delivery_address=delivery_address,
                     order_type=order_type,
                     payment_method=payment_method,
+                    comment=comment,
                     total_amount=0,
                     status='new'
                 )
@@ -439,6 +441,7 @@ def api_food_order_detail(request, pk):
             'customer_name': order.customer_name,
             'phone': order.phone,
             'delivery_address': order.delivery_address,
+            'comment': order.comment,
             'total_amount': float(order.total_amount),
             'status': order.status,
             'status_display': order.get_status_display(),

@@ -58,6 +58,7 @@ class FoodOrder(models.Model):
     payment_method = models.CharField(max_length=20, default='naqd', verbose_name="To'lov usuli")
     order_type = models.CharField(max_length=20, choices=ORDER_TYPES, default='delivery', verbose_name="Buyurtma turi")
     status = models.CharField(max_length=20, choices=ORDER_STATUS, default='new', db_index=True, verbose_name="Buyurtma holati")
+    comment = models.CharField(max_length=500, blank=True, null=True, verbose_name="Mijoz izohi")
     created_at = models.DateTimeField(default=timezone.now, verbose_name="Buyurtma vaqti")
 
     class Meta:

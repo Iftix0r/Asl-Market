@@ -130,7 +130,24 @@
             font-size: 12px; font-weight: 700; display: none;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
-        .food-card.in-cart .card-qty-badge { display: flex; }
+        /* In-Card Qty Control */
+        .card-qty-control {
+            position: absolute; bottom: 8px; right: 8px;
+            display: none; align-items: center; gap: 8px;
+            background: var(--tg-bg); padding: 4px;
+            border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .food-card.in-cart .card-qty-control { display: flex; }
+        .card-qty-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: none; cursor: pointer; font-size: 18px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform .1s;
+        }
+        .card-qty-btn:active { transform: scale(0.9); }
+        .card-qty-btn.minus { background: var(--tg-secondary-bg); color: var(--tg-text); border: 1px solid rgba(0,0,0,0.05); }
+        .card-qty-btn.plus  { background: var(--accent); color: #fff; }
+        .card-qty-num { font-size: 15px; font-weight: 700; min-width: 16px; text-align: center; color: var(--tg-text); }
 
         /* ---- Cart Bottom Sheet ---- */
         .cart-sheet {
@@ -311,8 +328,8 @@
 <!-- ===== FOOD GRID ===== -->
 <div class="food-grid" id="foodGrid">
     {% for item in food_items %}
-    <div class="food-card" id="card-{{ item.id }}"
-         onclick="addToCart({{ item.id }}, '{{ item.name|escapejs }}', {{ item.price }}, '{{ item.image_url|default:''|escapejs }}', {{ item.preparation_time_mins }})">
+    <div class="food-card" id="card-{{ item.id }}" data-category="{{ item.category.slug|default:'' }}"
+         onclick="if(!event.target.closest('.card-qty-control')) addToCart({{ item.id }}, '{{ item.name|escapejs }}', {{ item.price }}, '{{ item.image_url|default:''|escapejs }}', {{ item.preparation_time_mins }})">
 
         {% if item.image_url %}
         <img class="food-img" src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy">
@@ -320,12 +337,16 @@
         <div class="food-img-placeholder">🍽️</div>
         {% endif %}
 
-        <div class="card-qty-badge" id="badge-{{ item.id }}">0</div>
-
         <div class="food-info">
             <div class="food-name">{{ item.name }}</div>
             <div class="food-price">{{ item.price|floatformat:0 }} so'm</div>
             <div class="food-prep">⏱ {{ item.preparation_time_mins }} daq</div>
+        </div>
+
+        <div class="card-qty-control" id="control-{{ item.id }}">
+            <button class="card-qty-btn minus" onclick="event.stopPropagation(); changeQty({{ item.id }}, -1)">−</button>
+            <span class="card-qty-num" id="card-num-{{ item.id }}">0</span>
+            <button class="card-qty-btn plus" onclick="event.stopPropagation(); changeQty({{ item.id }}, 1)">+</button>
         </div>
     </div>
     {% empty %}
@@ -378,6 +399,9 @@
 
         <div class="form-label">Telefon raqam</div>
         <input class="form-input" id="phoneInput" type="tel" placeholder="+998 90 123 45 67">
+
+        <div class="form-label">Izoh (ixtiyoriy)</div>
+        <input class="form-input" id="commentInput" type="text" placeholder="Masalan: Ko'kat solmang">
     </div>
 
     <div class="cart-total-bar">
@@ -470,16 +494,16 @@ function updateUI() {
         btn.style.display = 'none';
     }
 
-    // Card badges
+    // Card badges & qty controls
     document.querySelectorAll('.food-card').forEach(card => {
         const id = card.id.replace('card-', '');
-        const badge = document.getElementById(`badge-${id}`);
+        const num = document.getElementById(`card-num-${id}`);
         if (cart[id]) {
-            badge.textContent = cart[id].qty;
+            if (num) num.textContent = cart[id].qty;
             card.classList.add('in-cart');
         } else {
             card.classList.remove('in-cart');
-            badge.textContent = '0';
+            if (num) num.textContent = '0';
         }
     });
 
@@ -578,6 +602,7 @@ async function placeOrder() {
     const phone = document.getElementById('phoneInput').value.trim();
     const address = document.getElementById('addressInput').value.trim();
     const table = document.getElementById('tableInput').value.trim();
+    const comment = document.getElementById('commentInput').value.trim();
 
     if (totalItems() === 0) { showToast('Savat bo\'sh!'); return; }
     if (!phone) { showToast('Telefon raqam kiriting!'); document.getElementById('phoneInput').focus(); return; }
@@ -599,6 +624,7 @@ async function placeOrder() {
         delivery_address: deliveryAddress,
         order_type: orderType,
         payment_method: 'naqd',
+        comment: comment,
         items: Object.entries(cart).map(([id, item]) => ({ id: parseInt(id), qty: item.qty }))
     };
 
@@ -643,33 +669,36 @@ function resetAfterOrder() {
     document.getElementById('phoneInput').value = '';
     document.getElementById('addressInput').value = '';
     document.getElementById('tableInput').value = '';
+    document.getElementById('commentInput').value = '';
     updateUI();
 }
 
 // =====================================================
-// SEARCH & FILTER
+// SEARCH & FILTER (SPA)
 // =====================================================
-document.getElementById('searchInput').addEventListener('input', function() {
-    const q = this.value.toLowerCase();
+function filterItems() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const activeCatBtn = document.querySelector('.cat-btn.active');
+    const activeSlug = activeCatBtn ? activeCatBtn.dataset.slug : '';
+
     document.querySelectorAll('.food-card').forEach(card => {
         const name = card.querySelector('.food-name').textContent.toLowerCase();
-        card.style.display = name.includes(q) ? '' : 'none';
+        const cardSlug = card.dataset.category;
+        const matchCat = (activeSlug === '' || cardSlug === activeSlug);
+        const matchSearch = name.includes(q);
+
+        card.style.display = (matchCat && matchSearch) ? '' : 'none';
     });
-});
+}
+
+document.getElementById('searchInput').addEventListener('input', filterItems);
 
 document.getElementById('categoriesRow').addEventListener('click', function(e) {
     const btn = e.target.closest('.cat-btn');
     if (!btn) return;
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const slug = btn.dataset.slug;
-
-    // Simple fetch — reload with category filter
-    if (slug === '') {
-        document.querySelectorAll('.food-card').forEach(c => c.style.display = '');
-    } else {
-        window.location.href = `?category=${slug}`;
-    }
+    filterItems();
 });
 
 // =====================================================

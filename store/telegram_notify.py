@@ -59,6 +59,10 @@ def send_order_to_group(order) -> bool:
     if order.delivery_address:
         address_line = f"📍 <b>Manzil:</b> {order.delivery_address}\n"
 
+    comment_line = ""
+    if hasattr(order, 'comment') and order.comment:
+        comment_line = f"💬 <b>Izoh:</b> {order.comment}\n"
+
     text = (
         f"🔔 <b>YANGI BUYURTMA #{order.order_code}</b>\n"
         f"{'─' * 30}\n"
@@ -66,6 +70,7 @@ def send_order_to_group(order) -> bool:
         f"📱 <b>Telefon:</b> {order.phone}\n"
         f"📦 <b>Turi:</b> {order_type_str}\n"
         f"{address_line}"
+        f"{comment_line}"
         f"{'─' * 30}\n"
         f"🍔 <b>Buyurtma tarkibi:</b>\n"
         f"{items_text}"
