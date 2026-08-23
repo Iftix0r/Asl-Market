@@ -147,7 +147,8 @@ class KitchenFragment : Fragment() {
     }
 
     private fun updateRefreshStatus() {
-        binding.tvRefreshStatus.text = "30s auto"
+        binding.tvRefreshStatus.text =
+            getString(R.string.kitchen_refresh_auto, autoRefreshInterval.toInt() / 1000)
     }
 
     override fun onResume() {

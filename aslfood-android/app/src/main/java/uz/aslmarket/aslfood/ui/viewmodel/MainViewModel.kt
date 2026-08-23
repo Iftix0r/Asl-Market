@@ -69,6 +69,11 @@ class MainViewModel : ViewModel() {
 
     // ─── Init ─────────────────────────────────────────────────────────────────
 
+    init {
+        fetchCategories()
+        fetchMenu()
+    }
+
     // ─── Menu Functions ───────────────────────────────────────────────────────
 
     fun fetchCategories() {

@@ -58,4 +58,27 @@
     <string name="retry">Qayta urinish</string>
     <string name="ok">OK</string>
     <string name="cancel">Bekor qilish</string>
+
+    <!-- Kitchen terminal (hodimlar uchun) -->
+    <string name="kitchen_new_badge">Yangi</string>
+    <string name="kitchen_refresh_auto">%ds auto</string>
+    <string name="kitchen_orders_count">%d ta buyurtma</string>
+    <string name="status_new">🟡 Yangi</string>
+    <string name="status_preparing">🍳 Tayyorlanmoqda</string>
+    <string name="status_delivering">🛵 Yetkazilmoqda</string>
+    <string name="status_completed">✅ Yakunlangan</string>
+    <string name="status_cancelled">❌ Bekor qilindi</string>
+    <string name="action_next_preparing">🍳 Tayyorlashga olish</string>
+    <string name="action_next_delivering">🛵 Kuryerga berish</string>
+    <string name="action_next_completed">✅ Topshirildi</string>
+    <string name="action_already_done">✅ Yakunlangan</string>
+
+    <!-- Settings / Role -->
+    <string name="settings_title">Sozlamalar</string>
+    <string name="current_role">Joriy rejim</string>
+    <string name="role_customer_label">👤 Mijoz rejimi</string>
+    <string name="role_kitchen_label">👨‍🍳 Oshxona rejimi</string>
+    <string name="change_role_confirm">Rejimni o\'zgartirishni tasdiqlaysizmi?</string>
+    <string name="logout_device">Qurilmadan chiqish</string>
+    <string name="server_url_hint">Server URL (masalan: https://aslmarket.uz)</string>
 </resources>
