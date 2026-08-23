@@ -29,7 +29,7 @@
             android:fontFamily="sans-serif-black"
             android:letterSpacing="0.02"
             android:text="@string/app_name"
-            android:textColor="@color/amber_600"
+            android:textColor="@color/primary_brand"
             android:textSize="22sp" />
 
         <!-- Savat badge — faqat count > 0 bo'lsa ko'rinadi (MainActivity'da boshqariladi) -->

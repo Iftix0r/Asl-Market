@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-black"
-                android:textColor="@color/amber_600"
+                android:textColor="@color/primary_brand"
                 android:textSize="18sp" />
 
             <!--

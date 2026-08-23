@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/kitchen_title"
-            android:textColor="@color/amber_600"
+            android:textColor="@color/primary_brand"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -79,7 +79,7 @@
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="7dp"
                 android:text="🆕 Yangi"
-                android:textColor="@color/amber_700"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -92,7 +92,7 @@
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="7dp"
                 android:text="🍳 Tayyorlanmoqda"
-                android:textColor="@color/amber_700"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -105,7 +105,7 @@
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="7dp"
                 android:text="🛵 Yetkazilmoqda"
-                android:textColor="@color/amber_700"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -117,7 +117,7 @@
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="7dp"
                 android:text="✅ Yakunlangan"
-                android:textColor="@color/amber_700"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp"
                 android:textStyle="bold" />
         </LinearLayout>

@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="24dp"
-            android:indeterminateTint="@color/amber_600"
+            android:indeterminateTint="@color/primary_brand"
             android:visibility="gone" />
 
         <!-- ═══ Buyurtma natijasi kartasi ════════════════════════════════════ -->
@@ -116,7 +116,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:fontFamily="sans-serif-black"
-                        android:textColor="@color/amber_600"
+                        android:textColor="@color/primary_brand"
                         android:textSize="22sp" />
 
                     <TextView
