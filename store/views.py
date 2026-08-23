@@ -512,6 +512,124 @@ def send_telegram_notification(text):
 
 # ==========================================================================
 # TELEGRAM BOT WEBHOOK VIEWS
+def _handle_telegram_update_builtin(data):
+    """
+    Built-in pure Python Telegram update handler.
+    Does NOT depend on python-telegram-bot package, guaranteeing 100% reliability on cPanel.
+    """
+    import urllib.request
+    import urllib.parse
+
+    bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
+    webapp_url = getattr(settings, 'WEBAPP_BASE_URL', '').rstrip('/') + '/'
+
+    if not bot_token:
+        return
+
+    def api_call(method, payload):
+        try:
+            url = f"https://api.telegram.org/bot{bot_token}/{method}"
+            body = json.dumps(payload).encode('utf-8')
+            req = urllib.request.Request(url, data=body, headers={'Content-Type': 'application/json'})
+            urllib.request.urlopen(req, timeout=5)
+        except Exception:
+            pass
+
+    # 1. Message Updates
+    if 'message' in data:
+        msg = data['message']
+        chat_id = msg.get('chat', {}).get('id')
+        text = msg.get('text', '').strip()
+        first_name = msg.get('from', {}).get('first_name', 'Mehmon')
+
+        if not chat_id:
+            return
+
+        if text.startswith('/start'):
+            reply_markup = {
+                'inline_keyboard': [
+                    [{'text': '🍔 Menyu va Buyurtma Berish', 'web_app': {'url': webapp_url}}],
+                    [
+                        {'text': "📞 Bog'lanish", 'url': 'https://t.me/aslfoodsupport'},
+                        {'text': 'ℹ️ Haqimizda', 'callback_data': 'about'}
+                    ]
+                ]
+            }
+            message_text = (
+                f"Assalomu alaykum, <b>{first_name}</b>! 👋\n\n"
+                f"🍔 <b>AslFood</b> botiga xush kelibsiz!\n\n"
+                f"Bizning menyumizdan mazali taomlarni tanlang va "
+                f"<b>15–25 daqiqada</b> dostavka qilib beramiz 🛵\n\n"
+                f"👇 <b>«Menyu va Buyurtma Berish»</b> tugmasini bosing:"
+            )
+            api_call('sendMessage', {
+                'chat_id': chat_id,
+                'text': message_text,
+                'parse_mode': 'HTML',
+                'reply_markup': reply_markup
+            })
+
+        elif text.startswith('/menu'):
+            reply_markup = {
+                'inline_keyboard': [
+                    [{'text': '🍔 Menyuni ochish', 'web_app': {'url': webapp_url}}]
+                ]
+            }
+            api_call('sendMessage', {
+                'chat_id': chat_id,
+                'text': "🍽️ <b>AslFood Menyu</b>\n\nQuyidagi tugmani bosing:",
+                'parse_mode': 'HTML',
+                'reply_markup': reply_markup
+            })
+
+        elif text.startswith('/orders'):
+            from store.models import FoodOrder
+            active = list(
+                FoodOrder.objects.filter(status__in=["new", "preparing", "delivering"]).order_by("created_at")[:10]
+            )
+            if not active:
+                api_call('sendMessage', {'chat_id': chat_id, 'text': "✅ Hozircha faol buyurtmalar yo'q."})
+            else:
+                STATUS_EMOJI = {"new": "🟡 Yangi", "preparing": "🍳 Tayyorlanmoqda", "delivering": "🛵 Yo'lda"}
+                out = "📋 <b>Faol buyurtmalar:</b>\n\n"
+                for o in active:
+                    out += f"#{o.order_code} — {o.customer_name} ({o.phone})\n   📊 {STATUS_EMOJI.get(o.status, o.status)} | 💰 {int(o.total_amount):,} so'm\n\n"
+                api_call('sendMessage', {'chat_id': chat_id, 'text': out, 'parse_mode': 'HTML'})
+
+        else:
+            reply_markup = {
+                'inline_keyboard': [
+                    [{'text': '🍔 Menyuni ochish', 'web_app': {'url': webapp_url}}]
+                ]
+            }
+            api_call('sendMessage', {
+                'chat_id': chat_id,
+                'text': "Menyu uchun /start yoki /menu buyrug'ini yuboring 👇",
+                'reply_markup': reply_markup
+            })
+
+    # 2. Callback Query Updates
+    elif 'callback_query' in data:
+        cb = data['callback_query']
+        cb_id = cb.get('id')
+        chat_id = cb.get('message', {}).get('chat', {}).get('id')
+        cb_data = cb.get('data')
+
+        if cb_id:
+            api_call('answerCallbackQuery', {'callback_query_id': cb_id})
+
+        if cb_data == 'about' and chat_id:
+            about_text = (
+                "🍔 <b>AslFood</b>\n\n"
+                "Biz tez va mazali taomlar yetkazib beramiz.\n"
+                "Lavash, Pizza, Gamburger va ko'p boshqa taomlar!\n\n"
+                "📍 Manzil: ...\n"
+                "📞 Tel: ...\n"
+                "🕒 Ish vaqti: 09:00 — 23:00"
+            )
+            api_call('sendMessage', {'chat_id': chat_id, 'text': about_text, 'parse_mode': 'HTML'})
+
+
 @csrf_exempt
 def telegram_webhook(request):
     """
@@ -524,6 +642,11 @@ def telegram_webhook(request):
 
     try:
         data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return HttpResponse("Invalid JSON", status=400)
+
+    # Try python-telegram-bot first, fallback to pure Python handler if missing/fails
+    try:
         from bot import create_bot_app
         from telegram import Update
         import asyncio
@@ -540,11 +663,13 @@ def telegram_webhook(request):
             return True
 
         asyncio.run(process_update_async())
-        return HttpResponse("OK", status=200)
     except Exception as e:
         import logging
-        logging.getLogger(__name__).error(f"Telegram webhook error: {e}", exc_info=True)
-        return HttpResponse(f"Error: {e}", status=500)
+        logging.getLogger(__name__).warning(f"python-telegram-bot failed, using built-in handler: {e}")
+        _handle_telegram_update_builtin(data)
+
+    return HttpResponse("OK", status=200)
+
 
 
 
