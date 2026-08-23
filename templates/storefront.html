@@ -7,6 +7,8 @@
 
     <!-- Telegram Web App SDK — MAJBURIY, birinchi bo'lishi shart -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
         /* ================================================
@@ -67,7 +69,7 @@
         .search-input:focus { border-color: var(--accent); }
         .search-icon {
             position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
-            font-size: 15px; color: var(--tg-hint);
+            font-size: 18px; color: var(--tg-hint);
         }
 
         /* ---- Categories ---- */
@@ -225,7 +227,7 @@
             background: var(--tg-secondary-bg); cursor: pointer; text-align: center;
             font-size: 12px; font-weight: 600; transition: all .2s; color: var(--tg-text);
         }
-        .otype-btn span { display: block; font-size: 20px; margin-bottom: 3px; }
+        .otype-btn i { display: block; font-size: 24px; margin-bottom: 3px; }
         .otype-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
         /* Cart total bar */
@@ -351,11 +353,11 @@
 <!-- ===== BOTTOM NAVIGATION ===== -->
 <div class="bottom-nav">
     <div class="nav-item active" id="nav-menu" onclick="switchTab('menu')">
-        <div class="nav-icon">🏠</div>
+        <i class="ph ph-house nav-icon"></i>
         <div>Menyu</div>
     </div>
     <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">
-        <div class="nav-icon">👤</div>
+        <i class="ph ph-user nav-icon"></i>
         <div>Profil</div>
     </div>
 </div>
@@ -365,21 +367,21 @@
 <!-- ===== HEADER ===== -->
 <div class="app-header">
     <div class="brand">
-        <div class="brand-icon">🍔</div>
+        <div class="brand-icon"><i class="ph-fill ph-hamburger"></i></div>
         <div>
             <div class="brand-name">AslFood</div>
-            <div class="brand-slogan">Issiq va mazali taomlar 🔥</div>
+            <div class="brand-slogan">Issiq va mazali taomlar <i class="ph-fill ph-fire" style="color: #ef4444;"></i></div>
         </div>
     </div>
     <div class="search-wrap">
-        <span class="search-icon">🔍</span>
+        <i class="ph ph-magnifying-glass search-icon"></i>
         <input class="search-input" id="searchInput" type="text" placeholder="Taom qidirish..." autocomplete="off">
     </div>
 </div>
 
 <!-- ===== CATEGORIES ===== -->
 <div class="categories" id="categoriesRow">
-    <button class="cat-btn active" data-slug="">🍽️ Hammasi</button>
+    <button class="cat-btn active" data-slug=""><i class="ph ph-squares-four"></i> Hammasi</button>
     {% for cat in food_categories %}
     <button class="cat-btn" data-slug="{{ cat.slug }}">{{ cat.name }}</button>
     {% endfor %}
@@ -394,13 +396,13 @@
         {% if item.image_url %}
         <img class="food-img" src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy">
         {% else %}
-        <div class="food-img-placeholder">🍽️</div>
+        <div class="food-img-placeholder"><i class="ph ph-fork-knife"></i></div>
         {% endif %}
 
         <div class="food-info">
             <div class="food-name">{{ item.name }}</div>
             <div class="food-price">{{ item.price|floatformat:0 }} so'm</div>
-            <div class="food-prep">⏱ {{ item.preparation_time_mins }} daq</div>
+            <div class="food-prep"><i class="ph ph-timer"></i> {{ item.preparation_time_mins }} daq</div>
         </div>
 
         <div class="card-qty-control" id="control-{{ item.id }}">
@@ -411,7 +413,7 @@
     </div>
     {% empty %}
     <div class="empty-state" style="grid-column: 1/-1;">
-        <div class="empty-icon">😔</div>
+        <div class="empty-icon"><i class="ph ph-smiley-sad"></i></div>
         <div class="empty-text">Hozircha taomlar mavjud emas</div>
     </div>
     {% endfor %}
@@ -421,7 +423,7 @@
 <!-- ===== PROFILE VIEW ===== -->
 <div id="profileView" class="profile-section">
     <div class="profile-header">
-        <div class="profile-pic" id="profilePic">👤</div>
+        <div class="profile-pic" id="profilePic"><i class="ph-fill ph-user"></i></div>
         <div class="profile-info">
             <div class="profile-name" id="profileName">Mehmon</div>
             <div class="profile-id" id="profileId"></div>
@@ -431,7 +433,7 @@
     <div class="orders-title">Mening buyurtmalarim</div>
     <div class="order-history-list" id="orderHistoryList">
         <div class="empty-state" style="padding: 20px;">
-            <div class="empty-icon" style="font-size: 40px; margin-bottom: 8px;">🛒</div>
+            <div class="empty-icon" style="font-size: 40px; margin-bottom: 8px;"><i class="ph ph-spinner-gap"></i></div>
             <div class="empty-text">Yuklanmoqda...</div>
         </div>
     </div>
@@ -442,13 +444,13 @@
 
 <!-- ===== FLOATING CART BUTTON ===== -->
 <button class="float-cart-btn" id="floatCartBtn" onclick="openCart()">
-    🛒 <span id="floatCartText">Savat (0)</span>
+    <i class="ph ph-shopping-cart-simple"></i> <span id="floatCartText">Savat (0)</span>
 </button>
 
 <!-- ===== CART BOTTOM SHEET ===== -->
 <div class="cart-sheet" id="cartSheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">🛒 Savatingiz</div>
+    <div class="sheet-title"><i class="ph-fill ph-shopping-cart"></i> Savatingiz</div>
 
     <div id="cartItemsList"></div>
 
@@ -457,13 +459,13 @@
         <div class="form-label">Buyurtma turi</div>
         <div class="order-types">
             <button class="otype-btn active" data-type="delivery" onclick="selectOrderType(this)">
-                <span>🛵</span>Dostavka
+                <i class="ph ph-moped"></i>Dostavka
             </button>
             <button class="otype-btn" data-type="pickup" onclick="selectOrderType(this)">
-                <span>🏃</span>Olib ketish
+                <i class="ph ph-person-simple-walk"></i>Olib ketish
             </button>
             <button class="otype-btn" data-type="table" onclick="selectOrderType(this)">
-                <span>🍽️</span>Zal/Stol
+                <i class="ph ph-storefront"></i>Zal/Stol
             </button>
         </div>
 
@@ -490,20 +492,20 @@
     </div>
 
     <button class="confirm-btn" id="confirmBtn" onclick="placeOrder()">
-        ✅ Buyurtma berish
+        <i class="ph-bold ph-check-circle"></i> Buyurtma berish
     </button>
 </div>
 
 <!-- ===== SUCCESS SCREEN ===== -->
 <div class="success-screen" id="successScreen">
-    <div class="success-icon">✅</div>
+    <div class="success-icon"><i class="ph-fill ph-check-circle" style="color: var(--accent);"></i></div>
     <div class="success-title">Buyurtma qabul qilindi!</div>
     <div class="success-code" id="successCode"></div>
     <div class="success-msg">
         Oshxona sizning buyurtmangizni qabul qildi.<br>
-        Tayyorlanish vaqti: <strong>15–25 daqiqa</strong> 🍳
+        Tayyorlanish vaqti: <strong>15–25 daqiqa</strong> <i class="ph ph-clock"></i>
     </div>
-    <button class="success-close-btn" onclick="resetAfterOrder()">🏠 Boshiga qaytish</button>
+    <button class="success-close-btn" onclick="resetAfterOrder()"><i class="ph ph-house"></i> Boshiga qaytish</button>
 </div>
 
 <!-- Toast -->

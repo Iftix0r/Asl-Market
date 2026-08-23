@@ -277,7 +277,7 @@ def aslfood_seed_data(request):
                 status="preparing"
             )
 
-    return HttpResponse("AslFood Fast-Food Demo Ma'lumotlari kiritildi! <a href='/aslfood/panel/'>Oshxona Paneliga o'tish</a>")
+    return HttpResponse("AslFood Fast-Food Demo Ma'lumotlari kiritildi! <a href='/panel/'>Oshxona Paneliga o'tish</a>")
 
 
 # ==========================================================================

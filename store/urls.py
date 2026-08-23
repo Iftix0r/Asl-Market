@@ -8,14 +8,14 @@ urlpatterns = [
     # AslFood Public Order API
     path('aslfood/order/', views.aslfood_order_api, name='aslfood_order_api'),
 
-    # AslFood Kitchen & Fast Food Panel routes (/aslfood/panel/...)
-    path('aslfood/panel/', views.aslfood_dashboard, name='aslfood_dashboard'),
-    path('aslfood/panel/status-update/', views.aslfood_update_status_api, name='aslfood_update_status_api'),
-    path('aslfood/panel/menu/', views.aslfood_menu_list, name='aslfood_menu_list'),
-    path('aslfood/panel/menu/add/', views.aslfood_add_item, name='aslfood_add_item'),
-    path('aslfood/panel/menu/toggle/<int:pk>/', views.aslfood_toggle_availability_api, name='aslfood_toggle_availability_api'),
-    path('aslfood/panel/receipt/<int:pk>/', views.aslfood_receipt_view, name='aslfood_receipt_view'),
-    path('aslfood/panel/seed/', views.aslfood_seed_data, name='aslfood_seed_data'),
+    # AslFood Kitchen & Fast Food Panel routes (/panel/...)
+    path('panel/', views.aslfood_dashboard, name='aslfood_dashboard'),
+    path('panel/status-update/', views.aslfood_update_status_api, name='aslfood_update_status_api'),
+    path('panel/menu/', views.aslfood_menu_list, name='aslfood_menu_list'),
+    path('panel/menu/add/', views.aslfood_add_item, name='aslfood_add_item'),
+    path('panel/menu/toggle/<int:pk>/', views.aslfood_toggle_availability_api, name='aslfood_toggle_availability_api'),
+    path('panel/receipt/<int:pk>/', views.aslfood_receipt_view, name='aslfood_receipt_view'),
+    path('panel/seed/', views.aslfood_seed_data, name='aslfood_seed_data'),
 
     # ==========================================================================
     # ASLFOOD MOBILE APP REST API ENDPOINTS (/api/food/...)
