@@ -130,9 +130,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 TELEGRAM_BOT_TOKEN = "8781759197:AAGdMaVnTsNPCMinScUns0jexgmnHZuPeME"
 
 # Buyurtmalar tushirilishi kerak bo'lgan guruh ID'si (minus bilan):
-# Guruh ID'ni bilish uchun: guruhga @userinfobot qo'shing yoki
-# https://api.telegram.org/bot<TOKEN>/getUpdates dan ko'ring
-TELEGRAM_GROUP_CHAT_ID = "-100YOUR_GROUP_ID"
+TELEGRAM_GROUP_CHAT_ID = "-1003873950737"
 
 # Sizning HTTPS domeningiz (Telegram Mini App uchun MAJBURIY HTTPS)
 # Masalan: "https://aslfood.uz" yoki "https://yourdomain.com"
