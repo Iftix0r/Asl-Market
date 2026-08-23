@@ -74,8 +74,8 @@ class FoodRepository {
 
     suspend fun updateOrderStatus(orderId: Long, newStatus: String): Result<Boolean> {
         return try {
-            val payload = mapOf<String, Any>("order_id" to orderId, "new_status" to newStatus)
-            val response = api.updateOrderStatus(payload)
+            val request = UpdateStatusRequest(orderId, newStatus)
+            val response = api.updateOrderStatus(request)
             if (response.isSuccessful && response.body()?.success == true) {
                 Result.success(true)
             } else {

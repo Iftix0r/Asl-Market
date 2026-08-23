@@ -80,6 +80,11 @@ data class OrdersListResponse(
     val error: String?
 )
 
+data class UpdateStatusRequest(
+    @SerializedName("order_id") val orderId: Long,
+    @SerializedName("new_status") val newStatus: String
+)
+
 data class UpdateStatusResponse(
     val success: Boolean,
     @SerializedName("new_status") val newStatus: String?,

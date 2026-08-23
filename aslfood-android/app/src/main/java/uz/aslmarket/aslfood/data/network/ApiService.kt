@@ -32,6 +32,6 @@ interface ApiService {
 
     @POST("api/food/orders/status/")
     suspend fun updateOrderStatus(
-        @Body payload: Map<String, Any>
+        @Body request: UpdateStatusRequest
     ): Response<UpdateStatusResponse>
 }
