@@ -158,24 +158,15 @@ async def unknown_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 
 # =====================================================
-# MAIN — Bot ishga tushirish
+# Application Factory
 # =====================================================
-def main() -> None:
-    if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
-        print("❌ XATO: settings.py da TELEGRAM_BOT_TOKEN to'ldirilmagan!")
-        print("   aslmarket/settings.py faylida TELEGRAM_BOT_TOKEN o'zgaruvchisini to'ldiring.")
-        sys.exit(1)
+def create_bot_app() -> Application:
+    """Telegram application bot factory (used for both polling and webhook)."""
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
+    if not token or token == "YOUR_BOT_TOKEN_HERE":
+        return None
 
-    if not WEBAPP_URL or "yourdomain" in WEBAPP_URL:
-        print("⚠️  OGOHLANTIRISH: WEBAPP_BASE_URL to'ldirilmagan yoki placeholder.")
-        print("   Mini App ishlashi uchun HTTPS domen kerak.")
-
-    print(f"🤖 AslFood Bot ishga tushmoqda...")
-    print(f"   Web App URL: {WEBAPP_URL}")
-    print(f"   Guruh ID   : {GROUP_CHAT_ID}")
-    print(f"   Ctrl+C bilan to'xtatish")
-
-    app = Application.builder().token(BOT_TOKEN).build()
+    app = Application.builder().token(token).build()
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
@@ -185,7 +176,74 @@ def main() -> None:
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, unknown_message))
 
-    # Polling mode (CPanel uchun qulay)
+    return app
+
+
+# =====================================================
+# MAIN — Bot ishga tushirish (Polling yoki Webhook Sozlash)
+# =====================================================
+def main() -> None:
+    import argparse
+    import urllib.request
+    import urllib.parse
+    import json
+
+    parser = argparse.ArgumentParser(description="AslFood Telegram Bot")
+    parser.add_argument("--set-webhook", type=str, help="Telegram Webhook URL'ini o'rnatish (masalan, https://aslmarket.uz/api/telegram/webhook/)")
+    parser.add_argument("--delete-webhook", action="store_true", help="Telegram Webhook'ni o'chirish (Polling'ga qaytish)")
+    parser.add_argument("--webhook-info", action="store_true", help="Mavjud Webhook holatini ko'rish")
+    args = parser.parse_args()
+
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
+    if not token or token == "YOUR_BOT_TOKEN_HERE":
+        print("❌ XATO: settings.py da TELEGRAM_BOT_TOKEN to'ldirilmagan!")
+        sys.exit(1)
+
+    if args.set_webhook:
+        url = f"https://api.telegram.org/bot{token}/setWebhook?url={urllib.parse.quote(args.set_webhook)}"
+        try:
+            req = urllib.request.Request(url)
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                res = json.loads(resp.read().decode())
+                print(f"✅ Webhook natijasi: {res}")
+        except Exception as e:
+            print(f"❌ Xato: {e}")
+        return
+
+    if args.delete_webhook:
+        url = f"https://api.telegram.org/bot{token}/deleteWebhook"
+        try:
+            req = urllib.request.Request(url)
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                res = json.loads(resp.read().decode())
+                print(f"✅ Webhook o'chirildi: {res}")
+        except Exception as e:
+            print(f"❌ Xato: {e}")
+        return
+
+    if args.webhook_info:
+        url = f"https://api.telegram.org/bot{token}/getWebhookInfo"
+        try:
+            req = urllib.request.Request(url)
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                res = json.loads(resp.read().decode())
+                print(f"ℹ️ Webhook Ma'lumoti: {json.dumps(res, indent=2)}")
+        except Exception as e:
+            print(f"❌ Xato: {e}")
+        return
+
+    if not WEBAPP_URL or "yourdomain" in WEBAPP_URL:
+        print("⚠️  OGOHLANTIRISH: WEBAPP_BASE_URL to'ldirilmagan yoki placeholder.")
+
+    print(f"🤖 AslFood Bot Polling rejimida ishga tushmoqda...")
+    print(f"   Web App URL: {WEBAPP_URL}")
+    print(f"   Guruh ID   : {GROUP_CHAT_ID}")
+
+    app = create_bot_app()
+    if not app:
+        print("❌ Bot ilovasini yaratib bo'lmadi.")
+        sys.exit(1)
+
     app.run_polling(
         allowed_updates=Update.ALL_TYPES,
         drop_pending_updates=True,
@@ -194,3 +252,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

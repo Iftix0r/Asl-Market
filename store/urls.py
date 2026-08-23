@@ -39,4 +39,9 @@ urlpatterns = [
 
     # Stats / Analytics
     path('api/food/stats/', views.api_food_stats, name='api_food_stats'),
+
+    # Telegram Bot Webhook
+    path('api/telegram/webhook/', views.telegram_webhook, name='telegram_webhook'),
+    path('api/telegram/set-webhook/', views.set_telegram_webhook, name='set_telegram_webhook'),
 ]
+

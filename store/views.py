@@ -508,3 +508,79 @@ def send_telegram_notification(text):
             urllib.request.urlopen(req, timeout=3)
         except Exception:
             pass
+
+
+# ==========================================================================
+# TELEGRAM BOT WEBHOOK VIEWS
+# ==========================================================================
+
+_telegram_bot_app = None
+
+async def _get_telegram_bot_app():
+    global _telegram_bot_app
+    if _telegram_bot_app is None:
+        from bot import create_bot_app
+        _telegram_bot_app = create_bot_app()
+        if _telegram_bot_app:
+            await _telegram_bot_app.initialize()
+    return _telegram_bot_app
+
+
+@csrf_exempt
+async def telegram_webhook(request):
+    """
+    Telegram Webhook Endpoint (/api/telegram/webhook/)
+    Telegram serverlaridan keluvchi POST so'rovlarini qabul qiladi.
+    """
+    if request.method != 'POST':
+        return HttpResponse("AslFood Telegram Webhook Endpoint Active", status=200)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        app = await _get_telegram_bot_app()
+        if not app:
+            return HttpResponse("Bot token missing or invalid", status=500)
+
+        from telegram import Update
+        update = Update.de_json(data, app.bot)
+        await app.process_update(update)
+        return HttpResponse("OK", status=200)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Telegram webhook error: {e}")
+        return HttpResponse(f"Error: {e}", status=400)
+
+
+def set_telegram_webhook(request):
+    """
+    Telegram Webhook'ni sozlash uchun yordamchi view (/api/telegram/set-webhook/)
+    GET parametrlar: ?action=set (default), ?action=delete, ?action=info
+    """
+    import urllib.request
+    import urllib.parse
+
+    bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
+    webapp_base_url = getattr(settings, 'WEBAPP_BASE_URL', '').rstrip('/')
+
+    if not bot_token or bot_token == 'YOUR_BOT_TOKEN_HERE':
+        return JsonResponse({'status': 'error', 'message': 'settings.py da TELEGRAM_BOT_TOKEN to\'ldirilmagan'}, status=400)
+
+    webhook_url = f"{webapp_base_url}/api/telegram/webhook/"
+    action = request.GET.get('action', 'set')
+
+    if action == 'delete':
+        api_url = f"https://api.telegram.org/bot{bot_token}/deleteWebhook"
+    elif action == 'info':
+        api_url = f"https://api.telegram.org/bot{bot_token}/getWebhookInfo"
+    else:
+        api_url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url={urllib.parse.quote(webhook_url)}"
+
+    try:
+        req = urllib.request.Request(api_url)
+        with urllib.request.urlopen(req, timeout=10) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            result['target_webhook_url'] = webhook_url
+            return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+

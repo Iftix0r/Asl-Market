@@ -125,6 +125,40 @@ Brauzerda:
 
 ---
 
+## 10. Telegram Bot Webhook Sozlash
+
+cPanel muhitida Telegram Boti har doim ishlab turishi uchun **Webhook** rejimi ishlatiladi.
+
+### Webhook'ni 1 bosqichda faollashtirish:
+Brauzeringizda quyidagi URL ga kiring:
+```
+https://aslmarket.uz/api/telegram/set-webhook/
+```
+Javob: `{"ok": true, "result": true, "description": "Webhook was set", "target_webhook_url": "https://aslmarket.uz/api/telegram/webhook/"}`
+
+### Webhook holatini tekshirish:
+```
+https://aslmarket.uz/api/telegram/set-webhook/?action=info
+```
+
+### SSH Terminal orqali sozlash (muqobil):
+```bash
+cd ~/aslmarket
+source ~/virtualenv/aslmarket/3.11/bin/activate
+
+# Webhook ulash
+python bot.py --set-webhook https://aslmarket.uz/api/telegram/webhook/
+
+# Holatni ko'rish
+python bot.py --webhook-info
+
+# Webhook ni o'chirish (Polling'ga o'tish)
+python bot.py --delete-webhook
+```
+
+---
+
+
 ## Muammo va yechimlar
 
 ### 500 Internal Server Error
