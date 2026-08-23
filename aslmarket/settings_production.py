@@ -1,10 +1,9 @@
 """
 Production settings — aslmarket.uz (cPanel Passenger WSGI)
-
-Faqat server uchun. Lokal ishlatmang.
+cPanel username: asilmarket3
 """
 
-from .settings import *  # noqa: bazaviy sozlamalar import
+from .settings import *  # noqa
 
 import os
 from pathlib import Path
@@ -13,25 +12,24 @@ from pathlib import Path
 
 DEBUG = False
 
-# cPanel dan environment variable orqali yoki to'g'ridan-to'g'ri kiriting
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
-    'change-this-to-a-new-random-secret-key-before-use'
+    'aslmarket-prod-change-this-asap-2024!'
 )
 
 ALLOWED_HOSTS = [
     'aslmarket.uz',
     'www.aslmarket.uz',
+    'localhost',
+    '127.0.0.1',
 ]
 
 # ─── Ma'lumotlar bazasi ───────────────────────────────────────────────────────
-# cPanel da SQLite fayl yo'lini to'liq ko'rsating
-# /home/<cpanel_username>/aslmarket/db.sqlite3
+# Path(__file__) = /home/asilmarket3/<appfolder>/aslmarket/settings_production.py
+# .parent        = /home/asilmarket3/<appfolder>/aslmarket/
+# .parent.parent = /home/asilmarket3/<appfolder>/          ← loyiha root, db.sqlite3 shu yerda
 
-BASE_DIR_PROD = Path(os.environ.get(
-    'DJANGO_BASE_DIR',
-    '/home/host7905/aslmarket'
-))
+BASE_DIR_PROD = Path(__file__).resolve().parent.parent
 
 DATABASES = {
     'default': {
@@ -41,33 +39,34 @@ DATABASES = {
 }
 
 # ─── Static fayllar ──────────────────────────────────────────────────────────
-# python manage.py collectstatic ishga tushirilganda fayllar shu yerga yig'iladi
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR_PROD / 'public' / 'static'
-STATICFILES_DIRS = []  # collectstatic bilan ishlash uchun bo'sh bo'lishi kerak
+STATICFILES_DIRS = []   # collectstatic uchun bo'sh bo'lishi shart
 
-# ─── Xavfsizlik sozlamalari ───────────────────────────────────────────────────
+# ─── Xavfsizlik headerlari ────────────────────────────────────────────────────
 
-SECURE_BROWSER_XSS_FILTER      = True
-SECURE_CONTENT_TYPE_NOSNIFF    = True
-X_FRAME_OPTIONS                = 'SAMEORIGIN'
+SECURE_BROWSER_XSS_FILTER   = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS             = 'SAMEORIGIN'
 
-# HTTPS ishlatilsa (tavsiya etiladi):
-# SESSION_COOKIE_SECURE   = True
-# CSRF_COOKIE_SECURE      = True
-# SECURE_SSL_REDIRECT     = True
-
-# ─── Loglar ──────────────────────────────────────────────────────────────────
+# ─── Logging: xatolar error.log ga yoziladi ───────────────────────────────────
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {module}: {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR_PROD / 'error.log',
+            'filename': str(BASE_DIR_PROD / 'error.log'),
+            'formatter': 'verbose',
         },
     },
     'loggers': {
