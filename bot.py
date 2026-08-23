@@ -1,0 +1,196 @@
+"""
+AslFood Telegram Bot
+====================
+Ishga tushirish:
+    python bot.py
+
+Talab qilinadi:
+    pip install python-telegram-bot>=21.0
+
+Settings.py da sozlash kerak:
+    TELEGRAM_BOT_TOKEN = "..."
+    TELEGRAM_GROUP_CHAT_ID = "-100..."
+    WEBAPP_BASE_URL = "https://yourdomain.com"
+"""
+
+import asyncio
+import sys
+import os
+
+# Django sozlamalarini yuklash (agar bot alohida ishlatilsa)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aslmarket.settings")
+
+import django
+django.setup()
+
+from django.conf import settings
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    ContextTypes,
+    filters,
+)
+
+BOT_TOKEN = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
+WEBAPP_URL = getattr(settings, "WEBAPP_BASE_URL", "").rstrip("/") + "/"
+GROUP_CHAT_ID = getattr(settings, "TELEGRAM_GROUP_CHAT_ID", "")
+
+
+# =====================================================
+# /start — Foydalanuvchini kutib olish + Web App tugmasi
+# =====================================================
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    first_name = user.first_name if user else "Mehmon"
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                text="🍔 Menyu va Buyurtma Berish",
+                web_app=WebAppInfo(url=WEBAPP_URL),
+            )
+        ],
+        [
+            InlineKeyboardButton("📞 Bog'lanish", url="https://t.me/aslfoodsupport"),
+            InlineKeyboardButton("ℹ️ Haqimizda", callback_data="about"),
+        ],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(
+        f"Assalomu alaykum, <b>{first_name}</b>! 👋\n\n"
+        f"🍔 <b>AslFood</b> botiga xush kelibsiz!\n\n"
+        f"Bizning menyumizdan mazali taomlarni tanlang va "
+        f"<b>15–25 daqiqada</b> dostavka qilib beramiz 🛵\n\n"
+        f"👇 <b>«Menyu va Buyurtma Berish»</b> tugmasini bosing:",
+        parse_mode="HTML",
+        reply_markup=reply_markup,
+    )
+
+
+# =====================================================
+# /menu — Tezkor menyu tugmasi
+# =====================================================
+async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    keyboard = [
+        [InlineKeyboardButton("🍔 Menyuni ochish", web_app=WebAppInfo(url=WEBAPP_URL))]
+    ]
+    await update.message.reply_text(
+        "🍽️ <b>AslFood Menyu</b>\n\nQuyidagi tugmani bosing:",
+        parse_mode="HTML",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+
+# =====================================================
+# /orders — Faol buyurtmalar ro'yxati (oshpaz uchun)
+# =====================================================
+async def orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Faqat guruh adminlari ko'ra oladi"""
+    from store.models import FoodOrder
+
+    active = FoodOrder.objects.filter(
+        status__in=["new", "preparing", "delivering"]
+    ).order_by("created_at")[:10]
+
+    if not active:
+        await update.message.reply_text("✅ Hozircha faol buyurtmalar yo'q.")
+        return
+
+    STATUS_EMOJI = {
+        "new": "🟡 Yangi",
+        "preparing": "🍳 Tayyorlanmoqda",
+        "delivering": "🛵 Yo'lda",
+    }
+
+    text = "📋 <b>Faol buyurtmalar:</b>\n\n"
+    for o in active:
+        text += (
+            f"#{o.order_code} — {o.customer_name} ({o.phone})\n"
+            f"   📊 {STATUS_EMOJI.get(o.status, o.status)} | 💰 {int(o.total_amount):,} so'm\n\n"
+        )
+
+    await update.message.reply_text(text, parse_mode="HTML")
+
+
+# =====================================================
+# Callback Query — Haqimizda
+# =====================================================
+async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "about":
+        await query.message.reply_text(
+            "🍔 <b>AslFood</b>\n\n"
+            "Biz tez va mazali taomlar yetkazib beramiz.\n"
+            "Lavash, Pizza, Gamburger va ko'p boshqa taomlar!\n\n"
+            "📍 Manzil: ...\n"
+            "📞 Tel: ...\n"
+            "🕒 Ish vaqti: 09:00 — 23:00",
+            parse_mode="HTML",
+        )
+
+
+# =====================================================
+# Web App ma'lumotlari (ixtiyoriy — tg.sendData orqali)
+# =====================================================
+async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Agar Mini App tg.sendData() ishlatsa"""
+    data = update.message.web_app_data.data
+    await update.message.reply_text(f"✅ Web App dan ma'lumot keldi:\n{data}")
+
+
+# =====================================================
+# Noma'lum xabar — Foydalanuvchiga yo'naltirish
+# =====================================================
+async def unknown_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    keyboard = [
+        [InlineKeyboardButton("🍔 Menyuni ochish", web_app=WebAppInfo(url=WEBAPP_URL))]
+    ]
+    await update.message.reply_text(
+        "Menyu uchun /start yoki /menu buyrug'ini yuboring 👇",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+
+# =====================================================
+# MAIN — Bot ishga tushirish
+# =====================================================
+def main() -> None:
+    if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
+        print("❌ XATO: settings.py da TELEGRAM_BOT_TOKEN to'ldirilmagan!")
+        print("   aslmarket/settings.py faylida TELEGRAM_BOT_TOKEN o'zgaruvchisini to'ldiring.")
+        sys.exit(1)
+
+    if not WEBAPP_URL or "yourdomain" in WEBAPP_URL:
+        print("⚠️  OGOHLANTIRISH: WEBAPP_BASE_URL to'ldirilmagan yoki placeholder.")
+        print("   Mini App ishlashi uchun HTTPS domen kerak.")
+
+    print(f"🤖 AslFood Bot ishga tushmoqda...")
+    print(f"   Web App URL: {WEBAPP_URL}")
+    print(f"   Guruh ID   : {GROUP_CHAT_ID}")
+    print(f"   Ctrl+C bilan to'xtatish")
+
+    app = Application.builder().token(BOT_TOKEN).build()
+
+    # Handlers
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("menu", menu_command))
+    app.add_handler(CommandHandler("orders", orders_command))
+    app.add_handler(CallbackQueryHandler(callback_handler))
+    app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, unknown_message))
+
+    # Polling mode (CPanel uchun qulay)
+    app.run_polling(
+        allowed_updates=Update.ALL_TYPES,
+        drop_pending_updates=True,
+    )
+
+
+if __name__ == "__main__":
+    main()

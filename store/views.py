@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
@@ -8,14 +9,15 @@ import json
 import uuid
 
 from .models import FoodCategory, FoodItem, FoodOrder, FoodOrderItem
+from .telegram_notify import send_order_to_group, send_status_update_to_group
 
 
 # ==========================================================================
-# ASLFOOD PUBLIC STOREFRONT
+# ASLFOOD TELEGRAM MINI APP — PUBLIC STOREFRONT
 # ==========================================================================
 
 def storefront(request):
-    """Public customer-facing AslFood menu."""
+    """Telegram Mini App — public customer-facing AslFood menu."""
     from django.db.models import Q
     query = request.GET.get('q', '').strip()
     cat_slug = request.GET.get('category', '').strip()
@@ -28,11 +30,14 @@ def storefront(request):
     if query:
         food_items = food_items.filter(Q(name__icontains=query) | Q(ingredients__icontains=query))
 
+    webapp_base_url = getattr(settings, 'WEBAPP_BASE_URL', '')
+
     context = {
         'food_items': food_items,
         'food_categories': food_categories,
         'selected_category': cat_slug,
-        'query': query
+        'query': query,
+        'webapp_base_url': webapp_base_url,
     }
     return render(request, 'storefront.html', context)
 
@@ -108,6 +113,12 @@ def aslfood_order_api(request):
                 order.total_amount = total_amount
                 order.save()
 
+            # Telegram guruhga xabar yuborish (transaction tashqarisida)
+            try:
+                send_order_to_group(order)
+            except Exception:
+                pass  # Telegram xatosi buyurtmani bloklamasin
+
             return JsonResponse({
                 'success': True,
                 'order_code': order_code,
@@ -133,6 +144,13 @@ def aslfood_update_status_api(request):
             order = get_object_or_404(FoodOrder, pk=order_id)
             order.status = new_status
             order.save()
+
+            # Holat o'zgarganda guruhga xabar (faqat muhim holatlar)
+            if new_status in ('completed', 'cancelled', 'delivering'):
+                try:
+                    send_status_update_to_group(order)
+                except Exception:
+                    pass
 
             return JsonResponse({'success': True, 'new_status': new_status, 'order_code': order.order_code})
         except Exception as e:

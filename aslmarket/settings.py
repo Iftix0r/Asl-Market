@@ -121,3 +121,20 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+
+# ==========================================================================
+# TELEGRAM BOT CONFIGURATION
+# ==========================================================================
+# Bot tokenini @BotFather dan oling va shu yerga kiriting:
+TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+
+# Buyurtmalar tushirilishi kerak bo'lgan guruh ID'si (minus bilan):
+# Guruh ID'ni bilish uchun: guruhga @userinfobot qo'shing yoki
+# https://api.telegram.org/bot<TOKEN>/getUpdates dan ko'ring
+TELEGRAM_GROUP_CHAT_ID = "-100YOUR_GROUP_ID"
+
+# Sizning HTTPS domeningiz (Telegram Mini App uchun MAJBURIY HTTPS)
+# Masalan: "https://aslfood.uz" yoki "https://yourdomain.com"
+WEBAPP_BASE_URL = "https://yourdomain.com"
+
