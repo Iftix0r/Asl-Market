@@ -14,11 +14,60 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import uz.aslmarket.aslfood.R
+import uz.aslmarket.aslfood.databinding.FragmentKitchenBinding
+import uz.aslmarket.aslfood.ui.adapter.KitchenOrderAdapter
+import uz.aslmarket.aslfood.ui.viewmodel.MainViewModel
+
+class KitchenFragment : Fragment() {
+
+    private var _binding: FragmentKitchenBinding? = null
+    private val binding get() = _binding!!
+    private val viewModel: MainViewModel by activityViewModels()
+
+    private lateinit var kitchenAdapter: KitchenOrderAdapter
+
+    // Auto-refresh: har 30 soniyada yangilanadi
+    private val refreshHandler = Handler(Looper.getMainLooper())
+    private val autoRefreshInterval = 30_000L
+    private var selectedStatus: String? = null
+
+    private val autoRefreshRunnable = object : Runnable {
+        override fun run() {
+            if (isAdded && !isDetached) {
+                viewModel.fetchKitchenOrders(selectedStatus)
+                updateRefreshStatus()
+                refreshHandler.postDelayed(this, autoRefreshInterval)
+            }
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentKitchenBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupRecyclerView()
+        setupStatusFilter()
+        setupSwipeRefresh()
+        observeViewModel()
+
+        // Dastlabki yuklash + timer boshlash
+        viewModel.fetchKitchenOrders(selectedStatus)
+        startAutoRefresh()
+    }
 
     private fun setupRecyclerView() {
         kitchenAdapter = KitchenOrderAdapter(emptyList()) { orderId, newStatus ->
             viewModel.updateOrderStatus(orderId, newStatus)
         }
+
         val screenWidthDp = resources.configuration.screenWidthDp
         val spanCount = when {
             screenWidthDp >= 900 -> 3
@@ -30,6 +79,7 @@ import uz.aslmarket.aslfood.R
         } else {
             binding.rvKitchenOrders.layoutManager = LinearLayoutManager(requireContext())
         }
+
         binding.rvKitchenOrders.adapter = kitchenAdapter
     }
 

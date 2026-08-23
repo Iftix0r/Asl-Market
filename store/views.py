@@ -9,7 +9,7 @@ import json
 import uuid
 
 from .models import BotUser, FoodCategory, FoodItem, FoodOrder, FoodOrderItem
-from .telegram_notify import send_order_to_group, send_status_update_to_group
+from .telegram_notify import send_order_to_group, send_status_update_to_group, send_status_update_to_customer
 
 
 # ==========================================================================
@@ -184,24 +184,31 @@ def aslfood_order_api(request):
 
 @csrf_exempt
 def aslfood_update_status_api(request):
-    """AJAX endpoint to update order status in Live Kitchen Board"""
+    """AJAX / REST endpoint to update order status in Live Kitchen Board and App"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             order_id = data.get('order_id')
             new_status = data.get('new_status')
 
-            order = get_object_or_404(FoodOrder, pk=order_id)
+            if not order_id or not new_status:
+                return JsonResponse({'success': False, 'error': "order_id yoki new_status ko'rsatilmagan"})
+
+            order = FoodOrder.objects.filter(pk=order_id).first()
+            if not order:
+                return JsonResponse({'success': False, 'error': f"Buyurtma #{order_id} topilmadi"})
+
             order.status = new_status
             order.save()
 
-            # Holat o'zgarganda guruhga hamda mijozga Telegram xabar yuboriladi
-            if new_status in ('completed', 'cancelled', 'delivering'):
-                try:
-                    send_status_update_to_group(order)
-                    send_status_update_to_customer(order)
-                except Exception:
-                    pass
+            # Holat o'zgarganda (barcha holatlarda: preparing, delivering, completed, cancelled)
+            # Telegram guruhiga va mijozning shaxsiy Telegramiga bildirishnoma yuboriladi
+            try:
+                send_status_update_to_group(order)
+                send_status_update_to_customer(order)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Status update notification error: {e}")
 
             return JsonResponse({'success': True, 'new_status': new_status, 'order_code': order.order_code})
         except Exception as e:
