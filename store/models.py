@@ -91,12 +91,20 @@ class FoodOrder(models.Model):
         ('table', 'Zalda / Table Order'),
     )
 
+    PAYMENT_METHODS = (
+        ('naqd',  'Naqd pul 💵'),
+        ('karta', 'Karta / Payme / Click 💳'),
+        ('qarz',  'Qarz / Kredit 📝'),
+    )
+
     order_code = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="Buyurtma kodi")
     customer_name = models.CharField(max_length=150, verbose_name="Mijoz ismi")
     phone = models.CharField(max_length=30, verbose_name="Telefon raqam")
     delivery_address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Dostavka manzili / Stol #")
     total_amount = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Jami summa")
-    payment_method = models.CharField(max_length=20, default='naqd', verbose_name="To'lov usuli")
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='naqd', verbose_name="To'lov usuli")
+    is_debt_paid   = models.BooleanField(default=False, verbose_name="Qarz to'landi")
+    debt_paid_at   = models.DateTimeField(null=True, blank=True, verbose_name="Qarz to'langan vaqt")
     order_type = models.CharField(max_length=20, choices=ORDER_TYPES, default='delivery', verbose_name="Buyurtma turi")
     status = models.CharField(max_length=20, choices=ORDER_STATUS, default='new', db_index=True, verbose_name="Buyurtma holati")
     comment    = models.CharField(max_length=500, blank=True, null=True, verbose_name="Mijoz izohi")
