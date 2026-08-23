@@ -162,9 +162,10 @@ def aslfood_order_api(request):
                 order.total_amount = total_amount
                 order.save()
 
-            # Telegram guruhga xabar yuborish (transaction tashqarisida)
+            # Telegram guruhga va mijozga bildirishnoma yuborish (transaction tashqarisida)
             try:
                 send_order_to_group(order)
+                send_status_update_to_customer(order)
             except Exception:
                 pass  # Telegram xatosi buyurtmani bloklamasin
 
@@ -194,10 +195,11 @@ def aslfood_update_status_api(request):
             order.status = new_status
             order.save()
 
-            # Holat o'zgarganda guruhga xabar (faqat muhim holatlar)
+            # Holat o'zgarganda guruhga hamda mijozga Telegram xabar yuboriladi
             if new_status in ('completed', 'cancelled', 'delivering'):
                 try:
                     send_status_update_to_group(order)
+                    send_status_update_to_customer(order)
                 except Exception:
                     pass
 
