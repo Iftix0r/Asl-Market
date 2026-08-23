@@ -136,5 +136,5 @@ TELEGRAM_GROUP_CHAT_ID = "-100YOUR_GROUP_ID"
 
 # Sizning HTTPS domeningiz (Telegram Mini App uchun MAJBURIY HTTPS)
 # Masalan: "https://aslfood.uz" yoki "https://yourdomain.com"
-WEBAPP_BASE_URL = "https://yourdomain.com"
+WEBAPP_BASE_URL = "https://aslmarket.uz"
 
