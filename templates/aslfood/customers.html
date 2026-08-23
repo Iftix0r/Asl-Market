@@ -1,0 +1,256 @@
+{% extends 'aslfood/food_panel_base.html' %}
+
+{% block title %}Mijozlar Katalogi — AslFood Manager{% endblock %}
+
+{% block panel_content %}
+<!-- Header Section -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-users text-warning"></i> Mijozlar Katalogi
+        </h3>
+        <p class="text-muted small mb-0">Telegram bot va mobil ilova orqali ro'yxatdan o'tgan mijozlar ro'yxati hamda xaridlar tarixi</p>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="d-flex align-items-center gap-2">
+        <div class="glass-card px-3 py-2 bg-white d-flex align-items-center gap-3 border border-secondary-subtle">
+            <div class="rounded-2 bg-warning-subtle text-warning p-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px;">
+                <i class="fa-solid fa-user-group fs-5"></i>
+            </div>
+            <div>
+                <div class="text-muted small lh-1">Jami Mijozlar</div>
+                <div class="fw-extrabold fs-5 text-dark lh-1 mt-1">{{ total_customers|default:customers.count }}</div>
+            </div>
+        </div>
+
+        <div class="glass-card px-3 py-2 bg-white d-flex align-items-center gap-3 border border-secondary-subtle">
+            <div class="rounded-2 bg-success-subtle text-success p-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px;">
+                <i class="fa-solid fa-bag-shopping fs-5"></i>
+            </div>
+            <div>
+                <div class="text-muted small lh-1">Buyurtmalar</div>
+                <div class="fw-extrabold fs-5 text-dark lh-1 mt-1">{{ total_orders_count|default:0 }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="glass-card p-3 bg-white mb-4 border border-secondary-subtle">
+    <div class="row g-2 align-items-center">
+        <div class="col-12 col-md-8 col-lg-9">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 border-secondary-subtle text-muted">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="customerSearchInput" class="form-control bg-light border-start-0 border-secondary-subtle" placeholder="Mijoz ismi, telefon raqami yoki username bo'yicha qidirish..." onkeyup="filterCustomers()">
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-3">
+            <select id="statusFilter" class="form-select bg-light border-secondary-subtle text-dark" onchange="filterCustomers()">
+                <option value="all">Barchasi (Hammasi)</option>
+                <option value="active">Faol mijozlar</option>
+                <option value="blocked">Bloklangan mijozlar</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Customers Table -->
+<div class="glass-card p-3 bg-white border border-secondary-subtle">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="customersTable">
+            <thead>
+                <tr class="text-muted small text-uppercase border-bottom border-secondary-subtle">
+                    <th>Mijoz / Telegram Profil</th>
+                    <th>Telefon Raqam</th>
+                    <th>Ro'yxatdan O'tgan</th>
+                    <th class="text-center">Buyurtmalar Soni</th>
+                    <th class="text-end">Jami Xarid (so'm)</th>
+                    <th>Holati</th>
+                    <th class="text-end">Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                    <tr class="customer-row" 
+                        data-name="{{ customer.full_name|lower }}" 
+                        data-phone="{{ customer.phone|default:''|lower }}" 
+                        data-username="{{ customer.username|default:''|lower }}"
+                        data-id="{{ customer.telegram_id }}"
+                        data-status="{% if customer.is_blocked %}blocked{% else %}active{% endif %}">
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle overflow-hidden bg-warning-subtle text-warning fw-bold d-flex align-items-center justify-content-center border border-warning-subtle flex-shrink-0" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                                    {% if customer.photo_url %}
+                                        <img src="{{ customer.photo_url }}" class="w-100 h-100 object-fit-cover" alt="{{ customer.full_name }}">
+                                    {% else %}
+                                        {{ customer.first_name|default:customer.telegram_id|slice:":1"|upper }}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                                        <span>{{ customer.full_name }}</span>
+                                        {% if customer.username %}
+                                            <a href="https://t.me/{{ customer.username }}" target="_blank" class="badge bg-info-subtle text-info text-decoration-none border border-info-subtle">
+                                                @{{ customer.username }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-muted small font-monospace">
+                                        <i class="fa-brands fa-telegram text-primary me-1"></i>ID: {{ customer.telegram_id }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if customer.phone %}
+                                <a href="tel:{{ customer.phone }}" class="text-dark text-decoration-none fw-semibold">
+                                    <i class="fa-solid fa-phone text-muted me-1 small"></i>{{ customer.phone }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="small text-dark">{{ customer.joined_at|date:"d.m.Y" }}</div>
+                            <div class="text-muted extra-small">{{ customer.joined_at|date:"H:i" }}</div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill fw-bold border border-secondary-subtle">
+                                <i class="fa-solid fa-box-open me-1"></i>{{ customer.orders.all|length }} ta
+                            </span>
+                        </td>
+                        <td class="text-end fw-extrabold text-warning-emphasis fs-6">
+                            {{ customer.total_spent|floatformat:0 }} so'm
+                        </td>
+                        <td>
+                            {% if customer.is_blocked %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                    <i class="fa-solid fa-ban me-1"></i>Bloklangan
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                    <i class="fa-solid fa-check-circle me-1"></i>Faol
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-warning text-dark btn-sm rounded-2 d-inline-flex align-items-center gap-1"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#ordersModal{{ customer.id }}">
+                                <i class="fa-solid fa-receipt"></i>
+                                <span>Tarix</span>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Order History Modal for Customer -->
+                    <div class="modal fade" id="ordersModal{{ customer.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content glass-card border-warning text-dark bg-white">
+                                <div class="modal-header border-bottom border-secondary-subtle">
+                                    <div>
+                                        <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-user-clock text-warning"></i> {{ customer.full_name }} — Xaridlar Tarixi
+                                        </h5>
+                                        <div class="text-muted small">Telegram ID: {{ customer.telegram_id }} | Tel: {{ customer.display_phone }}</div>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-3">
+                                    {% if customer.orders.all %}
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-striped align-middle mb-0">
+                                                <thead>
+                                                    <tr class="text-muted small">
+                                                        <th>Kod</th>
+                                                        <th>Turi</th>
+                                                        <th>Sana</th>
+                                                        <th>Summa</th>
+                                                        <th>Holat</th>
+                                                        <th class="text-end">Chek</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for order in customer.orders.all %}
+                                                        <tr>
+                                                            <td class="fw-bold text-dark">#{{ order.order_code }}</td>
+                                                            <td><span class="badge bg-light text-dark border">{{ order.get_order_type_display }}</span></td>
+                                                            <td class="small text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                                            <td class="fw-bold text-warning-emphasis">{{ order.total_amount|floatformat:0 }} so'm</td>
+                                                            <td>
+                                                                {% if order.status == 'completed' %}
+                                                                    <span class="badge bg-success-subtle text-success">Topshirildi ✅</span>
+                                                                {% elif order.status == 'cancelled' %}
+                                                                    <span class="badge bg-danger-subtle text-danger">Bekor qilindi 🔴</span>
+                                                                {% elif order.status == 'preparing' %}
+                                                                    <span class="badge bg-primary-subtle text-primary">Tayyorlanmoqda 🍳</span>
+                                                                {% elif order.status == 'delivering' %}
+                                                                    <span class="badge bg-info-subtle text-info">Yo'lda 🛵</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-warning-subtle text-warning-emphasis">Yangi 🟡</span>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <a href="{% url 'aslfood_receipt_view' order.id %}" target="_blank" class="btn btn-xs btn-outline-secondary">
+                                                                    <i class="fa-solid fa-print"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-4 text-muted">
+                                            <i class="fa-solid fa-box-open fs-2 mb-2 text-secondary"></i>
+                                            <div>Ushbu mijoz tomonidan hali buyurtmalar berilmagan.</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <tr id="emptyRow">
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-users-slash fs-1 mb-2 text-warning"></i>
+                            <div class="fw-bold fs-6 text-dark">Mijozlar topilmadi</div>
+                            <p class="small text-muted mb-0">Hozircha bot yoki ilova orqali ro'yxatdan o'tgan mijozlar mavjud emas.</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterCustomers() {
+    const searchVal = document.getElementById('customerSearchInput').value.toLowerCase().trim();
+    const statusVal = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('.customer-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name') || '';
+        const phone = row.getAttribute('data-phone') || '';
+        const username = row.getAttribute('data-username') || '';
+        const tgId = row.getAttribute('data-id') || '';
+        const status = row.getAttribute('data-status') || '';
+
+        const matchesSearch = name.includes(searchVal) || phone.includes(searchVal) || username.includes(searchVal) || tgId.includes(searchVal);
+        const matchesStatus = (statusVal === 'all') || (statusVal === status);
+
+        if (matchesSearch && matchesStatus) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

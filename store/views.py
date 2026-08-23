@@ -68,7 +68,15 @@ def aslfood_dashboard(request):
 def aslfood_customers(request):
     """Customer directory with Telegram profile data and order history."""
     customers = BotUser.objects.prefetch_related('orders').all()
-    return render(request, 'aslfood/customers.html', {'customers': customers})
+    total_customers = customers.count()
+    total_orders_count = sum(len(c.orders.all()) for c in customers)
+
+    context = {
+        'customers': customers,
+        'total_customers': total_customers,
+        'total_orders_count': total_orders_count,
+    }
+    return render(request, 'aslfood/customers.html', context)
 
 
 @csrf_exempt
@@ -255,6 +263,28 @@ def aslfood_seed_data(request):
                 }
             )
 
+        # Mock Bot Users
+        if BotUser.objects.count() == 0:
+            u1 = BotUser.objects.create(
+                telegram_id="589210492",
+                first_name="Dilshod",
+                last_name="Rahimov",
+                username="dilshod_rahimov",
+                phone="+998974443322",
+                language_code="uz"
+            )
+            u2 = BotUser.objects.create(
+                telegram_id="194820184",
+                first_name="Alisher",
+                last_name="Karimov",
+                username="alisher_k",
+                phone="+998901110099",
+                language_code="uz"
+            )
+        else:
+            u1 = BotUser.objects.first()
+            u2 = BotUser.objects.last()
+
         # Mock Kitchen Orders
         if FoodOrder.objects.count() == 0:
             item_lavash = FoodItem.objects.filter(name__icontains="Lavash").first()
@@ -267,7 +297,9 @@ def aslfood_seed_data(request):
                 delivery_address="Navoiy ko'chasi 14-uy",
                 total_amount=110000,
                 order_type="delivery",
-                status="new"
+                status="new",
+                bot_user=u1,
+                telegram_id=u1.telegram_id if u1 else None
             )
             if item_lavash and item_pizza:
                 FoodOrderItem.objects.create(order=o1, food_item=item_lavash, food_name=item_lavash.name, quantity=1, unit_price=item_lavash.price)
@@ -280,7 +312,9 @@ def aslfood_seed_data(request):
                 delivery_address="Stol #4",
                 total_amount=42000,
                 order_type="table",
-                status="preparing"
+                status="preparing",
+                bot_user=u2,
+                telegram_id=u2.telegram_id if u2 else None
             )
 
     return HttpResponse("AslFood Fast-Food Demo Ma'lumotlari kiritildi! <a href='/panel/'>Oshxona Paneliga o'tish</a>")
